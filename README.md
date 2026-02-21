@@ -94,6 +94,24 @@ This project is designed around one family's preferences but is easy to adapt:
 - **Grocery store** — run `/setup` to configure any store, or manually add ad images to `images/ads/`
 - **Staples list** — edit the "Staples" entry in your Notion Menu database
 
+## Running Free with Google Antigravity
+
+No Anthropic API key needed — use [Antigravity's](https://idx.google.com/antigravity) free Claude models:
+
+- `npm install -g antigravity-claude-proxy`
+- `antigravity-claude-proxy start` (authenticate with Google when prompted)
+- Add to `~/.claude/settings.json`:
+  ```json
+  {
+    "env": {
+      "ANTHROPIC_BASE_URL": "http://localhost:8080",
+      "ANTHROPIC_AUTH_TOKEN": "test",
+      "ANTHROPIC_MODEL": "claude-opus-4-5-thinking"
+    }
+  }
+  ```
+- Run `claude` in the project directory — it routes through Antigravity for free
+
 ## License
 
 MIT
