@@ -11,6 +11,7 @@ from .. import models as m
 from .. import schemas as s
 from ..deps import DB, AppSettingsDep, User
 from ..services import grocery
+from ..services.instacart import status as instacart_status
 from ..services import weeks as W
 from .inbox import queue_out
 from .pantry import pantry_status
@@ -64,17 +65,28 @@ def put_settings(body: s.AppSettingsUpdate, db: DB, who: User) -> s.AppSettings:
 def health(request: Request, db: DB, cfg: AppSettingsDep) -> s.Health:
     ok_db = True
     last_prep = None
+    last_prep_result = None
+    token_status: dict = {}
     try:
         db.execute(text("SELECT 1"))
         raw = W.get_setting(db, "last_prep_run")
         last_prep = datetime.fromisoformat(raw) if raw else None
+        last_prep_result = W.get_setting(db, "last_prep_result")
+        token_status = W.get_setting(db, "claude_token_status") or {}
     except Exception:
         ok_db = False
+    token = "present" if cfg.claude_code_oauth_token else "missing"
+    token_msg = None if token == "present" else "Claude token missing"
+    if token == "present" and token_status.get("status") == "rejected":
+        token, token_msg = "rejected", "Claude token rejected"
+    scheduler = getattr(request.app.state, "scheduler", None)
     from importlib.metadata import version
 
     return s.Health(
         ok=ok_db, database=ok_db, ai_mode=cfg.cafe_ai,
-        claude_token="present" if cfg.claude_code_oauth_token else "missing",
-        instacart_key=bool(cfg.instacart_api_key), last_prep_run=last_prep,
+        claude_token=token, claude_token_message=token_msg,
+        instacart_key=bool(cfg.instacart_api_key),
+        instacart=instacart_status(cfg), last_prep_run=last_prep, last_prep_result=last_prep_result,
+        scheduler_running=bool(scheduler and scheduler.running),
         worker_running=request.app.state.jobs.running, version=version("cafe"),
     )

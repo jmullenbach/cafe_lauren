@@ -853,6 +853,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/weeks/{monday}/instacart-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Instacart Link */
+        post: operations["createInstacartLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/export/all.json": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export All */
+        get: operations["exportAllJson"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/export/recipes.zip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Recipes */
+        get: operations["exportRecipesZip"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/export/database": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Database */
+        get: operations["exportDatabase"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/export/weeks/{monday}.md": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Week */
+        get: operations["exportWeekMarkdown"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1138,13 +1223,37 @@ export interface components {
             ai_mode: "fake" | "claude";
             /**
              * Claude Token
+             * @description "rejected" once a Claude call failed authentication; cleared by the next good call.
              * @enum {string}
              */
-            claude_token: "present" | "missing";
+            claude_token: "present" | "missing" | "rejected";
+            /**
+             * Claude Token Message
+             * @description e.g. "Claude token rejected"
+             */
+            claude_token_message?: string | null;
             /** Instacart Key */
             instacart_key: boolean;
+            /**
+             * Instacart
+             * @default not set up yet
+             * @enum {string}
+             */
+            instacart: "configured" | "not set up yet";
             /** Last Prep Run */
             last_prep_run?: string | null;
+            /**
+             * Last Prep Result
+             * @description What the last weekly prep queued.
+             */
+            last_prep_result?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Scheduler Running
+             * @default false
+             */
+            scheduler_running: boolean;
             /** Worker Running */
             worker_running: boolean;
             /** Version */
@@ -1179,6 +1288,21 @@ export interface components {
              * @description Sale note, e.g. "$3.49/lb"; null if not on sale.
              */
             sale?: string | null;
+        };
+        /** InstacartLink */
+        InstacartLink: {
+            /** Url */
+            url: string;
+            /**
+             * Cached
+             * @description True when an earlier link for the same unchecked items was reused.
+             */
+            cached: boolean;
+            /**
+             * Item Count
+             * @default 0
+             */
+            item_count: number;
         };
         /** Job */
         Job: {
@@ -4255,6 +4379,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    createInstacartLink: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path: {
+                monday: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstacartLink"];
+                };
+            };
+            /** @description detail.code is "instacart_not_configured" */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Instacart failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    exportAllJson: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportRecipesZip: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportDatabase: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportWeekMarkdown: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path: {
+                monday: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

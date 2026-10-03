@@ -35,20 +35,20 @@ def test_failed_and_resting(client, app):
 
 
 def test_unregistered_type_fails_cleanly_and_retry(client, app):
-    jid = enqueue(app, "plan_week")
+    jid = enqueue(app, "future_job")
     j = wait_job(client, jid)
     assert j["status"] == "failed" and "not available yet" in j["error"]
     registry.register("plan_week_test_retry", None)
-    # retry after a handler appears (simulates Phase 2 registering one)
+    # retry after a handler appears (as when a later phase registers one)
     async def ok(ctx: JobContext):
         return {"ran": ctx.type}
-    registry.register("plan_week", ok)
+    registry.register("future_job", ok)
     try:
         r = client.post(f"/api/jobs/{jid}/retry").json()
         assert r["status"] == "queued"
-        assert wait_job(client, jid)["result"] == {"ran": "plan_week"}
+        assert wait_job(client, jid)["result"] == {"ran": "future_job"}
     finally:
-        registry.types.pop("plan_week", None)
+        registry.types.pop("future_job", None)
         registry.types.pop("plan_week_test_retry", None)
     assert client.post(f"/api/jobs/{jid}/retry").status_code == 409
 

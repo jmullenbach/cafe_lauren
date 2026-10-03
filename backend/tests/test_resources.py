@@ -2,7 +2,7 @@
 
 import io
 
-from .conftest import H, recipe_id, slot
+from .conftest import H, recipe_id, slot, wait_job
 
 
 # ---------------------------------------------------------------- recipes
@@ -159,7 +159,10 @@ def test_chat_history_is_per_person(client, seeded):
     assert client.get("/api/chat", headers=H("joe")).json() == []
     sent = client.post("/api/chat", json={"text": "Something cheaper than shrimp"}).json()
     assert sent["message"]["from"] == "me" and sent["job"]["type"] == "chat"
-    assert [m["text"] for m in client.get("/api/chat").json()] == ["Something cheaper than shrimp"]
+    wait_job(client, sent["job"]["id"])
+    mine = client.get("/api/chat").json()
+    assert mine[0]["text"] == "Something cheaper than shrimp" and [m["from"] for m in mine] == ["me", "cafe"]
+    assert len(client.get("/api/chat", headers=H("lauren")).json()) == 2
 
 
 def test_chat_proposal_apply_and_dismiss(client, seeded, state):

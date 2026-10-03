@@ -596,9 +596,14 @@ class Health(Model):
     ok: bool
     database: bool
     ai_mode: Literal["fake", "claude"]
-    claude_token: Literal["present", "missing"]
+    claude_token: Literal["present", "missing", "rejected"] = Field(
+        description='"rejected" once a Claude call failed authentication; cleared by the next good call.')
+    claude_token_message: str | None = Field(default=None, description='e.g. "Claude token rejected"')
     instacart_key: bool
+    instacart: Literal["configured", "not set up yet"] = "not set up yet"
     last_prep_run: datetime | None = None
+    last_prep_result: dict[str, Any] | None = Field(default=None, description="What the last weekly prep queued.")
+    scheduler_running: bool = False
     worker_running: bool
     version: str
 
@@ -625,3 +630,18 @@ class Ok(Model):
 for _m in list(globals().values()):
     if isinstance(_m, type) and issubclass(_m, BaseModel) and _m is not BaseModel:
         _m.model_rebuild()
+
+
+# ---------------------------------------------------------------- ordering and export
+
+
+class InstacartLink(Model):
+    url: str
+    cached: bool = Field(description="True when an earlier link for the same unchecked items was reused.")
+    item_count: int = 0
+
+
+class ExportAll(Model):
+    schema_version: int
+    exported_at: datetime
+    tables: dict[str, list[dict[str, Any]]]

@@ -3929,6 +3929,279 @@
           }
         }
       }
+    },
+    "/api/weeks/{monday}/instacart-link": {
+      "post": {
+        "tags": [
+          "ordering"
+        ],
+        "summary": "Instacart Link",
+        "operationId": "createInstacartLink",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstacartLink"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "detail.code is \"instacart_not_configured\""
+          },
+          "502": {
+            "description": "Instacart failed"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/all.json": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export All",
+        "operationId": "exportAllJson",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/recipes.zip": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export Recipes",
+        "operationId": "exportRecipesZip",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/database": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export Database",
+        "operationId": "exportDatabase",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/weeks/{monday}.md": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export Week",
+        "operationId": "exportWeekMarkdown",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4766,13 +5039,36 @@
             "type": "string",
             "enum": [
               "present",
-              "missing"
+              "missing",
+              "rejected"
             ],
-            "title": "Claude Token"
+            "title": "Claude Token",
+            "description": "\"rejected\" once a Claude call failed authentication; cleared by the next good call."
+          },
+          "claude_token_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claude Token Message",
+            "description": "e.g. \"Claude token rejected\""
           },
           "instacart_key": {
             "type": "boolean",
             "title": "Instacart Key"
+          },
+          "instacart": {
+            "type": "string",
+            "enum": [
+              "configured",
+              "not set up yet"
+            ],
+            "title": "Instacart",
+            "default": "not set up yet"
           },
           "last_prep_run": {
             "anyOf": [
@@ -4785,6 +5081,24 @@
               }
             ],
             "title": "Last Prep Run"
+          },
+          "last_prep_result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Prep Result",
+            "description": "What the last weekly prep queued."
+          },
+          "scheduler_running": {
+            "type": "boolean",
+            "title": "Scheduler Running",
+            "default": false
           },
           "worker_running": {
             "type": "boolean",
@@ -4863,6 +5177,30 @@
         },
         "type": "object",
         "title": "IngredientFlag"
+      },
+      "InstacartLink": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "cached": {
+            "type": "boolean",
+            "title": "Cached",
+            "description": "True when an earlier link for the same unchecked items was reused."
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "cached"
+        ],
+        "title": "InstacartLink"
       },
       "Job": {
         "properties": {

@@ -134,10 +134,11 @@ def test_reject_another_enqueues_replacement(client, state):
     job = r["job"]
     assert job["type"] == "replacement" and job["payload"]["feedback_id"] == r["feedback_id"]
     done = wait_job(client, job["id"])
-    assert done["status"] == "failed" and "not available yet" in done["error"]
-    # the failure hook leaves the night open rather than stuck "thinking"
+    assert done["status"] == "done" and done["result"]["applied"] is True
+    # Café's replacement is a fresh suggestion that echoes the reason
     s = slot(client.get("/api/state").json()["week"], "sat")
-    assert s["status"] == "rejected" and s["kind"] == "open"
+    assert s["status"] == "suggested" and s["kind"] == "cook" and s["recipe_id"] != sat["recipe_id"]
+    assert s["basis"] == "Had it recently" and s["why"][0] == "You said: Had it recently"
 
 
 def test_ai_endpoints_enqueue_jobs(client, seeded, state):

@@ -27,10 +27,12 @@ class Settings(BaseSettings):
     cafe_ai: Literal["fake", "claude"] = "fake"
     cafe_run_migrations: bool = True
     cafe_start_worker: bool = True
+    cafe_start_scheduler: bool = True
     cafe_timezone: str = "America/Chicago"
 
     claude_code_oauth_token: str | None = None
     instacart_api_key: str | None = None
+    instacart_base: str = "https://connect.dev.instacart.tools"
 
     @property
     def db_url(self) -> str:

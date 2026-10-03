@@ -9,9 +9,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from .ai import handlers as _ai_handlers  # noqa: F401  (registers the AI job handlers)
 from .config import Settings, get_settings
 from .db import Database, run_migrations
 from .jobs import JobManager
+from .scheduler import PrepScheduler
+from .routers import export as export_router, ordering
 from .routers import chat, core, grocery_list, inbox, jobs, pantry, recipes, slots, stores, weeks
 
 
@@ -34,14 +37,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings.cafe_media_dir.mkdir(parents=True, exist_ok=True)
     db = Database(settings)
     manager = JobManager(db)
+    prep = PrepScheduler(db, manager)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if settings.cafe_start_worker:
             await manager.start()
+        if settings.cafe_start_scheduler:
+            prep.start()
         try:
             yield
         finally:
+            prep.stop()
             await manager.stop()
             db.dispose()
 
@@ -49,10 +56,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.db = db
     app.state.jobs = manager
+    app.state.scheduler = prep
 
     for r in (core.router, weeks.router, slots.router, recipes.router, inbox.queue_router,
               inbox.requests_router, inbox.staples_router, pantry.router, grocery_list.router,
-              stores.router, chat.router, jobs.router):
+              stores.router, chat.router, jobs.router, ordering.router, export_router.router):
         app.include_router(r)
 
     app.mount("/media", StaticFiles(directory=settings.cafe_media_dir), name="media")

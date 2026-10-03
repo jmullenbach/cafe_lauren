@@ -11,6 +11,7 @@ const backendEnv = {
   CAFE_DB_PATH: path.join(TMP, 'cafe-e2e.db'),
   CAFE_MEDIA_DIR: path.join(TMP, 'media'),
   CAFE_AI: 'fake',
+  CAFE_START_SCHEDULER: 'false',
 };
 
 export default defineConfig({

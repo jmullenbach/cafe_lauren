@@ -25,6 +25,7 @@ def settings(tmp_path: Path) -> Settings:
         cafe_media_dir=tmp_path / "media",
         cafe_frontend_dist=tmp_path / "no-dist",
         cafe_ai="fake",
+        cafe_start_scheduler=False,
     )
 
 
