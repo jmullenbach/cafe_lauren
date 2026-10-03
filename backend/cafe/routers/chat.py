@@ -54,9 +54,10 @@ def resolve_proposal(message_id: int, body: s.ProposalAction, db: DB, who: User)
         raise HTTPException(status_code=409, detail="Proposal has no week")
     if body.action == "apply":
         slot = W.slot_by_day(week, p.day)
-        req = (s.SwapRequest(kind="recipe", recipe_id=p.recipe_id, basis=f"Ask Café: {p.label}")
+        why = [p.detail] if p.detail else None
+        req = (s.SwapRequest(kind="recipe", recipe_id=p.recipe_id, basis=f"Ask Café: {p.label}", why=why)
                if p.recipe_id is not None
-               else s.SwapRequest(kind="text", text=p.text or p.label, basis=f"Ask Café: {p.label}"))
+               else s.SwapRequest(kind="text", text=p.text or p.label, basis=f"Ask Café: {p.label}", why=why))
         apply_swap(db, slot, who, req)
     msg.proposal = {**msg.proposal, "state": "applied" if body.action == "apply" else "dismissed"}
     db.flush()

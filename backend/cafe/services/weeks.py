@@ -169,7 +169,7 @@ def slot_out(slot: m.Slot) -> dict[str, Any]:
         "id": slot.id, "day": slot.day, "kind": slot.kind, "recipe_id": slot.recipe_id,
         "recipe": recipe_out(slot.recipe) if slot.recipe else None, "text": slot.text,
         "status": slot.status, "by": slot.by, "basis": slot.basis, "why": slot.why or [],
-        "cook": slot.cook, "ingredient_flags": slot.ingredient_flags or {},
+        "cook": slot.cook, "job_id": slot.job_id, "ingredient_flags": slot.ingredient_flags or {},
         "ingredients": slot_ingredients_out(slot),
         "ingredients_edited": slot.ingredients_override is not None,
         "votes": {v.person: v.value for v in slot.votes},

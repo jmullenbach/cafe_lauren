@@ -7558,6 +7558,18 @@
             ],
             "title": "Cook"
           },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id",
+            "description": "Slot-scoped job in flight or failed/resting (for Retry)."
+          },
           "ingredient_flags": {
             "additionalProperties": {
               "$ref": "#/components/schemas/IngredientFlag"
@@ -8036,6 +8048,21 @@
               }
             ],
             "title": "Cook"
+          },
+          "why": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Why",
+            "description": "Keep these reasons on the slot instead of clearing them."
           }
         },
         "type": "object",

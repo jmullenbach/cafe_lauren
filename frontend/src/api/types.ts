@@ -2062,6 +2062,11 @@ export interface components {
             why?: string[];
             /** Cook */
             cook?: string | null;
+            /**
+             * Job Id
+             * @description Slot-scoped job in flight or failed/resting (for Retry).
+             */
+            job_id?: number | null;
             /** Ingredient Flags */
             ingredient_flags?: {
                 [key: string]: components["schemas"]["IngredientFlag"];
@@ -2226,6 +2231,11 @@ export interface components {
             basis?: string | null;
             /** Cook */
             cook?: string | null;
+            /**
+             * Why
+             * @description Keep these reasons on the slot instead of clearing them.
+             */
+            why?: string[] | null;
         };
         /** ValidationError */
         ValidationError: {

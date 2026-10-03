@@ -330,6 +330,8 @@ def test_weekly_prep_runs_directly(client, app, monkeypatch, settings):
     monkeypatch.setattr(ads_service, "download", fake_download(settings.cafe_media_dir))
     tz = ZoneInfo(settings.cafe_timezone)
     now = datetime(2026, 10, 3, 7, 5, tzinfo=tz)  # a Saturday, just after 07:00
+    with app.state.db.session() as s:
+        W.set_setting(s, S.FIRST_STARTED_KEY, "2026-09-01T00:00:00")  # not a fresh install
     assert S.prep_due(app.state.db, now)
     out = S.run_prep(app.state.db, app.state.jobs, now=now)
     assert out["monday"] == "2026-10-05" and out["week_created"] and set(out["jobs"]) == {"ads_refresh", "plan_week"}

@@ -33,6 +33,7 @@ log = logging.getLogger("cafe.scheduler")
 PREP_GRACE = timedelta(hours=12)
 LAST_RUN_KEY = "last_prep_run"
 LAST_RESULT_KEY = "last_prep_result"
+FIRST_STARTED_KEY = "first_started_at"
 
 
 def _tz(name: str) -> ZoneInfo:
@@ -84,13 +85,30 @@ def run_prep(db: Database, jobs: JobManager, *, now: datetime | None = None) -> 
     return out
 
 
+def _utc_naive(dt: datetime) -> datetime:
+    return dt.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
+
+
+def ensure_first_started(db: Database, now: datetime | None = None) -> datetime:
+    """Record the first boot once (naive UTC); returns it as an aware UTC datetime."""
+    with db.session() as s:
+        raw = W.get_setting(s, FIRST_STARTED_KEY)
+        if not raw:
+            raw = _utc_naive(now or datetime.now(ZoneInfo("UTC"))).isoformat()
+            W.set_setting(s, FIRST_STARTED_KEY, raw)
+    return datetime.fromisoformat(raw).replace(tzinfo=ZoneInfo("UTC"))
+
+
 def prep_due(db: Database, now: datetime) -> bool:
+    first = ensure_first_started(db, now)
     with db.session() as s:
         cfg = W.all_settings(s)
         raw = W.get_setting(s, LAST_RUN_KEY)
     sched = last_scheduled(now, cfg.prep_day, cfg.prep_time)
     if now - sched > PREP_GRACE:
         return False
+    if not raw and first >= sched:
+        return False  # fresh install: no surprise prep until the next scheduled time
     if raw:
         last = datetime.fromisoformat(raw).replace(tzinfo=ZoneInfo("UTC"))
         if last >= sched:
@@ -113,6 +131,7 @@ class PrepScheduler:
             log.exception("weekly prep tick failed")
 
     def start(self) -> None:
+        ensure_first_started(self.db)
         from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
         self.scheduler = AsyncIOScheduler(timezone=_tz(self.db.settings.cafe_timezone))

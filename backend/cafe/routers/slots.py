@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 
 from .. import jobs as J
 from .. import models as m
@@ -35,15 +35,31 @@ def vote(slot_id: int, body: s.VoteRequest, db: DB, who: User) -> s.Week:
     return W.week_out(db, slot.week)
 
 
+def _option_why(db, slot: m.Slot, recipe_id: int) -> list[str]:
+    """Reasons Café gave for this recipe in this slot's latest swap_options results."""
+    jobs = db.scalars(select(m.Job).where(m.Job.type == J.SWAP_OPTIONS, m.Job.status == "done")
+                      .order_by(m.Job.id.desc()).limit(30))
+    for job in jobs:
+        res = job.result or {}
+        if res.get("slot_id") != slot.id:
+            continue
+        for o in res.get("options") or []:
+            if o.get("recipe_id") == recipe_id and o.get("why"):
+                return list(o["why"])
+    return []
+
+
 def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None = None) -> None:
     """Shared by /swap and chat proposals. Resets votes per the swap rule."""
     by = by or who
     slot.ingredients_override = None
+    slot.job_id = None
     slot.basis = body.basis
     slot.by = by
     if body.kind == "recipe":
         r = _recipe(db, body.recipe_id)
-        slot.kind, slot.recipe_id, slot.text, slot.status, slot.why = "cook", r.id, None, "edited", []
+        slot.kind, slot.recipe_id, slot.text, slot.status = "cook", r.id, None, "edited"
+        slot.why = list(body.why) if body.why is not None else _option_why(db, slot, r.id)
         if body.cook is not None:
             slot.cook = body.cook
         db.execute(delete(m.QueueEntry).where(m.QueueEntry.recipe_id == r.id))
@@ -63,7 +79,7 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
         slot.cook = body.cook or "leidy"
     elif body.kind == "open":
         slot.kind, slot.recipe_id, slot.text, slot.status = "open", None, body.text, None
-    slot.why = []
+    slot.why = list(body.why) if body.why is not None else []
     W.reset_votes(db, slot, who)
 
 
@@ -79,6 +95,7 @@ def swap_options(slot_id: int, body: s.SwapOptionsRequest, db: DB, who: User, jo
     slot = W.get_slot(db, slot_id)
     job = jobs.enqueue(db, J.SWAP_OPTIONS, {"slot_id": slot.id, "week_id": slot.week_id,
                                             "prefs": body.prefs, "text": body.text}, who)
+    slot.job_id = job.id
     return s.JobAccepted(job=s.Job.model_validate(job))
 
 
@@ -95,6 +112,7 @@ def reject(slot_id: int, body: s.RejectRequest, db: DB, who: User, jobs: Jobs) -
     if body.mode == "open":
         slot.kind, slot.recipe_id, slot.text, slot.status = "open", None, None, "rejected"
         slot.by, slot.basis, slot.why, slot.ingredients_override = who, basis or None, [], None
+        slot.job_id = None
         slot.votes.clear()
     else:
         slot.status = "thinking"
@@ -103,6 +121,7 @@ def reject(slot_id: int, body: s.RejectRequest, db: DB, who: User, jobs: Jobs) -
             "slot_id": slot.id, "week_id": slot.week_id, "feedback_id": fb.id,
             "rejected_recipe_id": old_recipe, "reasons": body.reasons, "note": body.note,
         }, who)
+        slot.job_id = job.id
     week = W.week_out(db, slot.week)
     return s.RejectResponse(week=week, feedback_id=fb.id,
                             job=s.Job.model_validate(job) if job is not None else None)

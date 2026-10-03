@@ -104,6 +104,8 @@ class Slot(TimestampMixin, Base):
     why: Mapped[list[str]] = mapped_column(JSON, default=list)
     cook: Mapped[str | None] = mapped_column(String(40), nullable=True)
     ingredient_flags: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    # Latest slot-scoped job (reject replacement, swap options); kept after failure so the UI can retry.
+    job_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     # Per-week ingredient edits from Meal detail; null means "use the recipe's".
     ingredients_override: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
 

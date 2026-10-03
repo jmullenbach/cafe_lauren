@@ -80,18 +80,25 @@ FailureHook = Callable[[Session, m.Job], None]
 class JobType:
     handler: Handler | None = None
     on_failure: FailureHook | None = None
+    on_resting: FailureHook | None = None
+    on_retry: FailureHook | None = None
 
 
 @dataclass
 class Registry:
     types: dict[str, JobType] = field(default_factory=dict)
 
-    def register(self, type_: str, handler: Handler | None = None, *, on_failure: FailureHook | None = None) -> None:
+    def register(self, type_: str, handler: Handler | None = None, *, on_failure: FailureHook | None = None,
+                 on_resting: FailureHook | None = None, on_retry: FailureHook | None = None) -> None:
         jt = self.types.setdefault(type_, JobType())
         if handler is not None:
             jt.handler = handler
         if on_failure is not None:
             jt.on_failure = on_failure
+        if on_resting is not None:
+            jt.on_resting = on_resting
+        if on_retry is not None:
+            jt.on_retry = on_retry
 
     def handler(self, type_: str) -> Callable[[Handler], Handler]:
         def deco(fn: Handler) -> Handler:
@@ -103,6 +110,20 @@ class Registry:
     def on_failure(self, type_: str) -> Callable[[FailureHook], FailureHook]:
         def deco(fn: FailureHook) -> FailureHook:
             self.register(type_, on_failure=fn)
+            return fn
+
+        return deco
+
+    def on_resting(self, type_: str) -> Callable[[FailureHook], FailureHook]:
+        def deco(fn: FailureHook) -> FailureHook:
+            self.register(type_, on_resting=fn)
+            return fn
+
+        return deco
+
+    def on_retry(self, type_: str) -> Callable[[FailureHook], FailureHook]:
+        def deco(fn: FailureHook) -> FailureHook:
+            self.register(type_, on_retry=fn)
             return fn
 
         return deco
@@ -126,13 +147,29 @@ async def _dummy(ctx: JobContext) -> Any:
 
 
 @registry.on_failure(REPLACEMENT)
-def _replacement_failed(db: Session, job: m.Job) -> None:
-    """A rejected slot waiting on a replacement goes back to an open night."""
+@registry.on_resting(REPLACEMENT)
+def _replacement_stopped(db: Session, job: m.Job) -> None:
+    """A rejected slot waiting on a replacement goes back to an open night (job_id kept for Retry)."""
     slot = db.get(m.Slot, job.payload.get("slot_id"))
     if slot is not None and slot.status == "thinking":
         slot.kind = "open"
         slot.recipe_id = None
         slot.status = "rejected"
+
+
+@registry.on_retry(REPLACEMENT)
+def _replacement_retry(db: Session, job: m.Job) -> None:
+    """Retrying puts the open night back to thinking so the handler will apply the answer."""
+    slot = db.get(m.Slot, job.payload.get("slot_id"))
+    if slot is not None and slot.job_id == job.id and slot.kind == "open" and slot.status == "rejected":
+        slot.status = "thinking"
+
+
+def _clear_slot_job(db: Session, job: m.Job) -> None:
+    slot_id = (job.payload or {}).get("slot_id")
+    slot = db.get(m.Slot, slot_id) if slot_id else None
+    if slot is not None and slot.job_id == job.id:
+        slot.job_id = None
 
 
 def job_dict(job: m.Job) -> dict[str, Any]:
@@ -232,13 +269,20 @@ class JobManager:
                 return None
             for k, v in fields.items():
                 setattr(job, k, v)
-            if fields.get("status") == "failed":
-                jt = self.registry.get(job.type)
-                if jt and jt.on_failure:
-                    try:
-                        jt.on_failure(s, job)
-                    except Exception:  # pragma: no cover
-                        log.exception("on_failure hook for %s failed", job.type)
+            status = fields.get("status")
+            jt = self.registry.get(job.type)
+            hook = None
+            if status == "failed":
+                hook = jt.on_failure if jt else None
+            elif status == "resting":
+                hook = jt.on_resting if jt else None
+            elif status == "done":
+                hook = _clear_slot_job
+            if hook:
+                try:
+                    hook(s, job)
+                except Exception:  # pragma: no cover
+                    log.exception("%s hook for %s failed", status, job.type)
             s.flush()
             d = job_dict(job)
         self.publish(d)
@@ -273,6 +317,9 @@ class JobManager:
         job.status = "queued"
         job.error = None
         job.result = None
+        jt = self.registry.get(job.type)
+        if jt and jt.on_retry:
+            jt.on_retry(db, job)
         db.flush()
         jid = job.id
 

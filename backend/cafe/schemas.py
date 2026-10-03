@@ -184,6 +184,7 @@ class Slot(Model):
     basis: str | None = None
     why: list[str] = Field(default_factory=list)
     cook: str | None = None
+    job_id: int | None = Field(default=None, description="Slot-scoped job in flight or failed/resting (for Retry).")
     ingredient_flags: dict[str, IngredientFlag] = Field(default_factory=dict)
     ingredients: list[SlotIngredient] = Field(
         default_factory=list, description="Effective ingredients (week override or recipe) with tags."
@@ -214,6 +215,7 @@ class SwapRequest(Model):
     text: str | None = None
     basis: str | None = Field(default=None, description="What the person asked for, echoed in the UI.")
     cook: str | None = None
+    why: list[str] | None = Field(default=None, description="Keep these reasons on the slot instead of clearing them.")
 
 
 class SwapOptionsRequest(Model):
