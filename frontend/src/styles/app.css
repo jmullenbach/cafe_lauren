@@ -1,0 +1,26 @@
+/* App-level layout. Component styling lives with the components (handoff inline styles + tokens). */
+html, body, #root { height: 100%; }
+body { background: var(--linen-200); overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+:root {
+  /* Clears the status bar / notch. 58px matches the prototype; larger on devices with a taller inset. */
+  --safe-top: max(env(safe-area-inset-top, 0px), 58px);
+}
+#root { display: flex; justify-content: center; align-items: center; }
+.app-frame {
+  position: relative;
+  width: 100%;
+  max-width: 402px;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--surface-page);
+  font-family: var(--font-sans);
+}
+/* Wider than a phone (desktop): a phone-width column, centered, with a soft edge. */
+@media (min-width: 520px) {
+  body { padding: 24px 16px; }
+  #root { min-height: calc(100vh - 48px); height: auto; }
+  .app-frame { height: min(874px, calc(100vh - 48px)); border-radius: 40px; box-shadow: 0 40px 80px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.12); }
+}
+.clm-scroll::-webkit-scrollbar { display: none; }
+button { font-family: inherit; }
