@@ -5,7 +5,8 @@ import { BASE_URL } from './client';
 import { keys } from './keys';
 import { useAppState } from './hooks';
 
-export const FINISHED = new Set(['done', 'failed', 'resting']);
+/** A cancelled job (superseded by a newer ask) is finished too. */
+export const FINISHED = new Set(['done', 'failed', 'resting', 'cancelled']);
 
 /** Latest known version of every job seen on the stream this session. */
 const jobs = new Map<number, Job>();
@@ -28,6 +29,8 @@ export function invalidateForJob(qc: QueryClient, job: Job): void {
   switch (job.type) {
     case 'plan_week': case 'swap_options': case 'replacement':
       inv(keys.weeks); inv(keys.state); break;
+    case 'recipe_fill':
+      inv(keys.weeks); inv(keys.state); inv(keys.recipesAll); break;
     case 'pantry_read':
       inv(keys.pantry); inv(keys.state); break;
     case 'ads_refresh': case 'ads_read':

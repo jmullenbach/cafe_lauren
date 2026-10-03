@@ -62,6 +62,8 @@ class Recipe(TimestampMixin, Base):
     leftovers: Mapped[str | None] = mapped_column(Text, nullable=True)
     source: Mapped[str] = mapped_column(String(20), default="manual")  # imported, ai, manual
     status: Mapped[str] = mapped_column(String(20), default="saved")  # draft, saved
+    # complete, or pending/failed for a picked idea whose ingredients and steps a recipe_fill job writes.
+    detail_status: Mapped[str] = mapped_column(String(12), default="complete", server_default="complete")
     last_made: Mapped[date | None] = mapped_column(Date, nullable=True)
 
 
@@ -253,7 +255,7 @@ class ChatMessage(TimestampMixin, Base):
 class Job(TimestampMixin, Base):
     __tablename__ = "jobs"
     type: Mapped[str] = mapped_column(String(40))
-    status: Mapped[str] = mapped_column(String(12), default="queued")  # queued, running, done, failed, resting
+    status: Mapped[str] = mapped_column(String(12), default="queued")  # queued, running, done, failed, resting, cancelled
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     result: Mapped[Any | None] = mapped_column(JSON, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)

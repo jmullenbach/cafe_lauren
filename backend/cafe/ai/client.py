@@ -38,11 +38,12 @@ RESTING_TEXT = "Café is resting. Try again later."
 # Protocol method -> key in the `models` setting.
 MODEL_KEYS = {
     "plan_week": "plan", "swap_options": "swap", "replacement": "replacement", "read_pantry": "pantry",
-    "read_ads": "ads", "draft_recipe": "recipe", "chat": "chat",
+    "read_ads": "ads", "draft_recipe": "recipe", "fill_recipe": "recipe", "chat": "chat",
 }
 PROMPT_FILES = {
     "plan_week": "plan_week", "swap_options": "swap_options", "replacement": "replacement",
-    "read_pantry": "pantry_read", "read_ads": "ads_read", "draft_recipe": "recipe_draft", "chat": "chat",
+    "read_pantry": "pantry_read", "read_ads": "ads_read", "draft_recipe": "recipe_draft",
+    "fill_recipe": "recipe_fill", "chat": "chat",
 }
 
 T = TypeVar("T", bound=BaseModel)
@@ -76,8 +77,9 @@ class AIOutputError(AIError):
 
 class CafeAI(Protocol):
     async def plan_week(self, ctx: A.PlanContext) -> A.PlanSuggestion: ...
-    async def swap_options(self, ctx: A.SwapContext) -> list[A.MealSuggestion]: ...
-    async def replacement(self, ctx: A.RejectContext) -> A.MealSuggestion: ...
+    async def swap_options(self, ctx: A.SwapContext) -> list[A.MealPick]: ...
+    async def replacement(self, ctx: A.RejectContext) -> A.MealPick: ...
+    async def fill_recipe(self, ctx: A.FillContext) -> A.RecipeDraft: ...
     async def read_pantry(self, photos: list[Path]) -> list[A.PantryRead]: ...
     async def read_ads(self, images: list[Path]) -> A.AdsReadResult: ...
     async def draft_recipe(self, src: A.RecipeSource) -> A.RecipeDraft: ...
@@ -197,13 +199,21 @@ class ClaudeCafeAI:
 
         async def run() -> None:
             nonlocal a_err, result
-            async for msg in query_fn(prompt=stream(), options=opts):
-                if isinstance(msg, AssistantMessage):
-                    a_err = msg.error or a_err
-                elif isinstance(msg, RateLimitEvent):
-                    events.append(msg)
-                elif isinstance(msg, ResultMessage):
-                    result = msg
+            gen = query_fn(prompt=stream(), options=opts)
+            try:
+                async for msg in gen:
+                    if isinstance(msg, AssistantMessage):
+                        a_err = msg.error or a_err
+                    elif isinstance(msg, RateLimitEvent):
+                        events.append(msg)
+                    elif isinstance(msg, ResultMessage):
+                        result = msg
+            finally:
+                # `async for` does not close its generator when cancelled (a superseded job or a
+                # timeout), so close it here: the SDK's own finally then tears the CLI subprocess down.
+                aclose = getattr(gen, "aclose", None)
+                if aclose is not None:
+                    await aclose()
 
         try:
             await asyncio.wait_for(run(), timeout=self.timeout)
@@ -257,14 +267,18 @@ class ClaudeCafeAI:
         text = context_text(ctx, f"Suggest meals for these days of the week of {ctx.monday}: {', '.join(ctx.days)}.")
         return await self._call("plan_week", A.PlanSuggestion, [{"type": "text", "text": text}])
 
-    async def swap_options(self, ctx: A.SwapContext) -> list[A.MealSuggestion]:
+    async def swap_options(self, ctx: A.SwapContext) -> list[A.MealPick]:
         text = context_text(ctx, f"Give three options for {ctx.day}.")
         out = await self._call("swap_options", A.SwapOptions, [{"type": "text", "text": text}])
         return out.options
 
-    async def replacement(self, ctx: A.RejectContext) -> A.MealSuggestion:
+    async def replacement(self, ctx: A.RejectContext) -> A.MealPick:
         text = context_text(ctx, f"Suggest one replacement for {ctx.day}.")
-        return await self._call("replacement", A.MealSuggestion, [{"type": "text", "text": text}])
+        return await self._call("replacement", A.MealPick, [{"type": "text", "text": text}])
+
+    async def fill_recipe(self, ctx: A.FillContext) -> A.RecipeDraft:
+        text = context_text(ctx, f"Write the full recipe for {ctx.title}.")
+        return await self._call("fill_recipe", A.RecipeDraft, [{"type": "text", "text": text}])
 
     async def read_pantry(self, photos: list[Path]) -> list[A.PantryRead]:
         blocks = [encode_image(p, 1024) for p in photos]
@@ -303,7 +317,17 @@ class ClaudeCafeAI:
 
 
 class FakeCafeAI:
-    """Fixtures from ui_kits/mobile/data.js (via seed_demo). No network, no quota."""
+    """Fixtures from ui_kits/mobile/data.js (via seed_demo). No network, no quota.
+
+    CAFE_FAKE_SWAP_DELAY / CAFE_FAKE_FILL_DELAY (seconds) slow swap_options / fill_recipe down, so
+    end-to-end tests can see the thinking states and superseded asks."""
+
+    # A new idea that is not in the demo data, so the swap sheet exercises "pick, then fill".
+    IDEA = dict(title="Sheet Pan Sausage and Gnocchi", short_title="Sausage gnocchi",
+                description="Crispy shelf-stable gnocchi roasted with smoked sausage, peppers and onion.",
+                method="Sheet pan", total_min=30, cost_usd=16.0)
+    IDEA_INGS = [("smoked sausage", False, "$2.99"), ("gnocchi", False, None), ("bell peppers", False, None),
+                 ("red onion", True, None)]
 
     PLAN = {"mon": "tacos", "tue": "leftover:Taco leftovers → taco-salad bowls", "wed": "chops",
             "thu": "salmon", "fri": "shrimp", "sat": "chicken", "sun": "leftover:Chicken leftovers → wraps"}
@@ -364,18 +388,61 @@ class FakeCafeAI:
             out.append(self._meal(key, day, ctx.recipe_box))
         return A.PlanSuggestion(slots=out, summary="Sale pork and chicken early in the week, shrimp on Friday.")
 
-    async def swap_options(self, ctx: A.SwapContext) -> list[A.MealSuggestion]:
-        self.calls.append({"task": "swap_options"})
-        current = (ctx.current or {}).get("title")
-        keys = [k for k in self.ALTERNATIVES if self._fx().MEALS[k]["title"] != current][:3]
-        return [self._meal(k, ctx.day, ctx.recipe_box) for k in keys]
+    def _pick(self, key: str, box: list[dict[str, Any]], why: list[str] | None = None) -> A.MealPick:
+        """A light option: the recipe-box id if the meal is there, else a new idea (no ingredients or steps)."""
+        fx = self._fx()
+        d = fx.MEALS[key]
+        rid = next((r["id"] for r in box if r.get("title") == d["title"]), None)
+        notes = [A.IngredientNote(name=name, have=tag == "have",
+                                  sale=fx.SALE.get(name.lower(), "On sale") if tag == "sale" else None)
+                 for _q, name, tag in d["ings"]][:6]
+        idea = None if rid else A.MealIdea(title=d["title"], short_title=d["short"], description=d["description"],
+                                           method=d["method"], total_min=d["total"], cost_usd=float(d["cost"]))
+        return A.MealPick(recipe_id=rid, idea=idea, why=why or list(d["why"]), ingredients=notes)
 
-    async def replacement(self, ctx: A.RejectContext) -> A.MealSuggestion:
+    def _idea_pick(self, why: list[str] | None = None) -> A.MealPick:
+        return A.MealPick(recipe_id=None, idea=A.MealIdea(**self.IDEA),
+                          why=why or ["Smoked sausage on sale, $2.99", "One pan, 30 min"],
+                          ingredients=[A.IngredientNote(name=n, have=h, sale=s) for n, h, s in self.IDEA_INGS])
+
+    async def swap_options(self, ctx: A.SwapContext) -> list[A.MealPick]:
+        self.calls.append({"task": "swap_options", "ask": ctx.ask})
+        delay = float(os.environ.get("CAFE_FAKE_SWAP_DELAY") or 0)
+        if delay:
+            await asyncio.sleep(delay)
+        current = (ctx.current or {}).get("title")
+        keys = [k for k in self.ALTERNATIVES if self._fx().MEALS[k]["title"] != current][:2]
+        out = [self._pick(k, ctx.recipe_box) for k in keys]
+        if current != self.IDEA["title"]:
+            out.append(self._idea_pick())
+        return out
+
+    async def replacement(self, ctx: A.RejectContext) -> A.MealPick:
         self.calls.append({"task": "replacement"})
         rejected = (ctx.rejected or {}).get("title")
         key = next(k for k in ["stirfry", *self.ALTERNATIVES] if self._fx().MEALS[k]["title"] != rejected)
         said = [f"You said: {r}" for r in ctx.reasons[:1]] or ["Something different, as asked"]
-        return self._meal(key, ctx.day, ctx.recipe_box, why=[*said, *self._fx().MEALS[key]["why"][:2]])
+        return self._pick(key, ctx.recipe_box, why=[*said, *self._fx().MEALS[key]["why"][:2]])
+
+    async def fill_recipe(self, ctx: A.FillContext) -> A.RecipeDraft:
+        self.calls.append({"task": "fill_recipe", "title": ctx.title})
+        delay = float(os.environ.get("CAFE_FAKE_FILL_DELAY") or 0)
+        if delay:
+            await asyncio.sleep(delay)
+        fx = self._fx()
+        key = next((k for k, d in fx.MEALS.items() if d["title"] == ctx.title), None)
+        if key is not None:
+            return self._draft(key)
+        names = [str(i.get("name")) for i in ctx.main_ingredients if i.get("name")] or ["chicken thighs"]
+        total = ctx.total_min or 30
+        return A.RecipeDraft(
+            title=ctx.title, short_title=" ".join(ctx.title.split()[:2]), description=ctx.description,
+            method=ctx.method or "Skillet", prep_min=10, cook_min=max(0, total - 10), total_min=total,
+            cost_usd=float(ctx.cost_usd or 15), healthy=7, delicious=8, tags=[],
+            ingredients=[A.AIIngredient(qty="1", unit="lb" if i == 0 else "", name=n) for i, n in enumerate(names)],
+            steps=[A.AIStepGroup(group="Cook", steps=[f"Cook **1 lb {names[0]}** until done.",
+                                                      *[f"Add **{n}** and toss." for n in names[1:]]])],
+            leftovers="Day 2: wrap it in tortillas")
 
     async def read_pantry(self, photos: list[Path]) -> list[A.PantryRead]:
         self.calls.append({"task": "read_pantry", "photos": len(photos)})

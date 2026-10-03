@@ -5,6 +5,7 @@ import { ChoiceChips } from '../../components/forms/ChoiceChips';
 import { Input } from '../../components/forms/Input';
 import { Switch } from '../../components/forms/Switch';
 import { useRejectSlot } from '../../api/hooks';
+import { useJobPoll } from '../../api/extra';
 import { useUi } from '../../state/UiContext';
 import { REJECT_REASONS } from '../../lib/meal';
 import { useSlotFor } from './shared';
@@ -16,13 +17,17 @@ export function RejectSheet({ open, slotId }: { open: boolean; slotId?: unknown 
   const [why, setWhy] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [remember, setRemember] = useState(true);
+  // The sheet stays mounted after it closes, so it keeps polling the replacement job (a backstop to the stream).
+  const [jobId, setJobId] = useState<number | null>(null);
+  useJobPoll(jobId);
   useEffect(() => { if (open) { setWhy([]); setNote(''); } }, [open, slotId]);
   const m = slot?.recipe;
   const go = (mode: 'open' | 'another') => {
     if (!slot) return;
     const basis = [...why, note.trim()].filter(Boolean).join(' · ');
     reject.mutate({ id: slot.id, reasons: why, note: note.trim() || null, remember, mode }, {
-      onSuccess: () => {
+      onSuccess: (r) => {
+        setJobId(r.job?.id ?? null);
         closeSheet();
         if (mode === 'open') toast({ icon: 'x', title: 'Night left open', message: 'Café will remember: ' + (basis || 'no reason given') });
       },

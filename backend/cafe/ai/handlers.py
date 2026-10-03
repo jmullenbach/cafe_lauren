@@ -7,6 +7,7 @@ as suggestions via services/planner.py.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
@@ -21,7 +22,7 @@ from sqlalchemy import select
 from .. import jobs as J
 from .. import models as m
 from .. import schemas as S
-from ..jobs import JobContext, JobResting, registry
+from ..jobs import JobContext, JobFailed, JobResting, registry
 from ..services import ads as ads_service
 from ..services import planner as P
 from ..services import weeks as W
@@ -35,6 +36,7 @@ PANTRY_BATCH = 4
 ADS_BATCH = 4
 PAGE_TEXT_LIMIT = 30_000
 TOKEN_STATUS_KEY = "claude_token_status"
+TOO_LONG = "Café took too long. Try again."
 
 
 # ---------------------------------------------------------------- shared
@@ -52,9 +54,16 @@ def record_token_status(ctx: JobContext, status: str, detail: str | None = None)
 
 
 async def guarded(ctx: JobContext, call: Awaitable[T]) -> T:
-    """Map AI errors onto job states and keep the token status current for /api/health."""
+    """Map AI errors onto job states and keep the token status current for /api/health.
+
+    Every call has a time limit (settings.ai_timeout for the job type). On timeout the call is
+    cancelled, which closes the Claude CLI subprocess, and the job fails with a friendly message."""
+    limit = ctx.db.settings.ai_timeout(ctx.type)
     try:
-        out = await call
+        out = await asyncio.wait_for(call, timeout=limit)
+    except asyncio.TimeoutError:
+        log.warning("job %s (%s) timed out after %.0f s", ctx.id, ctx.type, limit)
+        raise JobFailed(TOO_LONG) from None
     except AIResting as e:
         raise JobResting(str(e)) from e
     except ClaudeAuthError as e:
@@ -128,11 +137,52 @@ async def replacement(ctx: JobContext) -> dict[str, Any]:
             return {"slot_id": slot.id, "applied": False, "reason": "The night changed before Café answered."}
         rctx = P.reject_context(db, slot, ctx.payload.get("rejected_recipe_id"),
                                 list(ctx.payload.get("reasons") or []), ctx.payload.get("note"))
-    sug = await guarded(ctx, ai_for(ctx).replacement(rctx))
+    pick = await guarded(ctx, ai_for(ctx).replacement(rctx))
     with ctx.session() as db:
         slot = W.get_slot(db, ctx.payload["slot_id"])
-        applied = P.apply_replacement(db, slot, sug)
-        return {"slot_id": slot.id, "day": slot.day, "applied": applied, "recipe_id": slot.recipe_id}
+        r = P.apply_replacement(db, slot, pick)
+        fill = None
+        if P.needs_fill(r):
+            fill = P.enqueue_fill(db, ctx.manager, r, slot, ctx.requested_by,
+                                  main=[n.model_dump(mode="json") for n in pick.ingredients], why=pick.why)
+        return {"slot_id": slot.id, "day": slot.day, "applied": r is not None, "recipe_id": slot.recipe_id,
+                "fill_job_id": fill.id if fill else None}
+
+
+# ---------------------------------------------------------------- recipe fill (a picked idea -> full recipe)
+
+
+@registry.handler(J.RECIPE_FILL)
+async def recipe_fill(ctx: JobContext) -> dict[str, Any]:
+    rid = ctx.payload.get("recipe_id")
+    main = list(ctx.payload.get("main") or [])
+    with ctx.session() as db:
+        r = db.get(m.Recipe, rid)
+        if r is None:
+            raise ValueError("Recipe not found")
+        if r.detail_status == "complete" and r.ingredients:
+            return {"recipe_id": r.id, "filled": False, "reason": "Already written."}
+        fctx = P.fill_context(db, r, main, list(ctx.payload.get("why") or []))
+    draft = await guarded(ctx, ai_for(ctx).fill_recipe(fctx))
+    with ctx.session() as db:
+        r = db.get(m.Recipe, rid)
+        if r is None:
+            raise ValueError("Recipe not found")
+        slots = P.apply_fill(db, r, draft, main)
+        return {"recipe_id": r.id, "filled": True, "title": r.title, "ingredients": len(r.ingredients),
+                "slot_ids": slots}
+
+
+def _fill_recipe_state(status: str):
+    def hook(db, job: m.Job) -> None:
+        r = db.get(m.Recipe, (job.payload or {}).get("recipe_id"))
+        if r is not None and r.detail_status != "complete":
+            r.detail_status = status
+    return hook
+
+
+registry.register(J.RECIPE_FILL, on_failure=_fill_recipe_state("failed"), on_resting=_fill_recipe_state("failed"),
+                  on_retry=_fill_recipe_state("pending"))
 
 
 # ---------------------------------------------------------------- recipe draft

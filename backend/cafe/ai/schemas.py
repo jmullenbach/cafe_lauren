@@ -99,12 +99,44 @@ class PlanSuggestion(Out):
     summary: str = Field(description="One or two sentences on the shape of the week.")
 
 
+class MealIdea(Out):
+    """A new meal idea, without ingredients or steps. The full recipe is written later, only if it is picked."""
+
+    title: str = Field(description="Title Case meal title.")
+    short_title: str = Field(description='Two or three words for small cards, e.g. "Pork chops".')
+    description: str = Field(description="One sentence.")
+    method: str = Field(description="Sheet pan | Instant Pot | Le Creuset | Skillet (or another simple method).")
+    total_min: int = Field(description="Total minutes, prep plus cook.")
+    cost_usd: float = Field(description="Approximate cost for 5 people, in dollars.")
+
+
+class MealPick(Out):
+    """One light option: a recipe-box id, or a new idea (no full recipe)."""
+
+    recipe_id: int | None = Field(default=None, description="id of a recipe from the recipe box, or null for a new idea.")
+    idea: MealIdea | None = Field(default=None, description="A new idea when recipe_id is null; null otherwise.")
+    why: list[str] = Field(default_factory=list, description="2-3 short reasons: sale prices, requests, pantry items, favorites.")
+    ingredients: list[IngredientNote] = Field(
+        default_factory=list, description="have/sale flags for the 3-6 main ingredients only (proteins, key produce).")
+
+    @field_validator("why")
+    @classmethod
+    def _trim_why(cls, v: list[str]) -> list[str]:
+        return [x.strip() for x in v if x and x.strip()][:4]
+
+    @field_validator("ingredients")
+    @classmethod
+    def _main_only(cls, v: list[IngredientNote]) -> list[IngredientNote]:
+        return v[:8]
+
+
 class SwapOptions(Out):
-    options: list[MealSuggestion] = Field(description="Exactly three different options for the night.")
+    options: list[MealPick] = Field(description="Exactly three different options for the night.")
 
     @field_validator("options")
     @classmethod
-    def _three(cls, v: list[MealSuggestion]) -> list[MealSuggestion]:
+    def _three(cls, v: list[MealPick]) -> list[MealPick]:
+        v = [o for o in v if o.recipe_id is not None or o.idea is not None]
         if len(v) < 1:
             raise ValueError("return three options")
         return v[:3]
@@ -195,6 +227,21 @@ class ChatContext(PlanContext):
     message: str
     history: list[dict[str, str]] = Field(default_factory=list)
     week: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class FillContext(Ctx):
+    """A picked meal idea to write out as a full recipe."""
+
+    title: str
+    description: str = ""
+    method: str | None = None
+    total_min: int | None = None
+    cost_usd: float | None = None
+    main_ingredients: list[dict[str, Any]] = Field(default_factory=list, description="Main items with have/sale flags.")
+    why: list[str] = Field(default_factory=list)
+    household_size: int = 5
+    pantry: list[dict[str, Any]] = Field(default_factory=list)
+    deals: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class RecipeSource(Ctx):

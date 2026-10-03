@@ -15,7 +15,7 @@ import { useRunningJobs } from '../../api/jobs';
 import { useUi } from '../../state/UiContext';
 import { useWeekData } from '../../state/useWeekSlots';
 import { costStr, dayKey, mealRoute, slotTitle, timeStr } from '../../lib/meal';
-import { Meta, Thinking, Votes } from './parts';
+import { Meta, RecipeWriting, Thinking, Votes } from './parts';
 import '../../styles/screens-a.css';
 
 function SlotCard({ s }: { s: Slot }) {
@@ -56,6 +56,7 @@ function SlotCard({ s }: { s: Slot }) {
             <p style={{ font: 'italic 400 14px/1.4 var(--font-serif)', color: 'var(--text-body)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{m.description}</p>
           </div>
           <Meta method={m.method} time={timeStr(m)} cost={costStr(m)} />
+          <RecipeWriting recipe={m} jobId={s.job_id} />
           {(review || s.basis) && (why || s.basis) && <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', font: '400 13px/1.4 var(--font-sans)', color: 'var(--sage-900)' }}><Icon name="sparkles" size={14} style={{ color: 'var(--sage-600)', marginTop: 2 }} /><span>{s.basis ? `For “${s.basis}”: ` : ''}{why}</span></div>}
           <div style={{ paddingTop: 10, borderTop: '1px solid var(--border-subtle)' }}>
             {review

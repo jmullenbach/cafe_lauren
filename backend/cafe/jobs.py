@@ -10,8 +10,10 @@ Phase 2 adds AI work by registering handlers:
             ...
         return {"slots": [...]}            # stored in jobs.result
 
-Raise `JobResting` when the subscription limit is hit (status -> resting);
-any other exception marks the job failed with its text. A job whose type has
+Raise `JobResting` when the subscription limit is hit (status -> resting),
+`JobFailed` to fail with a message shown as-is; any other exception marks the
+job failed with its type and text. `JobManager.cancel` marks a queued or running
+job `cancelled` (a running one has its asyncio task cancelled). A job whose type has
 no handler fails at once with "not available yet", so routes can enqueue
 AI work before Phase 2 lands.
 """
@@ -35,13 +37,15 @@ from .db import Database
 
 log = logging.getLogger("cafe.jobs")
 
-JOB_STATUSES = ("queued", "running", "done", "failed", "resting")
+JOB_STATUSES = ("queued", "running", "done", "failed", "resting", "cancelled")
+ACTIVE = ("queued", "running")
 
 # Job types that routes enqueue. Phase 1 registers only "dummy".
 PLAN_WEEK = "plan_week"
 SWAP_OPTIONS = "swap_options"
 REPLACEMENT = "replacement"
 RECIPE_DRAFT = "recipe_draft"
+RECIPE_FILL = "recipe_fill"
 PANTRY_READ = "pantry_read"
 ADS_REFRESH = "ads_refresh"
 ADS_READ = "ads_read"
@@ -51,6 +55,10 @@ DUMMY = "dummy"
 
 class JobResting(Exception):
     """Raise from a handler when the Claude subscription limit is hit."""
+
+
+class JobFailed(Exception):
+    """Raise from a handler to fail the job with this exact, person-facing message."""
 
 
 @dataclass
@@ -82,6 +90,7 @@ class JobType:
     on_failure: FailureHook | None = None
     on_resting: FailureHook | None = None
     on_retry: FailureHook | None = None
+    on_cancel: FailureHook | None = None
 
 
 @dataclass
@@ -89,7 +98,8 @@ class Registry:
     types: dict[str, JobType] = field(default_factory=dict)
 
     def register(self, type_: str, handler: Handler | None = None, *, on_failure: FailureHook | None = None,
-                 on_resting: FailureHook | None = None, on_retry: FailureHook | None = None) -> None:
+                 on_resting: FailureHook | None = None, on_retry: FailureHook | None = None,
+                 on_cancel: FailureHook | None = None) -> None:
         jt = self.types.setdefault(type_, JobType())
         if handler is not None:
             jt.handler = handler
@@ -99,6 +109,8 @@ class Registry:
             jt.on_resting = on_resting
         if on_retry is not None:
             jt.on_retry = on_retry
+        if on_cancel is not None:
+            jt.on_cancel = on_cancel
 
     def handler(self, type_: str) -> Callable[[Handler], Handler]:
         def deco(fn: Handler) -> Handler:
@@ -192,6 +204,9 @@ class JobManager:
         self._listeners: set[asyncio.Queue[dict[str, Any]]] = set()
         self._lock = threading.Lock()
         self._pending: list[int] = []
+        self._current: tuple[int, asyncio.Task, asyncio.Future] | None = None  # the job the worker is running
+        self._tearing_down: set[asyncio.Task] = set()  # cancelled handler tasks still closing their AI call
+        self._cancelled: set[int] = set()  # cancel requested; never report these as done
 
     # ---- lifecycle
 
@@ -262,10 +277,12 @@ class JobManager:
             except Exception:  # pragma: no cover - defensive
                 log.exception("job %s crashed the worker loop", jid)
 
-    def _set(self, jid: int, **fields: Any) -> dict[str, Any] | None:
+    def _set(self, jid: int, *, unless_cancelled: bool = False, **fields: Any) -> dict[str, Any] | None:
         with self.db.session() as s:
             job = s.get(m.Job, jid)
             if job is None:
+                return None
+            if unless_cancelled and job.status == "cancelled":
                 return None
             for k, v in fields.items():
                 setattr(job, k, v)
@@ -292,26 +309,86 @@ class JobManager:
         with self.db.session() as s:
             job = s.get(m.Job, jid)
             if job is None or job.status != "queued":
-                return
+                self._cancelled.discard(jid)
+                return  # cancelled (or already handled) while it waited
             type_, payload, by = job.type, dict(job.payload or {}), job.requested_by
         jt = self.registry.get(type_)
         if jt is None or jt.handler is None:
             self._set(jid, status="failed", error=f"Job type '{type_}' is not available yet.")
             return
-        self._set(jid, status="running", error=None)
+        if self._set(jid, unless_cancelled=True, status="running", error=None) is None:
+            self._cancelled.discard(jid)
+            return
         ctx = JobContext(id=jid, type=type_, payload=payload, requested_by=by, db=self.db, manager=self)
+        task = asyncio.create_task(jt.handler(ctx), name=f"cafe-job-{jid}")
+        # The worker waits on `settled`, not the task: a cancelled task may take seconds to close its
+        # Claude CLI subprocess, and the next job should not wait for that.
+        settled: asyncio.Future = asyncio.get_running_loop().create_future()
+        task.add_done_callback(lambda _t: settled.done() or settled.set_result(None))
+        self._current = (jid, task, settled)
         try:
-            result = await jt.handler(ctx)
+            await settled
+            if not task.done():  # cancelled; let it finish closing in the background
+                self._tearing_down.add(task)
+                task.add_done_callback(_settle_torn_down(self._tearing_down))
+                raise asyncio.CancelledError
+            result = task.result()
         except asyncio.CancelledError:
-            self._set(jid, status="queued")
+            if jid in self._cancelled and not _cancelling(asyncio.current_task()):
+                self._set(jid, status="cancelled", error=None)  # superseded: the handler task was torn down
+                return
+            task.cancel()
+            self._set(jid, status="queued")  # the worker itself is stopping; run it again next start
             raise
         except JobResting as e:
-            self._set(jid, status="resting", error=str(e) or "Café is resting. Try again later.")
+            self._set(jid, unless_cancelled=True, status="resting", error=str(e) or "Café is resting. Try again later.")
+        except JobFailed as e:
+            self._set(jid, unless_cancelled=True, status="failed", error=str(e))
         except Exception as e:
             log.exception("job %s (%s) failed", jid, type_)
-            self._set(jid, status="failed", error=f"{type(e).__name__}: {e}")
+            self._set(jid, unless_cancelled=True, status="failed", error=f"{type(e).__name__}: {e}")
         else:
-            self._set(jid, status="done", result=_jsonable(result))
+            if jid in self._cancelled:
+                self._set(jid, status="cancelled", error=None)
+            else:
+                self._set(jid, status="done", result=_jsonable(result))
+        finally:
+            self._current = None
+            self._cancelled.discard(jid)
+
+    def cancel(self, db: Session, job: m.Job) -> bool:
+        """Mark a queued or running job cancelled. A running job's task is cancelled once this commits,
+        which closes its Claude call (and the CLI subprocess). Returns False if the job had finished."""
+        if job.status not in ACTIVE:
+            return False
+        job.status = "cancelled"
+        job.error = None
+        jt = self.registry.get(job.type)
+        if jt and jt.on_cancel:
+            jt.on_cancel(db, job)
+        db.flush()
+        jid = job.id
+        with self._lock:
+            self._cancelled.add(jid)
+        event = job_dict(job)
+
+        @_after_commit(db)
+        def _go() -> None:
+            self.publish(event)
+            if self.loop is not None:
+                if _in_loop(self.loop):
+                    self._cancel_task(jid)
+                else:
+                    self.loop.call_soon_threadsafe(self._cancel_task, jid)
+
+        return True
+
+    def _cancel_task(self, jid: int) -> None:
+        cur = self._current
+        if cur is not None and cur[0] == jid and not cur[1].done():
+            cur[1].cancel()
+            if not cur[2].done():
+                cur[2].set_result(None)
 
     def retry(self, db: Session, job: m.Job) -> m.Job:
         job.status = "queued"
@@ -351,6 +428,19 @@ class JobManager:
     def unsubscribe(self, q: asyncio.Queue[dict[str, Any]]) -> None:
         with self._lock:
             self._listeners.discard(q)
+
+
+def _settle_torn_down(pending: set[asyncio.Task]) -> Callable[[asyncio.Task], None]:
+    def done(t: asyncio.Task) -> None:
+        pending.discard(t)
+        if not t.cancelled() and t.exception() is not None:
+            log.info("cancelled job task ended with %r", t.exception())
+    return done
+
+
+def _cancelling(task: asyncio.Task | None) -> bool:
+    """True when `task` (the worker) has itself been asked to stop."""
+    return bool(task is not None and task.cancelling())
 
 
 def _in_loop(loop: asyncio.AbstractEventLoop) -> bool:

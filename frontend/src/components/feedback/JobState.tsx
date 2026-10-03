@@ -31,7 +31,7 @@ export function JobState({ jobId, thinking = 'Café is thinking…' }: Props) {
     }
   }, [job?.id, job?.status, toast]);
 
-  if (!job || job.status === 'done') return null;
+  if (!job || job.status === 'done' || job.status === 'cancelled') return null;
   const box = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 'var(--radius-m)', font: '500 14px/1.4 var(--font-sans)' } as const;
 
   if (job.status === 'queued' || job.status === 'running') {

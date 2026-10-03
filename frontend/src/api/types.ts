@@ -1339,7 +1339,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "queued" | "running" | "done" | "failed" | "resting";
+            status: "queued" | "running" | "done" | "failed" | "resting" | "cancelled";
             /** Payload */
             payload?: {
                 [key: string]: unknown;
@@ -1723,6 +1723,13 @@ export interface components {
              * @enum {string}
              */
             status: "draft" | "saved";
+            /**
+             * Detail Status
+             * @description pending/failed: a picked idea whose ingredients and steps Café is still writing.
+             * @default complete
+             * @enum {string}
+             */
+            detail_status: "complete" | "pending" | "failed";
             /** Last Made */
             last_made?: string | null;
             /** Prep Min */
@@ -1822,6 +1829,13 @@ export interface components {
              * @enum {string}
              */
             status: "draft" | "saved";
+            /**
+             * Detail Status
+             * @description pending/failed: a picked idea whose ingredients and steps Café is still writing.
+             * @default complete
+             * @enum {string}
+             */
+            detail_status: "complete" | "pending" | "failed";
             /** Last Made */
             last_made?: string | null;
             /** Prep Min */
@@ -1952,6 +1966,13 @@ export interface components {
              * @enum {string}
              */
             status: "draft" | "saved";
+            /**
+             * Detail Status
+             * @description pending/failed: a picked idea whose ingredients and steps Café is still writing.
+             * @default complete
+             * @enum {string}
+             */
+            detail_status: "complete" | "pending" | "failed";
             /** Last Made */
             last_made?: string | null;
         };

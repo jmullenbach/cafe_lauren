@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sheet } from '../../components/feedback/Sheet';
 import { Button } from '../../components/core/Button';
 import { Icon } from '../../components/core/Icon';
@@ -10,24 +10,36 @@ import { JobState } from '../../components/feedback/JobState';
 import { ListRow } from '../../components/layout/Layout';
 import { useQueue, useRecipes, useSwapOptions, useSwapSlot } from '../../api/hooks';
 import { useJobStatus } from '../../api/jobs';
+import { useJobPoll } from '../../api/extra';
 import { useUi } from '../../state/UiContext';
 import { useWeekData } from '../../state/useWeekSlots';
 import { DAYNAME, SWAP_PREFS, metaLine, shortDate } from '../../lib/meal';
 import { caption, useSlotFor } from './shared';
+import '../../styles/screens-a.css';
 
-/** One option from a swap_options job (services/planner.py swap_option_rows): a stored recipe, possibly a draft. */
-interface Opt { recipe_id: number; title: string; method?: string | null; total_min?: number | null; cost_usd?: number | null; why?: string[]; ingredient_flags?: Record<string, { have?: boolean; sale?: string | null }> }
+/**
+ * One option from a swap_options job (services/planner.py swap_option_rows): a stored recipe, possibly a draft.
+ * A new idea has detail_status "pending": Café writes its full recipe only after it is picked.
+ */
+interface Opt { recipe_id: number; title: string; method?: string | null; total_min?: number | null; cost_usd?: number | null; detail_status?: string; why?: string[]; ingredient_flags?: Record<string, { have?: boolean; sale?: string | null }> }
+
+/** What an ask said (its chips and text), for "Quicker · no fish: ..." on the options it produced. */
+function askBasis(payload: unknown): string {
+  const p = (payload ?? {}) as { prefs?: string[]; text?: string | null };
+  return [...(p.prefs ?? []), (p.text ?? '').trim()].filter(Boolean).join(' · ');
+}
 
 function parseOptions(result: unknown): Opt[] {
   const r = result as { options?: Opt[] } | null | undefined;
   return Array.isArray(r?.options) ? r!.options! : [];
 }
 
-function OptionCard({ title, meta, sale, basis, why, onUse, busy }: { title: string; meta: string; sale: boolean; basis: string; why?: string; onUse: () => void; busy: boolean }) {
+function OptionCard({ title, meta, sale, isNew, basis, why, onUse, busy }: { title: string; meta: string; sale: boolean; isNew: boolean; basis: string; why?: string; onUse: () => void; busy: boolean }) {
   return (
     <div data-testid="swap-option" style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 14, borderRadius: 'var(--radius-m)', background: 'var(--surface-card)', border: '1px dashed var(--sage-300)' }}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
         <span style={{ flex: 1, font: '400 18px/1.2 var(--font-serif)', color: 'var(--text-strong)' }}>{title}</span>
+        {isNew && <Badge tone="neutral" icon="sparkles">New idea</Badge>}
         {sale && <Badge tone="sale" icon="tag">Sale</Badge>}
       </div>
       {meta && <span style={{ font: '500 12.5px/1 var(--font-sans)', color: 'var(--text-muted)' }}>{meta}</span>}
@@ -43,34 +55,71 @@ export function SwapSheet({ open, slotId }: { open: boolean; slotId?: unknown })
   const slot = useSlotFor(slotId);
   const [prefs, setPrefs] = useState<string[]>([]);
   const [note, setNote] = useState('');
-  const [asks, setAsks] = useState(0);
   const [jobId, setJobId] = useState<number | null>(null);
+  /** What the newest ask said (null: chips only), so the thinking line can echo it. */
+  const [asked, setAsked] = useState<string | null>(null);
+  /** The last options Café returned: they stay on screen, dimmed, while a newer ask runs. */
+  const [shown, setShown] = useState<{ jobId: number; opts: Opt[]; basis: string } | null>(null);
+  const [since, setSince] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const options = useSwapOptions();
   const swap = useSwapSlot();
   const job = useJobStatus(jobId);
   const { data: queue } = useQueue();
   const { data: box } = useRecipes({ status: 'saved', sort: 'stars' });
-
-  useEffect(() => { if (open) { setPrefs([]); setNote(''); setAsks(0); setJobId(null); } }, [open, slotId]);
-  // Ask Café for options when the sheet opens, and again (debounced) when the preferences change or "Ask" is tapped.
-  const prefKey = prefs.join('|');
   const sid = slot?.id;
+
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
+  /** Ask Café. The server cancels any older ask for this night, so only the newest one runs. */
+  const ask = (text: string | null) => {
+    if (sid == null) return;
+    setAsked(text);
+    setSince(Date.now());
+    setNow(Date.now());
+    setJobId(null);
+    options.mutate({ id: sid, prefs: prefsRef.current, text }, { onSuccess: (r) => setJobId(r.job.id) });
+  };
+
+  useEffect(() => { if (open) { setPrefs([]); setNote(''); setJobId(null); setAsked(null); setShown(null); } }, [open, slotId]);
+  // Ask when the sheet opens, and again (debounced) when the preference chips change.
+  const prefKey = prefs.join('|');
+  const first = useRef(true);
   useEffect(() => {
-    if (!open || sid == null) return;
-    const t = setTimeout(() => options.mutate({ id: sid, prefs, text: note.trim() || null }, { onSuccess: (r) => setJobId(r.job.id) }), asks === 0 ? 0 : 450);
+    if (!open || sid == null) { first.current = true; return; }
+    const t = setTimeout(() => ask(note.trim() || null), first.current ? 0 : 450);
+    first.current = false;
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, sid, prefKey, asks]);
+  }, [open, sid, prefKey]);
+
+  const running = options.isPending || (jobId != null && (!job || job.status === 'queued' || job.status === 'running'));
+  useJobPoll(running ? jobId : null);
+  // Elapsed seconds on the thinking line (restarts on Retry too).
+  useEffect(() => {
+    if (!running) return;
+    setSince(Date.now());
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [running]);
+  useEffect(() => {
+    if (job?.status === 'done' && job.id === jobId && shown?.jobId !== job.id) setShown({ jobId: job.id, opts: parseOptions(job.result).slice(0, 3), basis: askBasis(job.payload) });
+  }, [job, jobId, shown?.jobId]);
 
   const used = useMemo(() => new Set(slots.map((s) => s.recipe_id).filter((x): x is number => x != null)), [slots]);
   if (!slot) return <Sheet open={false} />;
   const cur = slot.recipe;
-  const basis = [...prefs, note.trim()].filter(Boolean).join(' · ');
-  const running = job && (job.status === 'queued' || job.status === 'running');
-  const opts = job?.status === 'done' ? parseOptions(job.result).slice(0, 3) : [];
+  const opts = shown?.opts ?? [];
+  const basis = shown?.basis ?? '';
+  const typed = note.trim();
+  const askBusy = running && asked === typed;
+  const secs = Math.max(0, Math.round((now - since) / 1000));
+  const thinkingText = asked ? `Asking Café: “${asked}”…` : 'Looking at deals and the pantry…';
 
   const done = (msg?: string) => { closeSheet(); toast({ icon: 'refresh-cw', title: msg ?? 'Swapped', message: 'Votes reset so everyone can weigh in.' }); };
-  const useRecipe = (recipe_id: number, b: string, why?: string[]) => swap.mutate({ id: slot.id, kind: 'recipe', recipe_id, basis: b || null, ...(why?.length ? { why } : {}) }, { onSuccess: () => done() });
+  const useRecipe = (recipe_id: number, b: string, why?: string[], isNew = false) => swap.mutate({ id: slot.id, kind: 'recipe', recipe_id, basis: b || null, ...(why?.length ? { why } : {}) },
+    { onSuccess: () => { if (isNew) { closeSheet(); toast({ icon: 'sparkles', title: 'Swapped', message: 'Café is writing the full recipe. Votes reset so everyone can weigh in.' }); } else done(); } });
   const makeIt = (kind: 'leftover' | 'leidy' | 'text', text: string, icon: string) => swap.mutate({ id: slot.id, kind, text, cook: kind === 'leidy' ? 'leidy' : undefined }, { onSuccess: () => { closeSheet(); toast({ icon, title: `${DAYNAME[slot.day]}: ${text}` }); } });
   const next = (queue ?? []).filter((q) => !used.has(q.recipe.id));
   const fromBox = (box ?? []).filter((r) => !used.has(r.id) && !next.some((q) => q.recipe.id === r.id)).slice(0, 3);
@@ -81,19 +130,20 @@ export function SwapSheet({ open, slotId }: { open: boolean; slotId?: unknown })
         <ChoiceChips size="s" value={prefs} onChange={setPrefs} options={SWAP_PREFS} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
           <Input style={{ flex: 1, minWidth: 0 }} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Or say it: “use the freezer meatballs”" />
-          <Button variant="secondary" icon="sparkles" onClick={() => setAsks((n) => n + 1)} disabled={!note.trim()}>Ask</Button>
+          <Button variant="secondary" icon="sparkles" onClick={() => { if (!askBusy && typed) ask(typed); }} disabled={!typed || askBusy}
+            style={askBusy ? { opacity: 0.8, animation: 'clm-pulse 1.4s ease-in-out infinite' } : undefined}>{askBusy ? 'Asking…' : 'Ask'}</Button>
         </div>
         <span style={{ ...caption, marginTop: 4 }}>Café's options</span>
-        {(running || (jobId == null && !options.isError))
-          ? <div data-testid="swap-thinking" style={{ padding: 16, borderRadius: 'var(--radius-m)', background: 'var(--sage-50)', font: '500 14px/1.4 var(--font-sans)', color: 'var(--sage-700)', display: 'flex', gap: 8, alignItems: 'center' }}><Icon name="sparkles" size={16} />Looking at deals and the pantry…</div>
-          : <>
-              <JobState jobId={jobId} />
-              {job?.status === 'done' && opts.length === 0 && <span style={{ font: '400 13px/1.4 var(--font-sans)', color: 'var(--text-muted)' }}>Café had no new ideas. Try the recipe box below.</span>}
-              {opts.map((o) => (
-                <OptionCard key={o.recipe_id} title={o.title} meta={metaLine(o)} sale={Object.values(o.ingredient_flags ?? {}).some((x) => x.sale)} basis={basis} why={o.why?.[0]} busy={swap.isPending}
-                  onUse={() => useRecipe(o.recipe_id, basis, o.why)} />
-              ))}
-            </>}
+        {running && <div data-testid="swap-thinking" role="status" style={{ padding: 16, borderRadius: 'var(--radius-m)', background: 'var(--sage-50)', font: '500 14px/1.4 var(--font-sans)', color: 'var(--sage-700)', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Icon name="sparkles" size={16} /><span style={{ flex: 1 }}>{thinkingText}</span><span data-testid="swap-elapsed" style={{ font: '500 12.5px/1 var(--font-sans)', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>{secs}s</span></div>}
+        {!running && <JobState jobId={jobId} />}
+        {!running && job?.status === 'done' && opts.length === 0 && <span style={{ font: '400 13px/1.4 var(--font-sans)', color: 'var(--text-muted)' }}>Café had no new ideas. Try the recipe box below.</span>}
+        {opts.length > 0 && <div data-testid="swap-options" data-stale={running ? 'true' : 'false'} aria-busy={running} style={{ display: 'flex', flexDirection: 'column', gap: 14, opacity: running ? 0.45 : 1, transition: 'opacity var(--dur-fast) var(--ease-out)' }}>
+          {opts.map((o) => (
+            <OptionCard key={o.recipe_id} title={o.title} meta={metaLine(o)} sale={Object.values(o.ingredient_flags ?? {}).some((x) => x.sale)} isNew={o.detail_status === 'pending'} basis={basis} why={o.why?.[0]} busy={swap.isPending}
+              onUse={() => useRecipe(o.recipe_id, basis, o.why, o.detail_status === 'pending')} />
+          ))}
+        </div>}
         {next.length > 0 && <><span style={{ ...caption, marginTop: 8 }}>Up next</span>
           <Card padding="none" style={{ padding: '0 14px' }}>{next.map((q, i) => <ListRow key={q.id} icon="list" iconColor="var(--sage-700)" title={q.recipe.title} sub={`Queued by ${q.by[0].toUpperCase() + q.by.slice(1)}`} onClick={() => useRecipe(q.recipe.id, 'From Up next')} last={i === next.length - 1} />)}</Card></>}
         {fromBox.length > 0 && <><span style={{ ...caption, marginTop: 8 }}>From the recipe box</span>

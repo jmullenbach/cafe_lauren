@@ -19,7 +19,7 @@ import { useAddToQueue, useDeleteRecipe, useKeepSlot, useMarkCooked, usePatchSlo
 import { useUi } from '../../state/UiContext';
 import { useWeekData } from '../../state/useWeekSlots';
 import { Md, costStr, dayKey, hasSale, stepTimer, timeStr } from '../../lib/meal';
-import { Meta } from '../plan/parts';
+import { Meta, RecipeWriting, isWriting } from '../plan/parts';
 import '../../styles/screens-a.css';
 
 const TAG = { have: ['success', 'On hand'], list: ['neutral', 'On list'], sale: ['sale', 'On sale'] } as const;
@@ -108,11 +108,12 @@ export function MealDetail() {
         <MealPhoto height={200} radius="var(--radius-m)">{s && <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6 }}><DayTag day={dayKey(s.day)} />{hasSale(s) && <Badge tone="sale" variant="solid" icon="tag">On sale</Badge>}</div>}</MealPhoto>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
           {status && <SuggestedTag status={status} by={status === 'suggested' || status === 'draft' ? undefined : nameOf(s?.by)} style={{ alignSelf: 'flex-start' }} />}
-          {s?.job_id != null && <JobState jobId={s.job_id} thinking="Finding something else…" />}
+          {s?.job_id != null && !isWriting(m) && <JobState jobId={s.job_id} thinking="Finding something else…" />}
+          <RecipeWriting recipe={m} jobId={s?.job_id ?? null} />
           <h1 style={{ font: '300 30px/1.1 var(--font-serif)', letterSpacing: 'var(--ls-display)', color: 'var(--text-strong)' }}>{m.title}</h1>
           <p style={{ font: 'var(--type-description)', fontSize: 16, color: 'var(--text-body)' }}>{m.description}</p>
           <Meta method={m.method} time={timeStr(m)} cost={costStr(m)} />
-          {draft && <div style={{ display: 'flex', gap: 10, padding: '12px 14px', borderRadius: 'var(--radius-s)', background: 'var(--honey-100)', color: 'var(--honey-700)', font: '400 13px/1.45 var(--font-sans)' }}><Icon name="notebook-pen" size={16} style={{ marginTop: 2 }} /><span>Café wrote this from your description. Check the amounts and steps before cooking it. Nothing is saved until you do.</span></div>}
+          {draft && !isWriting(m) && <div style={{ display: 'flex', gap: 10, padding: '12px 14px', borderRadius: 'var(--radius-s)', background: 'var(--honey-100)', color: 'var(--honey-700)', font: '400 13px/1.45 var(--font-sans)' }}><Icon name="notebook-pen" size={16} style={{ marginTop: 2 }} /><span>Café wrote this recipe. Check the amounts and steps before cooking it. Nothing is saved until you do.</span></div>}
           {m.healthy != null && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}><Score label="Healthy" value={m.healthy} /><Score label="Delicious" value={m.delicious ?? 0} tone="terra" /></div>}
           {s && (status === 'suggested' || status === 'edited') && ((s.why?.length ?? 0) > 0 || s.basis) && <Why items={s.why ?? []} basis={s.basis ?? undefined} />}
         </div>

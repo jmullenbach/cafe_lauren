@@ -26,7 +26,8 @@ RecipeStatus = Literal["draft", "saved"]
 RequestType = Literal["meal", "out"]
 RequestStatus = Literal["new", "planned", "declined"]
 PantryState = Literal["found", "unsure", "confirmed", "removed"]
-JobStatus = Literal["queued", "running", "done", "failed", "resting"]
+JobStatus = Literal["queued", "running", "done", "failed", "resting", "cancelled"]
+RecipeDetailStatus = Literal["complete", "pending", "failed"]
 OrderVia = Literal["delivery", "pickup", "amazon", "share", "self"]
 SectionKey = Literal["produce", "frozen", "meat", "dry", "dairy", "beverages"]
 IngredientTag = Literal["have", "sale", "list"]
@@ -75,6 +76,8 @@ class RecipeSummary(Model):
     tags: list[str] = Field(default_factory=list)
     source: RecipeSource
     status: RecipeStatus
+    detail_status: RecipeDetailStatus = Field(
+        default="complete", description="pending/failed: a picked idea whose ingredients and steps Café is still writing.")
     last_made: date | None = None
 
 

@@ -29,10 +29,16 @@ class Settings(BaseSettings):
     cafe_start_worker: bool = True
     cafe_start_scheduler: bool = True
     cafe_timezone: str = "America/Chicago"
+    # Time limit on each AI call, in seconds: the default, and per job type.
+    cafe_ai_timeout: float = 120.0
+    cafe_ai_timeouts: dict[str, float] = Field(default_factory=lambda: {"plan_week": 240.0, "recipe_fill": 240.0})
 
     claude_code_oauth_token: str | None = None
     instacart_api_key: str | None = None
     instacart_base: str = "https://connect.dev.instacart.tools"
+
+    def ai_timeout(self, job_type: str) -> float:
+        return float(self.cafe_ai_timeouts.get(job_type, self.cafe_ai_timeout))
 
     @property
     def db_url(self) -> str:

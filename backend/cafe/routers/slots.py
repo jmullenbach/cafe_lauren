@@ -7,6 +7,7 @@ from .. import jobs as J
 from .. import models as m
 from .. import schemas as s
 from ..deps import DB, Jobs, User
+from ..services import planner as P
 from ..services import weeks as W
 
 router = APIRouter(prefix="/api/slots", tags=["slots"])
@@ -35,8 +36,8 @@ def vote(slot_id: int, body: s.VoteRequest, db: DB, who: User) -> s.Week:
     return W.week_out(db, slot.week)
 
 
-def _option_why(db, slot: m.Slot, recipe_id: int) -> list[str]:
-    """Reasons Café gave for this recipe in this slot's latest swap_options results."""
+def _option(db, slot: m.Slot, recipe_id: int) -> dict:
+    """This recipe's row in the slot's latest swap_options results (why[], main-ingredient notes)."""
     jobs = db.scalars(select(m.Job).where(m.Job.type == J.SWAP_OPTIONS, m.Job.status == "done")
                       .order_by(m.Job.id.desc()).limit(30))
     for job in jobs:
@@ -44,13 +45,16 @@ def _option_why(db, slot: m.Slot, recipe_id: int) -> list[str]:
         if res.get("slot_id") != slot.id:
             continue
         for o in res.get("options") or []:
-            if o.get("recipe_id") == recipe_id and o.get("why"):
-                return list(o["why"])
-    return []
+            if o.get("recipe_id") == recipe_id:
+                return o
+    return {}
 
 
-def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None = None) -> None:
-    """Shared by /swap and chat proposals. Resets votes per the swap rule."""
+def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None = None, jobs=None) -> None:
+    """Shared by /swap and chat proposals. Resets votes per the swap rule.
+
+    Picking a new idea Café has not written out yet takes effect at once; with `jobs`, a
+    recipe_fill job is queued to write its ingredients and steps (slot.job_id points at it)."""
     by = by or who
     slot.ingredients_override = None
     slot.job_id = None
@@ -59,11 +63,16 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
     if body.kind == "recipe":
         r = _recipe(db, body.recipe_id)
         slot.kind, slot.recipe_id, slot.text, slot.status = "cook", r.id, None, "edited"
-        slot.why = list(body.why) if body.why is not None else _option_why(db, slot, r.id)
+        opt = _option(db, slot, r.id)
+        slot.why = list(body.why) if body.why is not None else list(opt.get("why") or [])
+        if opt.get("ingredient_flags"):
+            slot.ingredient_flags = dict(opt["ingredient_flags"])
         if body.cook is not None:
             slot.cook = body.cook
         db.execute(delete(m.QueueEntry).where(m.QueueEntry.recipe_id == r.id))
         W.reset_votes(db, slot, who, actor_up=True)
+        if jobs is not None and P.needs_fill(r):
+            P.enqueue_fill(db, jobs, r, slot, who, main=opt.get("main"), why=slot.why)
         return
     if body.kind == "text":
         if not (body.text or "").strip():
@@ -84,15 +93,19 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
 
 
 @router.post("/{slot_id}/swap", response_model=s.Week, operation_id="swapSlot")
-def swap(slot_id: int, body: s.SwapRequest, db: DB, who: User) -> s.Week:
+def swap(slot_id: int, body: s.SwapRequest, db: DB, who: User, jobs: Jobs) -> s.Week:
     slot = W.get_slot(db, slot_id)
-    apply_swap(db, slot, who, body)
+    apply_swap(db, slot, who, body, jobs=jobs)
     return W.week_out(db, slot.week)
 
 
 @router.post("/{slot_id}/swap-options", response_model=s.JobAccepted, status_code=202, operation_id="swapOptions")
 def swap_options(slot_id: int, body: s.SwapOptionsRequest, db: DB, who: User, jobs: Jobs) -> s.JobAccepted:
     slot = W.get_slot(db, slot_id)
+    # A newer ask supersedes older ones for this night: one worker, so they would only queue up.
+    for old in db.scalars(select(m.Job).where(m.Job.type == J.SWAP_OPTIONS, m.Job.status.in_(J.ACTIVE))):
+        if (old.payload or {}).get("slot_id") == slot.id:
+            jobs.cancel(db, old)
     job = jobs.enqueue(db, J.SWAP_OPTIONS, {"slot_id": slot.id, "week_id": slot.week_id,
                                             "prefs": body.prefs, "text": body.text}, who)
     slot.job_id = job.id

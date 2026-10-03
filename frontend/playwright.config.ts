@@ -12,6 +12,9 @@ const backendEnv = {
   CAFE_MEDIA_DIR: path.join(TMP, 'media'),
   CAFE_AI: 'fake',
   CAFE_START_SCHEDULER: 'false',
+  // Slow the fake AI a little so the swap specs can see thinking states and superseded asks.
+  CAFE_FAKE_SWAP_DELAY: process.env.PW_FAKE_SWAP_DELAY || '1.5',
+  CAFE_FAKE_FILL_DELAY: process.env.PW_FAKE_FILL_DELAY || '1.5',
 };
 
 export default defineConfig({

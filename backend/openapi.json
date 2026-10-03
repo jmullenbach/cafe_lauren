@@ -5295,7 +5295,8 @@
               "running",
               "done",
               "failed",
-              "resting"
+              "resting",
+              "cancelled"
             ],
             "title": "Status"
           },
@@ -6395,6 +6396,17 @@
             ],
             "title": "Status"
           },
+          "detail_status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "pending",
+              "failed"
+            ],
+            "title": "Detail Status",
+            "description": "pending/failed: a picked idea whose ingredients and steps Café is still writing.",
+            "default": "complete"
+          },
           "last_made": {
             "anyOf": [
               {
@@ -6747,6 +6759,17 @@
               "saved"
             ],
             "title": "Status"
+          },
+          "detail_status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "pending",
+              "failed"
+            ],
+            "title": "Detail Status",
+            "description": "pending/failed: a picked idea whose ingredients and steps Café is still writing.",
+            "default": "complete"
           },
           "last_made": {
             "anyOf": [
@@ -7226,6 +7249,17 @@
               "saved"
             ],
             "title": "Status"
+          },
+          "detail_status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "pending",
+              "failed"
+            ],
+            "title": "Detail Status",
+            "description": "pending/failed: a picked idea whose ingredients and steps Café is still writing.",
+            "default": "complete"
           },
           "last_made": {
             "anyOf": [

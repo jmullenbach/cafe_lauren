@@ -2,7 +2,9 @@
 
 Nothing here writes AI output to live state. Results become:
   - slots with status `suggested` (by "cafe"), with why[] and ingredient_flags,
-  - recipes with status `draft`, source `ai` (saved only through /save),
+  - recipes with status `draft`, source `ai` (saved only through /save); swap and
+    replacement ideas start with no ingredients or steps (detail_status `pending`)
+    and a `recipe_fill` job writes them once the idea is picked,
   - pantry items with state `found` or `unsure`,
   - chat proposals with state `pending`,
   - deals rows (read from the store's ad).
@@ -154,6 +156,89 @@ def recipe_from_draft(db: Session, d: A.RecipeDraft) -> m.Recipe:
     return r
 
 
+def recipe_from_idea(db: Session, idea: A.MealIdea) -> m.Recipe:
+    """A draft recipe with only the headline facts (detail_status=pending), or the one with the same title."""
+    existing = db.scalar(select(m.Recipe).where(m.Recipe.title.ilike(idea.title.strip())))
+    if existing is not None:
+        return existing
+    r = m.Recipe(
+        title=idea.title.strip(), short_title=(idea.short_title or "").strip() or None, description=idea.description,
+        method=idea.method, total_min=idea.total_min, cost_usd=float(idea.cost_usd), stars=None, tags=[],
+        ingredients=[], steps=[], source="ai", status="draft", detail_status="pending",
+    )
+    db.add(r)
+    db.flush()
+    return r
+
+
+def resolve_pick(db: Session, pick: A.MealPick) -> m.Recipe | None:
+    if pick.recipe_id is not None:
+        r = db.get(m.Recipe, pick.recipe_id)
+        if r is not None:
+            return r
+    return recipe_from_idea(db, pick.idea) if pick.idea is not None else None
+
+
+def needs_fill(r: m.Recipe | None) -> bool:
+    return r is not None and r.detail_status != "complete"
+
+
+def fill_context(db: Session, r: m.Recipe, main: list[dict[str, Any]] | None = None,
+                 why: list[str] | None = None) -> A.FillContext:
+    cfg = W.all_settings(db)
+    pantry = [{"area": p.area, "name": p.name, "qty": p.qty}
+              for p in db.scalars(select(m.PantryItem).where(m.PantryItem.state == "confirmed").order_by(m.PantryItem.id))]
+    week = db.scalar(select(m.Week).join(m.Slot).where(m.Slot.recipe_id == r.id).order_by(m.Week.monday.desc()))
+    deals = [{"item": d.item, "price": d.price, "unit": d.unit} for d in current_deals(db, week)] if week else []
+    return A.FillContext(title=r.title, description=r.description or "", method=r.method, total_min=r.total_min,
+                         cost_usd=r.cost_usd, main_ingredients=list(main or []), why=list(why or []),
+                         household_size=cfg.household_size, pantry=pantry, deals=deals)
+
+
+def apply_fill(db: Session, r: m.Recipe, d: A.RecipeDraft, main: list[dict[str, Any]] | None = None) -> list[int]:
+    """Write a filled recipe's details (the idea's title stays), then refresh flags on slots using it."""
+    r.short_title = r.short_title or (d.short_title or "").strip() or None
+    r.description = r.description or d.description
+    r.method = r.method or d.method
+    r.prep_min, r.cook_min, r.total_min = d.prep_min, d.cook_min, d.total_min
+    r.cost_usd = float(d.cost_usd) if d.cost_usd else r.cost_usd
+    r.healthy, r.delicious = d.healthy, d.delicious
+    r.tags = list(d.tags)
+    r.ingredients = [{"qty": i.qty, "unit": i.unit, "name": i.name, "group": i.group} for i in d.ingredients]
+    r.steps = [{"group": g.group, "steps": list(g.steps)} for g in d.steps]
+    r.leftovers = d.leftovers
+    r.detail_status = "complete"
+    db.flush()
+    notes = [A.IngredientNote(name=str(n.get("name", "")), have=bool(n.get("have")), sale=n.get("sale"))
+             for n in (main or []) if n.get("name")]
+    touched_ids = []
+    for slot in db.scalars(select(m.Slot).where(m.Slot.recipe_id == r.id)):
+        if slot.ingredients_override is None:
+            flag_notes = notes or [A.IngredientNote(name=k, have=bool(v.get("have")), sale=v.get("sale"))
+                                   for k, v in (slot.ingredient_flags or {}).items()]
+            slot.ingredient_flags = ingredient_flags(db, slot.week, r, flag_notes)
+            touched_ids.append(slot.id)
+    db.flush()
+    return touched_ids
+
+
+def enqueue_fill(db: Session, manager: Any, r: m.Recipe, slot: m.Slot | None, who: str | None,
+                 main: list[dict[str, Any]] | None = None, why: list[str] | None = None) -> m.Job:
+    """Queue a recipe_fill for a picked idea (reusing one already queued or running for it)."""
+    from .. import jobs as J
+
+    active = next((j for j in db.scalars(select(m.Job).where(m.Job.type == J.RECIPE_FILL,
+                                                              m.Job.status.in_(J.ACTIVE)))
+                   if (j.payload or {}).get("recipe_id") == r.id), None)
+    job = active or manager.enqueue(db, J.RECIPE_FILL, {
+        "recipe_id": r.id, "slot_id": slot.id if slot else None, "main": list(main or []), "why": list(why or []),
+    }, who)
+    r.detail_status = "pending"
+    if slot is not None:
+        slot.job_id = job.id
+    return job
+
+
 def resolve_recipe(db: Session, recipe_id: int | None, new_recipe: A.RecipeDraft | None) -> m.Recipe | None:
     if recipe_id is not None:
         r = db.get(m.Recipe, recipe_id)
@@ -182,7 +267,9 @@ def ingredient_flags(db: Session, week: m.Week, recipe: m.Recipe,
     pantry = [_words(p.name) for p in db.scalars(select(m.PantryItem).where(m.PantryItem.state == "confirmed"))]
     deals = [(_words(d.item), d) for d in current_deals(db, week)]
     out: dict[str, dict[str, Any]] = {}
-    for ing in recipe.ingredients or []:
+    # An idea not written out yet has no ingredients: flag its main items from Café's notes.
+    ings = recipe.ingredients or [{"name": n.name} for n in notes]
+    for ing in ings:
         name = str(ing.get("name", "")).strip()
         if not name:
             continue
@@ -242,27 +329,39 @@ def apply_plan(db: Session, week: m.Week, plan: A.PlanSuggestion, days: list[str
     return filled
 
 
-def apply_replacement(db: Session, slot: m.Slot, sug: A.MealSuggestion) -> bool:
+def _notes(pick: A.MealPick) -> list[dict[str, Any]]:
+    return [n.model_dump(mode="json") for n in pick.ingredients]
+
+
+def apply_replacement(db: Session, slot: m.Slot, pick: A.MealPick) -> m.Recipe | None:
+    """Put a light replacement on a thinking slot. Returns the recipe (which may still need filling)."""
     if slot.status != "thinking":
-        return False  # a person changed it while Café was thinking
-    sug = sug.model_copy(update={"day": slot.day, "kind": "cook"})
-    if not apply_suggestion(db, slot, sug, keep_basis=True):
+        return None  # a person changed it while Café was thinking
+    r = resolve_pick(db, pick)
+    if r is None:
         slot.kind, slot.recipe_id, slot.status = "open", None, "rejected"
-        return False
-    return True
+        return None
+    slot.kind, slot.recipe_id, slot.text, slot.status, slot.by = "cook", r.id, None, "suggested", CAFE
+    slot.why = list(pick.why)
+    slot.ingredients_override = None
+    slot.ingredient_flags = ingredient_flags(db, slot.week, r, pick.ingredients)
+    slot.votes.clear()
+    db.flush()
+    return r
 
 
-def swap_option_rows(db: Session, slot: m.Slot, options: list[A.MealSuggestion]) -> list[dict[str, Any]]:
-    """Swap-sheet options. New recipes are stored as drafts so /swap can point at them."""
+def swap_option_rows(db: Session, slot: m.Slot, options: list[A.MealPick]) -> list[dict[str, Any]]:
+    """Swap-sheet options. New ideas are stored as pending drafts so /swap can point at them."""
     out = []
     for o in options:
-        r = resolve_recipe(db, o.recipe_id, o.new_recipe)
-        if r is None:
+        r = resolve_pick(db, o)
+        if r is None or r.id in {x["recipe_id"] for x in out}:
             continue
         out.append({
             "recipe_id": r.id, "title": r.title, "short_title": r.short_title, "description": r.description,
             "method": r.method, "total_min": r.total_min, "cost_usd": r.cost_usd, "status": r.status,
-            "why": list(o.why), "ingredient_flags": ingredient_flags(db, slot.week, r, o.ingredients),
+            "detail_status": r.detail_status, "why": list(o.why), "main": _notes(o),
+            "ingredient_flags": ingredient_flags(db, slot.week, r, o.ingredients),
         })
     return out
 
