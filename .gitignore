@@ -11,3 +11,15 @@ images/ads/
 __pycache__/
 *.pyc
 .venv/
+
+# App build
+data/cafe.db
+data/cafe.db-*
+data/media/
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+frontend/e2e/screenshots/
+backend/.venv/
+.pytest_cache/

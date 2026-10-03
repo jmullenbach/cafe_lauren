@@ -1,0 +1,18 @@
+<!-- @dsCard group="Components" viewport="700x330" name="Display" subtitle="Badge, DayTag, Card, Avatar, Score, Stars" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.col{display:flex;flex-direction:column;gap:16px}.lbl{font:600 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);width:84px;flex:none}</style></head><body><div id="root"></div>
+<script type="text/babel">
+const NS=window.CafeLaurenDesignSystem_9f0e0a;
+const {Badge,DayTag,Card,Avatar,AvatarStack,Score,Stars}=NS;
+const fam=[{name:'Lauren',color:'sage'},{name:'Joe',color:'slate'},{name:'Leidy',color:'terra'}];
+ReactDOM.createRoot(root).render(<div className="col">
+<div className="row"><span className="lbl">Badges</span><Badge tone="sale" icon="tag">$2.29/lb</Badge><Badge tone="success" icon="check">Approved</Badge><Badge tone="warning">Pantry unconfirmed</Badge><Badge tone="info">Leftovers</Badge><Badge tone="danger">Out</Badge><Badge>Staple</Badge><Badge tone="sale" variant="solid">On sale</Badge></div>
+<div className="row"><span className="lbl">Days</span>{['week','mon','tue','wed','thu','fri','sat','sun','spare'].map(d=><DayTag key={d} day={d} short/>)}</div>
+<div className="row"><span className="lbl">People</span>{fam.map(p=><Avatar key={p.name} {...p}/>)}<AvatarStack people={fam}/><Stars value={5}/><Stars value={3} size={14}/></div>
+<div className="row" style={{alignItems:'stretch'}}><span className="lbl">Card</span><Card style={{width:240}}><div style={{display:'flex',gap:20}}><Score label="Healthy" value={8}/><Score label="Delicious" value={9} tone="terra"/></div></Card><Card tone="sunken" style={{width:150}}><span style={{font:'var(--type-caption)'}}>Sunken card</span></Card><Card tone="accent" selected style={{width:150}}><span style={{font:'var(--type-caption)'}}>Accent, selected</span></Card></div>
+</div>);
+</script></body></html>
