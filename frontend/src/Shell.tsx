@@ -63,7 +63,8 @@ export function Shell() {
         </div>
       )}
       <SheetHost />
-      <ToastHost />
+      {/* Tabs: above the Ask button (or Plan's approve bar). Pushed screens: above a BottomBar. */}
+      <ToastHost bottom={isTab ? 160 : 104} />
       {!user && <WhoAreYou onPick={setUser} />}
     </div>
   );
