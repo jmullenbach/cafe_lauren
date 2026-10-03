@@ -5,12 +5,10 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import './styles/styles.css';
 import './styles/app.css';
 import { queryClient } from './api/queryClient';
-import { startJobStream } from './api/jobs';
 import { UserProvider } from './state/UserContext';
 import { UiProvider } from './state/UiContext';
 import { Shell } from './Shell';
 
-startJobStream(queryClient);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

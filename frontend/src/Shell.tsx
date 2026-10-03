@@ -9,6 +9,9 @@ import { WhoAreYou } from './screens/WhoAreYou';
 import { useUser } from './state/UserContext';
 import { useUi } from './state/UiContext';
 import { useTabBadges } from './state/useTabBadges';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { startJobStream } from './api/jobs';
 
 export const TABS = [
   { id: 'home', label: 'Home', icon: 'house', title: 'Home', overline: 'This week' },
@@ -24,6 +27,8 @@ export function Shell() {
   const loc = useLocation();
   const nav = useNavigate();
   const badges = useTabBadges();
+  const qc = useQueryClient();
+  useEffect(() => (user ? startJobStream(qc, user) : undefined), [qc, user]);
   const seg = loc.pathname.split('/').filter(Boolean);
   const tab = seg.length === 1 ? TABS.find((t) => t.id === seg[0])?.id : undefined;
   // A pushed route (anything deeper than one segment) hides the tab bar and the Ask button.

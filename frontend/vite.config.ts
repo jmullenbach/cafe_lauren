@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const backend = process.env.CAFE_BACKEND || 'http://localhost:8080';
+const backend = process.env.CAFE_API_URL || 'http://localhost:8080';
 
 export default defineConfig({
   plugins: [react()],
