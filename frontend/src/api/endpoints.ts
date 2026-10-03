@@ -73,6 +73,11 @@ export const uploadPantryPhotos = (files: File[], label?: string) => {
   if (label) f.append('label', label);
   return api<Pantry>('/api/pantry/photos', { method: 'POST', body: f });
 };
+export const uploadRecipePhoto = (file: File) => {
+  const f = new FormData();
+  f.append('file', file);
+  return api<{ path: string }>('/api/recipes/photos', { method: 'POST', body: f });
+};
 export const readPantry = (b: PantryReadRequest = {}) => post<JobAccepted>('/api/pantry/read', b);
 export const patchPantryItem = (id: number, b: PantryItemPatch) => patch<PantryItem>(`/api/pantry/items/${id}`, b);
 export const addPantryItem = (b: PantryItemCreate) => post<PantryItem>('/api/pantry/items', b);

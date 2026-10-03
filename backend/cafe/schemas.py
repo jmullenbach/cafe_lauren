@@ -158,6 +158,17 @@ class RecipeDraftRequest(Model):
     photo_path: str | None = Field(default=None, description="Media-relative path of an uploaded photo.")
 
 
+class RecipeDraftResult(Model):
+    """Result of a recipe_draft job."""
+    recipe_id: int
+    title: str
+    status: str
+
+
+class RecipePhotoOut(Model):
+    path: str = Field(description="Media-relative path; pass it as photo_path to POST /api/recipes/draft.")
+
+
 # ---------------------------------------------------------------- slots and weeks
 
 

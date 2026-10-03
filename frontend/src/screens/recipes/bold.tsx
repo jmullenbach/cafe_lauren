@@ -7,4 +7,4 @@ export function renderBold(text: string): ReactNode[] {
 }
 
 /** Tags starting with notion: are internal and never shown. */
-export const visibleTags = (tags: string[]) => tags.filter((t) => !t.startsWith('notion:'));
+export { publicTags as visibleTags } from '../../lib/meal';

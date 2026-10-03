@@ -70,7 +70,7 @@ export function SwapSheet({ open, slotId }: { open: boolean; slotId?: unknown })
   const opts = job?.status === 'done' ? parseOptions(job.result).slice(0, 3) : [];
 
   const done = (msg?: string) => { closeSheet(); toast({ icon: 'refresh-cw', title: msg ?? 'Swapped', message: 'Votes reset so everyone can weigh in.' }); };
-  const useRecipe = (recipe_id: number, b: string) => swap.mutate({ id: slot.id, kind: 'recipe', recipe_id, basis: b || null }, { onSuccess: () => done() });
+  const useRecipe = (recipe_id: number, b: string, why?: string[]) => swap.mutate({ id: slot.id, kind: 'recipe', recipe_id, basis: b || null, ...(why?.length ? { why } : {}) }, { onSuccess: () => done() });
   const makeIt = (kind: 'leftover' | 'leidy' | 'text', text: string, icon: string) => swap.mutate({ id: slot.id, kind, text, cook: kind === 'leidy' ? 'leidy' : undefined }, { onSuccess: () => { closeSheet(); toast({ icon, title: `${DAYNAME[slot.day]}: ${text}` }); } });
   const next = (queue ?? []).filter((q) => !used.has(q.recipe.id));
   const fromBox = (box ?? []).filter((r) => !used.has(r.id) && !next.some((q) => q.recipe.id === r.id)).slice(0, 3);
@@ -91,7 +91,7 @@ export function SwapSheet({ open, slotId }: { open: boolean; slotId?: unknown })
               {job?.status === 'done' && opts.length === 0 && <span style={{ font: '400 13px/1.4 var(--font-sans)', color: 'var(--text-muted)' }}>Café had no new ideas. Try the recipe box below.</span>}
               {opts.map((o) => (
                 <OptionCard key={o.recipe_id} title={o.title} meta={metaLine(o)} sale={Object.values(o.ingredient_flags ?? {}).some((x) => x.sale)} basis={basis} why={o.why?.[0]} busy={swap.isPending}
-                  onUse={() => useRecipe(o.recipe_id, basis)} />
+                  onUse={() => useRecipe(o.recipe_id, basis, o.why)} />
               ))}
             </>}
         {next.length > 0 && <><span style={{ ...caption, marginTop: 8 }}>Up next</span>

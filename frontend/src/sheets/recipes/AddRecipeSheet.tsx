@@ -9,17 +9,12 @@ import { PhotoTile } from '../../components/kitchen/PhotoTile';
 import { JobState } from '../../components/feedback/JobState';
 import { useDraftRecipe } from '../../api/hooks';
 import { useJobStatus } from '../../api/jobs';
-import { listRecipes, uploadPantryPhotos } from '../../api/endpoints';
+import { uploadRecipePhoto } from '../../api/endpoints';
 import { useQueryClient } from '@tanstack/react-query';
 import { keys } from '../../api/keys';
+import type { RecipeDraftResult } from '../../api/models';
 import { useUi } from '../../state/UiContext';
 import { useJobPoll } from '../../api/extra';
-
-/**
- * Label for recipe-card photos. There is no recipe photo upload endpoint yet, so the photo goes through
- * POST /api/pantry/photos with this label, and the Inbox hides photos carrying it.
- */
-export const RECIPE_PHOTO_LABEL = 'recipe-card';
 
 type Mode = 'describe' | 'link' | 'photo' | 'paste';
 const LABEL: Record<Mode, string> = { link: 'Read the page', photo: 'Read the photo', paste: 'Tidy it up', describe: 'Write a draft' };
@@ -48,13 +43,8 @@ export function AddRecipeSheet({ open, onClose }: { open: boolean; onClose: () =
     if (!job || job.status !== 'done' || handled.current === job.id) return;
     handled.current = job.id;
     (async () => {
-      const r = job.result as { recipe_id?: number; id?: number; recipe?: { id?: number } } | null;
-      let id = r?.recipe_id ?? r?.id ?? r?.recipe?.id;
+      const id = (job.result as RecipeDraftResult | null)?.recipe_id;
       qc.invalidateQueries({ queryKey: keys.recipesAll });
-      if (id == null) {
-        const drafts = await listRecipes({ status: 'draft', sort: 'recent' });
-        id = drafts[0]?.id;
-      }
       onClose();
       if (id != null) nav(`/recipes/${id}`);
       else toast({ icon: 'book-open', title: 'Draft ready', message: 'Find it under Drafts to check.' });
@@ -69,11 +59,9 @@ export function AddRecipeSheet({ open, onClose }: { open: boolean; onClose: () =
       let body;
       if (mode === 'photo') {
         setUploading(true);
-        const p = await uploadPantryPhotos([file!], RECIPE_PHOTO_LABEL);
+        const p = await uploadRecipePhoto(file!);
         setUploading(false);
-        const mine = p.photos.filter((x) => x.label === RECIPE_PHOTO_LABEL).sort((a, b) => b.id - a.id)[0];
-        if (!mine) throw new Error('Upload failed');
-        body = { mode, photo_path: mine.url.replace(/^\/media\//, '') };
+        body = { mode, photo_path: p.path };
       } else if (mode === 'link') body = { mode, url: val.trim() };
       else body = { mode, text: val.trim() };
       draft.mutate(body as never, { onSuccess: (r) => setJobId(r.job.id), onError: (e) => toast({ tone: 'danger', icon: 'triangle-alert', title: 'Could not start', message: (e as Error).message }) });

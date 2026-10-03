@@ -1,24 +1,10 @@
-import { useSyncExternalStore } from 'react';
 import type { Slot } from '../../api/models';
 import { Icon } from '../../components/core/Icon';
 import { VoteButtons } from '../../components/kitchen/VoteButtons';
 import { JobState } from '../../components/feedback/JobState';
-import { useRunningJobs } from '../../api/jobs';
 import { useVoteSlot } from '../../api/hooks';
 import { useWeekData } from '../../state/useWeekSlots';
 import '../../styles/screens-a.css';
-
-/** Replacement jobs we started this session, so a failed one can show Retry on its slot. */
-const slotJobs = new Map<number, number>();
-const listeners = new Set<() => void>();
-let ver = 0;
-export function noteSlotJob(slotId: number, jobId: number | undefined | null) {
-  if (jobId == null) return;
-  slotJobs.set(slotId, jobId);
-  ver++;
-  listeners.forEach((l) => l());
-}
-const sub = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
 
 export function Meta({ method, time, cost }: { method?: string | null; time?: string; cost?: string }) {
   const items = ([['cooking-pot', method], ['clock', time], ['receipt', cost]] as const).filter(([, t]) => t);
@@ -36,15 +22,12 @@ export function Votes({ slot }: { slot: Slot }) {
 
 /** The "finding something else" state while a replacement is being found. */
 export function Thinking({ slot }: { slot: Slot }) {
-  useSyncExternalStore(sub, () => ver, () => ver);
-  const running = useRunningJobs('replacement');
-  const jobId = slotJobs.get(slot.id) ?? running.find((j) => (j.payload as { slot_id?: number } | undefined)?.slot_id === slot.id)?.id;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '6px 0' }}>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, font: '500 14px/1.4 var(--font-sans)', color: 'var(--sage-700)' }}><Icon name="sparkles" size={16} />Finding something else…</span>
       {slot.basis && <span style={{ font: '400 13px/1.4 var(--font-sans)', color: 'var(--text-muted)' }}>Working from: “{slot.basis}”</span>}
       {[80, 60].map((w) => <span key={w} className="clm-skeleton" style={{ height: 10, width: w + '%', borderRadius: 3, background: 'var(--linen-200)' }} />)}
-      <JobState jobId={jobId} thinking="Looking at deals and the pantry…" />
+      <JobState jobId={slot.job_id} thinking="Looking at deals and the pantry…" />
     </div>
   );
 }

@@ -77,6 +77,7 @@ test('list: sections, quick add, edit, check, copy, store sheet, instacart', asy
   await sheet.getByRole('button', { name: 'Send the list', exact: true }).click();
   await settle(page);
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Send the list' })).toBeVisible();
+  await expect(page.getByRole('dialog').getByText(/notion/i)).toHaveCount(0);
   await page.screenshot({ path: `${SHOTS}/b-send-sheet.png` });
 });
 
@@ -212,4 +213,40 @@ test('settings: health and exports', async ({ page }) => {
   await page.getByRole('button', { name: 'Fri' }).click();
   await page.getByRole('button', { name: 'Save settings' }).click();
   await expect(page.getByText('Settings saved')).toBeVisible();
+});
+
+const APIB = process.env.CAFE_API_URL || `http://localhost:${process.env.PW_API_PORT || 8081}`;
+
+test('recipes: notion: tags are hidden; photo draft leaves the pantry alone', async ({ page, request }) => {
+  const H = { 'X-Cafe-User': 'joe' };
+  const list = await (await request.get(`${APIB}/api/recipes`, { headers: H })).json();
+  const id = list[0].id;
+  await request.patch(`${APIB}/api/recipes/${id}`, { headers: H, data: { tags: ['Quick', 'notion:abc123'] } });
+  await asJoe(page, `/recipes/${id}`);
+  await expect(page.getByTestId('recipe-title')).toBeVisible();
+  await expect(page.getByText('Quick', { exact: true })).toBeVisible();
+  await expect(page.getByText(/notion/i)).toHaveCount(0);
+  await page.goto('/recipes');
+  await expect(page.getByTestId('recipe-list')).toBeVisible();
+  await expect(page.getByText(/notion/i)).toHaveCount(0);
+
+  const before = (await (await request.get(`${APIB}/api/pantry`, { headers: H })).json()).photos.length;
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByRole('button', { name: 'Photo', exact: true }).click();
+  await sheet.getByTestId('recipe-photo-file').setInputFiles(FIXTURE);
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/b-add-recipe-photo.png` });
+  await sheet.getByRole('button', { name: 'Read the photo' }).click();
+  await expect(page).toHaveURL(/\/recipes\/\d+$/, { timeout: 30_000 });
+  await expect(page.getByTestId('draft-banner')).toBeVisible();
+  expect((await (await request.get(`${APIB}/api/pantry`, { headers: H })).json()).photos.length).toBe(before);
+});
+
+test('home: avatar opens settings', async ({ page }) => {
+  await asJoe(page, '/home');
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/b-home.png` });
+  await page.getByTestId('open-settings').click();
+  await expect(page).toHaveURL(/\/settings$/);
 });

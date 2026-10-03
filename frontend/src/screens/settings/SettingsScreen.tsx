@@ -106,7 +106,7 @@ export function SettingsScreen() {
               <>
                 <HealthRow label="Database" ok={health.database} text={health.database ? 'OK' : 'Down'} />
                 <HealthRow label="Claude" ok={health.ai_mode === 'fake' ? null : health.claude_token === 'present'} text={health.ai_mode === 'fake' ? 'Demo mode' : health.claude_token === 'present' ? 'Token present' : 'Token missing'} />
-                <HealthRow label="Instacart" ok={health.instacart_key} text={health.instacart_key ? 'Configured' : 'Not set up yet'} />
+                <HealthRow label="Instacart" ok={health.instacart === 'configured'} text={health.instacart === 'configured' ? 'Configured' : 'Not set up yet'} />
                 <HealthRow label="Last prep run" ok={null} text={lastRun} />
                 <HealthRow label="Background worker" ok={health.worker_running} text={health.worker_running ? 'Running' : 'Stopped'} last />
               </>

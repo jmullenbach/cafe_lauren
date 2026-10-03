@@ -48,6 +48,8 @@ export type Recipe = S['Recipe'];
 export type RecipeCreate = S['RecipeCreate'];
 export type RecipeDetail = S['RecipeDetail'];
 export type RecipeDraftRequest = S['RecipeDraftRequest'];
+/** Result of a recipe_draft job (backend: schemas.RecipeDraftResult). */
+export interface RecipeDraftResult { recipe_id: number; title: string; status: string }
 export type RecipePatch = S['RecipePatch'];
 export type RecipeSummary = S['RecipeSummary'];
 export type RejectRequest = S['RejectRequest'];

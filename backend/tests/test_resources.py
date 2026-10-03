@@ -196,3 +196,17 @@ def test_staples_crud_feeds_list(client, seeded):
     client.patch(f"/api/staples/{st['id']}", json={"active": False})
     assert "Coffee" not in names()
     assert client.delete(f"/api/staples/{st['id']}").json() == {"ok": True}
+
+
+def test_recipe_photo_upload_then_draft(client, seeded, settings):
+    pantry_before = len(client.get("/api/pantry").json()["photos"])
+    up = client.post("/api/recipes/photos", files={"file": ("card.jpg", io.BytesIO(b"\xff\xd8fakejpeg"), "image/jpeg")})
+    assert up.status_code == 201
+    path = up.json()["path"]
+    assert path.startswith("recipes/") and (settings.cafe_media_dir / path).is_file()
+    assert len(client.get("/api/pantry").json()["photos"]) == pantry_before
+    bad = client.post("/api/recipes/photos", files={"file": ("x.exe", io.BytesIO(b"x"), "application/octet-stream")})
+    assert bad.status_code == 415
+    job = wait_job(client, client.post("/api/recipes/draft", json={"mode": "photo", "photo_path": path}).json()["job"]["id"])
+    assert job["status"] == "done"
+    assert set(job["result"]) == {"recipe_id", "title", "status"} and job["result"]["status"] == "draft"

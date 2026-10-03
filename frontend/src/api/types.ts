@@ -278,6 +278,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/recipes/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Recipe Photo */
+        post: operations["uploadRecipePhoto"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/recipes/{recipe_id}": {
         parameters: {
             query?: never;
@@ -1050,6 +1067,14 @@ export interface components {
             files: string[];
             /** Label */
             label?: string | null;
+        };
+        /** Body_uploadRecipePhoto */
+        Body_uploadRecipePhoto: {
+            /**
+             * File
+             * @description A recipe card or cookbook page
+             */
+            file: string;
         };
         /** ChatMessageOut */
         ChatMessageOut: {
@@ -1881,6 +1906,14 @@ export interface components {
             steps?: components["schemas"]["StepGroup"][] | null;
             /** Leftovers */
             leftovers?: string | null;
+        };
+        /** RecipePhotoOut */
+        RecipePhotoOut: {
+            /**
+             * Path
+             * @description Media-relative path; pass it as photo_path to POST /api/recipes/draft.
+             */
+            path: string;
         };
         /** RecipeSummary */
         RecipeSummary: {
@@ -2931,6 +2964,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobAccepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    uploadRecipePhoto: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_uploadRecipePhoto"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipePhotoOut"];
                 };
             };
             /** @description Validation Error */

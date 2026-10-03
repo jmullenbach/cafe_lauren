@@ -1219,6 +1219,67 @@
         }
       }
     },
+    "/api/recipes/photos": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Upload Recipe Photo",
+        "operationId": "uploadRecipePhoto",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_uploadRecipePhoto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipePhotoOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/recipes/{recipe_id}": {
       "get": {
         "tags": [
@@ -4541,6 +4602,21 @@
         ],
         "title": "Body_uploadPantryPhotos"
       },
+      "Body_uploadRecipePhoto": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "A recipe card or cookbook page"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_uploadRecipePhoto"
+      },
       "ChatMessageOut": {
         "properties": {
           "id": {
@@ -7020,6 +7096,20 @@
         },
         "type": "object",
         "title": "RecipePatch"
+      },
+      "RecipePhotoOut": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Media-relative path; pass it as photo_path to POST /api/recipes/draft."
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "RecipePhotoOut"
       },
       "RecipeSummary": {
         "properties": {

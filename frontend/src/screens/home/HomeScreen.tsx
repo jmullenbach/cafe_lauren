@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/core/Button';
 import { Icon } from '../../components/core/Icon';
-import { Avatar } from '../../components/display/Avatar';
+import { ProfileButton } from '../settings/ProfileButton';
 import { Badge } from '../../components/display/Badge';
 import { Card } from '../../components/display/Card';
 import { DayTag } from '../../components/display/DayTag';
@@ -63,7 +63,7 @@ export function HomeScreen() {
   const overline = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   return (
     <Screen>
-      <LargeTitle overline={overline} title={a.me ? `${greet}, ${a.me.name}` : greet} right={a.me && <Avatar name={a.me.name} color={a.me.color as never} size={30} />} />
+      <LargeTitle overline={overline} title={a.me ? `${greet}, ${a.me.name}` : greet} right={<ProfileButton />} />
       {a.loading ? <Card tone="sunken"><span className="clm-skeleton" style={{ display: 'block', height: 120 }} /></Card> : <Tonight slot={tonight} />}
       <SectionHead title="Needs you" />
       {items.length === 0

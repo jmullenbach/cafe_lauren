@@ -3,13 +3,16 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from typing import Annotated
+
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from sqlalchemy import select
 
 from .. import jobs as J
 from .. import models as m
 from .. import schemas as s
 from ..deps import DB, AppSettingsDep, Jobs, User
+from ..services import media
 from ..services import weeks as W
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
@@ -88,6 +91,12 @@ def create_recipe(body: s.RecipeCreate, db: DB, who: User, cfg: AppSettingsDep) 
 def draft_recipe(body: s.RecipeDraftRequest, db: DB, who: User, jobs: Jobs) -> s.JobAccepted:
     job = jobs.enqueue(db, J.RECIPE_DRAFT, body.model_dump(), who)
     return s.JobAccepted(job=s.Job.model_validate(job))
+
+
+@router.post("/photos", response_model=s.RecipePhotoOut, status_code=201, operation_id="uploadRecipePhoto")
+async def upload_recipe_photo(who: User, cfg: AppSettingsDep, file: Annotated[UploadFile, File(description="A recipe card or cookbook page")]) -> s.RecipePhotoOut:
+    rel = await media.save_upload(cfg.cafe_media_dir, "recipes", file)
+    return s.RecipePhotoOut(path=rel)
 
 
 @router.get("/{recipe_id}", response_model=s.RecipeDetail, operation_id="getRecipe")

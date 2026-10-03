@@ -1,3 +1,4 @@
+import { JobState } from '../../components/feedback/JobState';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { Ingredient, SlotIngredient } from '../../api/models';
@@ -107,6 +108,7 @@ export function MealDetail() {
         <MealPhoto height={200} radius="var(--radius-m)">{s && <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6 }}><DayTag day={dayKey(s.day)} />{hasSale(s) && <Badge tone="sale" variant="solid" icon="tag">On sale</Badge>}</div>}</MealPhoto>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
           {status && <SuggestedTag status={status} by={status === 'suggested' || status === 'draft' ? undefined : nameOf(s?.by)} style={{ alignSelf: 'flex-start' }} />}
+          {s?.job_id != null && <JobState jobId={s.job_id} thinking="Finding something else…" />}
           <h1 style={{ font: '300 30px/1.1 var(--font-serif)', letterSpacing: 'var(--ls-display)', color: 'var(--text-strong)' }}>{m.title}</h1>
           <p style={{ font: 'var(--type-description)', fontSize: 16, color: 'var(--text-body)' }}>{m.description}</p>
           <Meta method={m.method} time={timeStr(m)} cost={costStr(m)} />

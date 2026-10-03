@@ -12,7 +12,6 @@ import { ChoiceChips } from '../../components/forms/ChoiceChips';
 import { SuggestedTag } from '../../components/kitchen/SuggestedTag';
 import { useAddPantryItem, useConfirmPantry, usePantry, usePatchPantryItem } from '../../api/hooks';
 import { useUi } from '../../state/UiContext';
-import { RECIPE_PHOTO_LABEL } from '../../sheets/recipes/AddRecipeSheet';
 import type { PantryItem } from '../../api/models';
 
 const PEOPLE = ['lauren', 'joe', 'leidy'];
@@ -99,7 +98,7 @@ export function PantryReview() {
   const areas = [...new Set([...(pantry?.areas ?? []), ...items.map((i) => i.area)])].filter((a) => items.some((i) => i.area === a));
   const keep = items.filter((i) => i.state !== 'removed').length;
   const unsure = items.filter((i) => i.state === 'unsure').length;
-  const photos = (pantry?.photos ?? []).filter((p) => p.label !== RECIPE_PHOTO_LABEL).length;
+  const photos = (pantry?.photos ?? []).length;
   const chipAreas = ['Pantry', 'Fridge', 'Freezer', 'Counter'];
   const back = () => nav('/inbox?seg=pantry');
   const doConfirm = () => confirm.mutate(undefined, {

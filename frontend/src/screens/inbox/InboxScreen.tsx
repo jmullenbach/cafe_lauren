@@ -18,7 +18,6 @@ import { useUi } from '../../state/UiContext';
 import { useJobPoll } from '../../api/extra';
 import { ProfileButton } from '../settings/ProfileButton';
 import { RequestRow } from './RequestRow';
-import { RECIPE_PHOTO_LABEL } from '../../sheets/recipes/AddRecipeSheet';
 import { shortDate } from '../../lib/listText';
 
 export function InboxScreen() {
@@ -85,7 +84,7 @@ function PantryTab() {
   const [jobId, setJobId] = useState<number | null>(null);
   useJobPoll(jobId ?? running[0]?.id);
   const fileRef = useRef<HTMLInputElement>(null);
-  const photos = (pantry?.photos ?? []).filter((p) => p.label !== RECIPE_PHOTO_LABEL);
+  const photos = (pantry?.photos ?? []);
   const items = pantry?.items ?? [];
   const status = pantry?.status;
   const unread = photos.filter((p) => !p.read_at);

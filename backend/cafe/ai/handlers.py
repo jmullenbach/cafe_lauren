@@ -20,6 +20,7 @@ from sqlalchemy import select
 
 from .. import jobs as J
 from .. import models as m
+from .. import schemas as S
 from ..jobs import JobContext, JobResting, registry
 from ..services import ads as ads_service
 from ..services import planner as P
@@ -225,7 +226,7 @@ async def recipe_draft(ctx: JobContext) -> dict[str, Any]:
     draft = await guarded(ctx, ai_for(ctx).draft_recipe(src))
     with ctx.session() as db:
         r = P.recipe_from_draft(db, draft)
-        return {"recipe_id": r.id, "title": r.title, "status": r.status}
+        return S.RecipeDraftResult(recipe_id=r.id, title=r.title, status=r.status).model_dump()
 
 
 # ---------------------------------------------------------------- pantry

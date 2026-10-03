@@ -41,7 +41,6 @@ export function SendSheet({ open, onClose }: { open: boolean; onClose: () => voi
       <ChoiceChips value={picked} onChange={setWho} options={others} />
       <span style={{ display: 'block', font: 'var(--type-overline)', letterSpacing: 'var(--ls-overline)', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '24px 0 6px' }}>Or</span>
       <Card padding="none" style={{ padding: '0 14px' }}>
-        <ListRow icon="notebook-pen" title="Update the Notion page" sub="Not available yet" />
         <ListRow icon="clipboard-list" title="Copy as text" sub="Paste anywhere" onClick={copy} last />
       </Card>
     </Sheet>

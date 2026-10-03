@@ -7,7 +7,6 @@ import { Switch } from '../../components/forms/Switch';
 import { useRejectSlot } from '../../api/hooks';
 import { useUi } from '../../state/UiContext';
 import { REJECT_REASONS } from '../../lib/meal';
-import { noteSlotJob } from '../../screens/plan/parts';
 import { useSlotFor } from './shared';
 
 export function RejectSheet({ open, slotId }: { open: boolean; slotId?: unknown }) {
@@ -23,8 +22,7 @@ export function RejectSheet({ open, slotId }: { open: boolean; slotId?: unknown 
     if (!slot) return;
     const basis = [...why, note.trim()].filter(Boolean).join(' · ');
     reject.mutate({ id: slot.id, reasons: why, note: note.trim() || null, remember, mode }, {
-      onSuccess: (r) => {
-        noteSlotJob(slot.id, r.job?.id);
+      onSuccess: () => {
         closeSheet();
         if (mode === 'open') toast({ icon: 'x', title: 'Night left open', message: 'Café will remember: ' + (basis || 'no reason given') });
       },
