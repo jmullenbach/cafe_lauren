@@ -3,9 +3,16 @@ import { TabBar } from './components/navigation/TabBar';
 import { AskFab } from './components/layout/Layout';
 import { ToastHost } from './components/feedback/ToastHost';
 import { SheetHost } from './sheets/SheetHost';
-import { PlaceholderScreen } from './screens/Placeholder';
-import { DetailPlaceholder } from './screens/DetailPlaceholder';
+import { HomeScreen } from './screens/home/HomeScreen';
+import { PlanScreen } from './screens/plan/PlanScreen';
+import { MealDetail } from './screens/meal/MealDetail';
 import { WhoAreYou } from './screens/WhoAreYou';
+import { InboxScreen } from './screens/inbox/InboxScreen';
+import { PantryReview } from './screens/inbox/PantryReview';
+import { RecipesScreen } from './screens/recipes/RecipesScreen';
+import { RecipeDetail } from './screens/recipes/RecipeDetail';
+import { ListScreen } from './screens/list/ListScreen';
+import { SettingsScreen } from './screens/settings/SettingsScreen';
 import { useUser } from './state/UserContext';
 import { useUi } from './state/UiContext';
 import { useTabBadges } from './state/useTabBadges';
@@ -38,10 +45,15 @@ export function Shell() {
     <div className="app-frame">
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
-        {TABS.map((t) => (
-          <Route key={t.id} path={`/${t.id}`} element={<PlaceholderScreen overline={t.overline} title={t.title} note="This screen is coming in Phase 4." />} />
-        ))}
-        <Route path="/meal/:id" element={<DetailPlaceholder />} />
+        <Route path="/home" element={<HomeScreen />} />
+        <Route path="/plan" element={<PlanScreen />} />
+        <Route path="/list" element={<ListScreen />} />
+        <Route path="/inbox" element={<InboxScreen />} />
+        <Route path="/inbox/pantry" element={<PantryReview />} />
+        <Route path="/recipes" element={<RecipesScreen />} />
+        <Route path="/recipes/:id" element={<RecipeDetail />} />
+        <Route path="/settings" element={<SettingsScreen />} />
+        <Route path="/meal/:id" element={<MealDetail />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
       {isTab && tab !== 'plan' && <AskFab onClick={() => openSheet({ type: 'chat' })} />}

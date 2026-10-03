@@ -45,12 +45,12 @@ test('shell: picker, tabs, ask sheet (backend not required)', async ({ page }) =
   await expect(sheet.getByRole('heading', { name: 'Ask Café' })).toBeVisible();
   await page.waitForTimeout(450);
   await page.screenshot({ path: `${SHOTS}/03-ask-sheet.png` });
-  await sheet.getByRole('button', { name: 'Close' }).click();
+  await page.getByTestId('sheet-scrim').click({ position: { x: 20, y: 20 } });
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
   // Pushed route hides the tab bar; back returns.
-  await page.getByRole('button', { name: 'Open a detail page' }).click();
-  await expect(page).toHaveURL(/\/meal\/sample$/);
+  await page.getByText('Taco Tuesday').first().click();
+  await expect(page).toHaveURL(/\/meal\/\d+/);
   await expect(nav).toHaveCount(0);
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(nav).toBeVisible();

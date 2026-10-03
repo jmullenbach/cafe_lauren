@@ -1,0 +1,6 @@
+/* Screens owned by Home, Plan, Meal detail and the Ask Café sheet. */
+@keyframes clm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.clm-skeleton { animation: clm-pulse 1.4s ease-in-out infinite; }
+.clm-thinking-dot { display: inline-block; width: 6px; height: 6px; border-radius: 999px; background: var(--sage-500); margin-right: 3px; animation: clm-pulse 1s ease-in-out infinite; }
+.clm-thinking-dot:nth-child(2) { animation-delay: .15s; }
+.clm-thinking-dot:nth-child(3) { animation-delay: .3s; }

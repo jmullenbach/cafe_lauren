@@ -1,0 +1,13 @@
+/* Inbox, Recipes, List and Settings screens (Agent B). */
+.b-chips-scroll { margin: 14px -20px 8px; padding: 0 20px; overflow-x: auto; scrollbar-width: none; }
+.b-chips-scroll::-webkit-scrollbar { display: none; }
+.b-press { cursor: pointer; }
+.b-hidden-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.b-native-input {
+  width: 100%; min-height: 40px; padding: 0 12px; background: var(--surface-raised);
+  border: 1px solid var(--border-default); border-radius: var(--radius-control);
+  font: 400 15px/1.4 var(--font-sans); color: var(--text-strong); box-shadow: var(--shadow-inset);
+}
+.b-native-input:focus { outline: 0; border-color: var(--border-focus); box-shadow: var(--focus-ring); }
+.b-label { display: block; font: 600 13px/1.2 var(--font-sans); color: var(--text-strong); margin: 0 0 8px; }
+.b-overline { display: block; font: var(--type-overline); letter-spacing: var(--ls-overline); text-transform: uppercase; color: var(--text-muted); margin: 4px 0 6px; }
