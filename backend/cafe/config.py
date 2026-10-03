@@ -1,0 +1,42 @@
+"""Settings read from the repo-root .env (and the process environment)."""
+
+from __future__ import annotations
+
+from functools import lru_cache
+from pathlib import Path
+from typing import Literal
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = BACKEND_DIR.parent
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=REPO_ROOT / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    cafe_db_path: Path = Field(default=REPO_ROOT / "data" / "cafe.db")
+    cafe_media_dir: Path = Field(default=REPO_ROOT / "data" / "media")
+    cafe_frontend_dist: Path = Field(default=REPO_ROOT / "frontend" / "dist")
+    cafe_ai: Literal["fake", "claude"] = "fake"
+    cafe_run_migrations: bool = True
+    cafe_start_worker: bool = True
+    cafe_timezone: str = "America/Chicago"
+
+    claude_code_oauth_token: str | None = None
+    instacart_api_key: str | None = None
+
+    @property
+    def db_url(self) -> str:
+        return f"sqlite:///{self.cafe_db_path}"
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

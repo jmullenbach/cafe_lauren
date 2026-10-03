@@ -1,0 +1,123 @@
+from __future__ import annotations
+
+from datetime import date
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import PlainTextResponse
+from sqlalchemy import select
+
+from .. import models as m
+from .. import schemas as s
+from ..deps import DB, User
+from ..services import grocery
+from ..services import weeks as W
+
+router = APIRouter(prefix="/api/weeks/{monday}/list", tags=["list"])
+
+
+def list_out(db, week: m.Week) -> s.GroceryList:
+    items = grocery.derive_items(db, week)
+    return s.GroceryList.model_validate({
+        "monday": week.monday, "approved": week.approved_at is not None,
+        "approved_by": week.approved_by, "approved_at": week.approved_at,
+        "sections": grocery.group_sections(items), "diff": grocery.diff(db, week),
+        "total": len(items), "unchecked": sum(1 for i in items if not i.checked),
+    })
+
+
+def _item(db, week: m.Week, key: str) -> grocery.Item:
+    for it in grocery.derive_items(db, week):
+        if it.key == key:
+            return it
+    raise HTTPException(status_code=404, detail="List item not found")
+
+
+def _add_row(db, week: m.Week, key: str) -> m.ListAdd | None:
+    if not key.startswith("add-"):
+        return None
+    try:
+        row = db.get(m.ListAdd, int(key[4:]))
+    except ValueError:
+        return None
+    return row if row is not None and row.week_id == week.id else None
+
+
+def _edit_row(db, week: m.Week, key: str) -> m.ListEdit:
+    e = db.scalar(select(m.ListEdit).where(m.ListEdit.week_id == week.id, m.ListEdit.item_key == key))
+    if e is None:
+        e = m.ListEdit(week_id=week.id, item_key=key, removed=False)
+        db.add(e)
+    return e
+
+
+@router.get("", response_model=s.GroceryList, operation_id="getList")
+def get_list(monday: date, db: DB, who: User) -> s.GroceryList:
+    return list_out(db, W.get_or_create_week(db, monday))
+
+
+@router.post("/items", response_model=s.GroceryList, status_code=201, operation_id="addListItem")
+def add_item(monday: date, body: s.ListItemCreate, db: DB, who: User) -> s.GroceryList:
+    week = W.get_or_create_week(db, monday)
+    p = grocery.parse_free_text(body.text)
+    db.add(m.ListAdd(week_id=week.id, name=p.name, qty=p.qty, section=body.section or p.section,
+                     note=body.note, from_=who))
+    db.flush()
+    return list_out(db, week)
+
+
+@router.patch("/items/{key}", response_model=s.GroceryList, operation_id="patchListItem")
+def patch_item(monday: date, key: str, body: s.ListItemPatch, db: DB, who: User) -> s.GroceryList:
+    week = W.get_or_create_week(db, monday)
+    _item(db, week, key)
+    data = body.model_dump(exclude_unset=True)
+    row = _add_row(db, week, key)
+    target = row if row is not None else _edit_row(db, week, key)
+    for k, v in data.items():
+        setattr(target, k, v)
+    db.flush()
+    return list_out(db, week)
+
+
+@router.delete("/items/{key}", response_model=s.GroceryList, operation_id="deleteListItem")
+def delete_item(monday: date, key: str, db: DB, who: User) -> s.GroceryList:
+    week = W.get_or_create_week(db, monday)
+    row = _add_row(db, week, key)
+    if row is not None:
+        db.delete(row)
+    else:
+        _item(db, week, key)
+        _edit_row(db, week, key).removed = True
+    db.flush()
+    return list_out(db, week)
+
+
+@router.post("/items/{key}/check", response_model=s.GroceryList, operation_id="checkListItem")
+def check_item(monday: date, key: str, body: s.CheckRequest, db: DB, who: User) -> s.GroceryList:
+    week = W.get_or_create_week(db, monday)
+    _item(db, week, key)
+    row = db.scalar(select(m.ListCheck).where(m.ListCheck.week_id == week.id, m.ListCheck.item_key == key))
+    want = (row is None) if body.checked is None else body.checked
+    if want and row is None:
+        db.add(m.ListCheck(week_id=week.id, item_key=key, checked_by=who))
+    elif not want and row is not None:
+        db.delete(row)
+    db.flush()
+    return list_out(db, week)
+
+
+@router.post("/confirm-diff", response_model=s.GroceryList, operation_id="confirmListDiff")
+def confirm_diff(monday: date, db: DB, who: User) -> s.GroceryList:
+    week = W.get_or_create_week(db, monday)
+    if week.approved_at is None:
+        raise HTTPException(status_code=409, detail="Week is not approved yet")
+    week.approved_list = grocery.snapshot(db, week)
+    db.flush()
+    return list_out(db, week)
+
+
+@router.get("/text", response_class=PlainTextResponse, operation_id="getListText",
+            responses={200: {"content": {"text/plain": {"schema": {"type": "string"}}}}})
+def list_text(monday: date, db: DB, who: User, include_checked: bool = False) -> str:
+    week = W.get_or_create_week(db, monday)
+    items = grocery.derive_items(db, week)
+    return grocery.as_text(items, f"Grocery list · {W.week_label(week.monday)}", include_checked)

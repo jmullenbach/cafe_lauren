@@ -1,0 +1,7869 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Café Lauren",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/state": {
+      "get": {
+        "tags": [
+          "core"
+        ],
+        "summary": "Get State",
+        "operationId": "getState",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppState"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "tags": [
+          "core"
+        ],
+        "summary": "Get Settings",
+        "operationId": "getSettings",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "core"
+        ],
+        "summary": "Put Settings",
+        "operationId": "putSettings",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppSettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": [
+          "core"
+        ],
+        "summary": "Health",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}": {
+      "get": {
+        "tags": [
+          "weeks"
+        ],
+        "summary": "Get Week",
+        "operationId": "getWeek",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/plan": {
+      "post": {
+        "tags": [
+          "weeks"
+        ],
+        "summary": "Plan Week",
+        "operationId": "planWeek",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/approve": {
+      "post": {
+        "tags": [
+          "weeks"
+        ],
+        "summary": "Approve Week",
+        "operationId": "approveWeek",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/keep": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Keep",
+        "operationId": "keepSlot",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/vote": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Vote",
+        "operationId": "voteSlot",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/swap": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Swap",
+        "operationId": "swapSlot",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwapRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/swap-options": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Swap Options",
+        "operationId": "swapOptions",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwapOptionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/reject": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Reject",
+        "operationId": "rejectSlot",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RejectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/move": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Move",
+        "operationId": "moveSlot",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}/cook": {
+      "post": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Set Cook",
+        "operationId": "setSlotCook",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CookRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/slots/{slot_id}": {
+      "patch": {
+        "tags": [
+          "slots"
+        ],
+        "summary": "Patch Slot",
+        "operationId": "patchSlot",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Slot Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlotPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Week"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recipes": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "List Recipes",
+        "operationId": "listRecipes",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search title, description and ingredients",
+              "title": "Q"
+            },
+            "description": "Search title, description and ingredients"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Chip: \"All\", \"5 stars\", or a tag such as \"Quick\"",
+              "title": "Filter"
+            },
+            "description": "Chip: \"All\", \"5 stars\", or a tag such as \"Quick\""
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "title": "Tag"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Method"
+            }
+          },
+          {
+            "name": "min_stars",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 5,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Stars"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "saved",
+                "draft",
+                "all"
+              ],
+              "type": "string",
+              "default": "saved",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "title",
+                "stars",
+                "last_made",
+                "recent"
+              ],
+              "type": "string",
+              "default": "stars",
+              "title": "Sort"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecipeSummary"
+                  },
+                  "title": "Response Listrecipes"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Create Recipe",
+        "operationId": "createRecipe",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recipes/draft": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Draft Recipe",
+        "operationId": "draftRecipe",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeDraftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recipes/{recipe_id}": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Get Recipe",
+        "operationId": "getRecipe",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Patch Recipe",
+        "operationId": "patchRecipe",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Delete Recipe",
+        "operationId": "deleteRecipe",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recipes/{recipe_id}/save": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Save Recipe",
+        "operationId": "saveRecipe",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recipes/{recipe_id}/cooked": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Cooked",
+        "operationId": "markCooked",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CookedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CookedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/queue": {
+      "get": {
+        "tags": [
+          "queue"
+        ],
+        "summary": "Get Queue",
+        "operationId": "getQueue",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QueueItem"
+                  },
+                  "title": "Response Getqueue"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "queue"
+        ],
+        "summary": "Add To Queue",
+        "operationId": "addToQueue",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueueAddRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QueueItem"
+                  },
+                  "title": "Response Addtoqueue"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/queue/{recipe_id}": {
+      "delete": {
+        "tags": [
+          "queue"
+        ],
+        "summary": "Remove From Queue",
+        "operationId": "removeFromQueue",
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QueueItem"
+                  },
+                  "title": "Response Removefromqueue"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests": {
+      "get": {
+        "tags": [
+          "requests"
+        ],
+        "summary": "List Requests",
+        "operationId": "listRequests",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "new",
+                "planned",
+                "declined",
+                "all"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequestOut"
+                  },
+                  "title": "Response Listrequests"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "requests"
+        ],
+        "summary": "Create Request",
+        "operationId": "createRequest",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests/{request_id}/answer": {
+      "post": {
+        "tags": [
+          "requests"
+        ],
+        "summary": "Answer Request",
+        "operationId": "answerRequest",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Request Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestAnswer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/staples": {
+      "get": {
+        "tags": [
+          "staples"
+        ],
+        "summary": "List Staples",
+        "operationId": "listStaples",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StapleOut"
+                  },
+                  "title": "Response Liststaples"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "staples"
+        ],
+        "summary": "Create Staple",
+        "operationId": "createStaple",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StapleCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/staples/{staple_id}": {
+      "patch": {
+        "tags": [
+          "staples"
+        ],
+        "summary": "Patch Staple",
+        "operationId": "patchStaple",
+        "parameters": [
+          {
+            "name": "staple_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Staple Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaplePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "staples"
+        ],
+        "summary": "Delete Staple",
+        "operationId": "deleteStaple",
+        "parameters": [
+          {
+            "name": "staple_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Staple Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry": {
+      "get": {
+        "tags": [
+          "pantry"
+        ],
+        "summary": "Get Pantry",
+        "operationId": "getPantry",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pantry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry/photos": {
+      "post": {
+        "tags": [
+          "pantry"
+        ],
+        "summary": "Upload Photos",
+        "operationId": "uploadPantryPhotos",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_uploadPantryPhotos"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pantry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry/read": {
+      "post": {
+        "tags": [
+          "pantry"
+        ],
+        "summary": "Read Pantry",
+        "operationId": "readPantry",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PantryReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry/items/{item_id}": {
+      "patch": {
+        "tags": [
+          "pantry"
+        ],
+        "summary": "Patch Item",
+        "operationId": "patchPantryItem",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PantryItemPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PantryItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry/items": {
+      "post": {
+        "tags": [
+          "pantry"
+        ],
+        "summary": "Add Item",
+        "operationId": "addPantryItem",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PantryItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PantryItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pantry/confirm": {
+      "post": {
+        "tags": [
+          "pantry"
+        ],
+        "summary": "Confirm",
+        "operationId": "confirmPantry",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pantry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/list": {
+      "get": {
+        "tags": [
+          "list"
+        ],
+        "summary": "Get List",
+        "operationId": "getList",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/list/items": {
+      "post": {
+        "tags": [
+          "list"
+        ],
+        "summary": "Add Item",
+        "operationId": "addListItem",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/list/items/{key}": {
+      "patch": {
+        "tags": [
+          "list"
+        ],
+        "summary": "Patch Item",
+        "operationId": "patchListItem",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListItemPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "list"
+        ],
+        "summary": "Delete Item",
+        "operationId": "deleteListItem",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/list/items/{key}/check": {
+      "post": {
+        "tags": [
+          "list"
+        ],
+        "summary": "Check Item",
+        "operationId": "checkListItem",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/list/confirm-diff": {
+      "post": {
+        "tags": [
+          "list"
+        ],
+        "summary": "Confirm Diff",
+        "operationId": "confirmListDiff",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/list/text": {
+      "get": {
+        "tags": [
+          "list"
+        ],
+        "summary": "List Text",
+        "operationId": "getListText",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "include_checked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Checked"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stores": {
+      "get": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "List Stores",
+        "operationId": "listStores",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Store"
+                  },
+                  "title": "Response Liststores"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/store": {
+      "put": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Set Store",
+        "operationId": "setWeekStore",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeekStoreRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreChangeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/weeks/{monday}/order-via": {
+      "put": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Set Order Via",
+        "description": "Keeps store and method consistent, as in store.jsx setOrderVia.",
+        "operationId": "setOrderVia",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderViaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoreChangeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stores/{store_id}/ads/refresh": {
+      "post": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Refresh Ads",
+        "operationId": "refreshAds",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Store Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stores/{store_id}/ads/upload": {
+      "post": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "Upload Ads",
+        "operationId": "uploadAds",
+        "parameters": [
+          {
+            "name": "store_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Store Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_uploadAds"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/deals": {
+      "get": {
+        "tags": [
+          "stores"
+        ],
+        "summary": "List Deals",
+        "operationId": "listDeals",
+        "parameters": [
+          {
+            "name": "store_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Store Key"
+            }
+          },
+          {
+            "name": "current",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Current"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Deal"
+                  },
+                  "title": "Response Listdeals"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "get": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Get Chat",
+        "description": "Your conversation with Café for a week (default: the current week), oldest first.",
+        "operationId": "getChat",
+        "parameters": [
+          {
+            "name": "monday",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Monday"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageOut"
+                  },
+                  "title": "Response Getchat"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Send Chat",
+        "operationId": "sendChat",
+        "parameters": [
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatSend"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatSendResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/{message_id}/proposal": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Resolve Proposal",
+        "operationId": "resolveProposal",
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Message Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/stream": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Stream Jobs",
+        "operationId": "streamJobs",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "For EventSource, which cannot set headers",
+              "title": "User"
+            },
+            "description": "For EventSource, which cannot set headers"
+          },
+          {
+            "name": "max_events",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Events"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Close after this many seconds",
+              "title": "Timeout"
+            },
+            "description": "Close after this many seconds"
+          },
+          {
+            "name": "ping",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "default": 15.0,
+              "title": "Ping"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Cafe-User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-sent events. `event: job`, data is a Job (plus optional progress).",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "List Jobs",
+        "operationId": "listJobs",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Active"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "title": "Response Listjobs"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job",
+        "operationId": "getJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}/retry": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Retry Job",
+        "operationId": "retryJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdUploadResponse": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "Media URLs of the stored ad images."
+          },
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files",
+          "job"
+        ],
+        "title": "AdUploadResponse"
+      },
+      "AppSettings": {
+        "properties": {
+          "prep_day": {
+            "type": "string",
+            "enum": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat",
+              "sun"
+            ],
+            "title": "Prep Day",
+            "default": "sat"
+          },
+          "prep_time": {
+            "type": "string",
+            "title": "Prep Time",
+            "description": "HH:MM, local time",
+            "default": "07:00"
+          },
+          "leidy_nights": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "mon",
+                "tue",
+                "wed",
+                "thu",
+                "fri",
+                "sat",
+                "sun"
+              ]
+            },
+            "type": "array",
+            "title": "Leidy Nights"
+          },
+          "household_size": {
+            "type": "integer",
+            "title": "Household Size",
+            "default": 5
+          },
+          "cook_nights_target": {
+            "type": "integer",
+            "title": "Cook Nights Target",
+            "default": 5
+          },
+          "default_store": {
+            "type": "string",
+            "title": "Default Store",
+            "default": "cermak"
+          },
+          "default_order_via": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "amazon",
+              "share",
+              "self"
+            ],
+            "title": "Default Order Via",
+            "default": "delivery"
+          },
+          "models": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "title": "AppSettings"
+      },
+      "AppSettingsUpdate": {
+        "properties": {
+          "prep_day": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Day"
+          },
+          "prep_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{2}:\\d{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Time"
+          },
+          "leidy_nights": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "mon",
+                    "tue",
+                    "wed",
+                    "thu",
+                    "fri",
+                    "sat",
+                    "sun"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leidy Nights"
+          },
+          "household_size": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Household Size"
+          },
+          "cook_nights_target": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 7.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Nights Target"
+          },
+          "default_store": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Store"
+          },
+          "default_order_via": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "delivery",
+                  "pickup",
+                  "amazon",
+                  "share",
+                  "self"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Order Via"
+          },
+          "models": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "title": "AppSettingsUpdate"
+      },
+      "AppState": {
+        "properties": {
+          "me": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            },
+            "type": "array",
+            "title": "People"
+          },
+          "week": {
+            "$ref": "#/components/schemas/Week"
+          },
+          "queue": {
+            "items": {
+              "$ref": "#/components/schemas/QueueItem"
+            },
+            "type": "array",
+            "title": "Queue"
+          },
+          "requests": {
+            "$ref": "#/components/schemas/RequestCounts"
+          },
+          "pantry": {
+            "$ref": "#/components/schemas/PantryStatus"
+          },
+          "list": {
+            "$ref": "#/components/schemas/ListStatus"
+          },
+          "jobs": {
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            },
+            "type": "array",
+            "title": "Jobs",
+            "description": "Queued and running jobs."
+          },
+          "stores": {
+            "items": {
+              "$ref": "#/components/schemas/Store"
+            },
+            "type": "array",
+            "title": "Stores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "me",
+          "people",
+          "week",
+          "queue",
+          "requests",
+          "pantry",
+          "list",
+          "jobs",
+          "stores"
+        ],
+        "title": "AppState"
+      },
+      "Body_uploadAds": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "Photos or PDFs of the weekly ad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_uploadAds"
+      },
+      "Body_uploadPantryPhotos": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "One or more photos"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_uploadPantryPhotos"
+      },
+      "ChatMessageOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "who": {
+            "type": "string",
+            "enum": [
+              "lauren",
+              "joe",
+              "leidy"
+            ],
+            "title": "Who"
+          },
+          "from": {
+            "type": "string",
+            "enum": [
+              "me",
+              "cafe"
+            ],
+            "title": "From"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "proposal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatProposal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "week_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Week Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "who",
+          "from",
+          "text",
+          "created_at"
+        ],
+        "title": "ChatMessageOut"
+      },
+      "ChatProposal": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "enum": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat",
+              "sun"
+            ],
+            "title": "Day"
+          },
+          "recipe_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipe Id"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "applied",
+              "dismissed"
+            ],
+            "title": "State",
+            "default": "pending"
+          }
+        },
+        "type": "object",
+        "required": [
+          "day",
+          "label"
+        ],
+        "title": "ChatProposal"
+      },
+      "ChatSend": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ChatSend"
+      },
+      "ChatSendResponse": {
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ChatMessageOut"
+          },
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "job"
+        ],
+        "title": "ChatSendResponse"
+      },
+      "CheckRequest": {
+        "properties": {
+          "checked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked",
+            "description": "null toggles"
+          }
+        },
+        "type": "object",
+        "title": "CheckRequest"
+      },
+      "CookLogEntry": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "recipe_id": {
+            "type": "integer",
+            "title": "Recipe Id"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "who": {
+            "type": "string",
+            "enum": [
+              "lauren",
+              "joe",
+              "leidy"
+            ],
+            "title": "Who"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "recipe_id",
+          "date",
+          "who"
+        ],
+        "title": "CookLogEntry"
+      },
+      "CookRequest": {
+        "properties": {
+          "cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook",
+            "description": "Who cooks: a person key or free text."
+          }
+        },
+        "type": "object",
+        "title": "CookRequest"
+      },
+      "CookedRequest": {
+        "properties": {
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "title": "CookedRequest"
+      },
+      "CookedResponse": {
+        "properties": {
+          "recipe": {
+            "$ref": "#/components/schemas/Recipe"
+          },
+          "log": {
+            "$ref": "#/components/schemas/CookLogEntry"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe",
+          "log"
+        ],
+        "title": "CookedResponse"
+      },
+      "Deal": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "store_id": {
+            "type": "integer",
+            "title": "Store Id"
+          },
+          "store_key": {
+            "type": "string",
+            "title": "Store Key"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          },
+          "item": {
+            "type": "string",
+            "title": "Item"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Section"
+          },
+          "source_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "store_id",
+          "store_key",
+          "item",
+          "price",
+          "section"
+        ],
+        "title": "Deal"
+      },
+      "GroceryList": {
+        "properties": {
+          "monday": {
+            "type": "string",
+            "format": "date",
+            "title": "Monday"
+          },
+          "approved": {
+            "type": "boolean",
+            "title": "Approved"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/Section"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "diff": {
+            "items": {
+              "$ref": "#/components/schemas/ListDiffItem"
+            },
+            "type": "array",
+            "title": "Diff"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "unchecked": {
+            "type": "integer",
+            "title": "Unchecked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "monday",
+          "approved",
+          "sections",
+          "diff",
+          "total",
+          "unchecked"
+        ],
+        "title": "GroceryList"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "ai_mode": {
+            "type": "string",
+            "enum": [
+              "fake",
+              "claude"
+            ],
+            "title": "Ai Mode"
+          },
+          "claude_token": {
+            "type": "string",
+            "enum": [
+              "present",
+              "missing"
+            ],
+            "title": "Claude Token"
+          },
+          "instacart_key": {
+            "type": "boolean",
+            "title": "Instacart Key"
+          },
+          "last_prep_run": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Prep Run"
+          },
+          "worker_running": {
+            "type": "boolean",
+            "title": "Worker Running"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "database",
+          "ai_mode",
+          "claude_token",
+          "instacart_key",
+          "worker_running",
+          "version"
+        ],
+        "title": "Health"
+      },
+      "Ingredient": {
+        "properties": {
+          "qty": {
+            "type": "string",
+            "title": "Qty",
+            "default": ""
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Ingredient"
+      },
+      "IngredientFlag": {
+        "properties": {
+          "have": {
+            "type": "boolean",
+            "title": "Have",
+            "default": false
+          },
+          "sale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sale",
+            "description": "Sale note, e.g. \"$3.49/lb\"; null if not on sale."
+          }
+        },
+        "type": "object",
+        "title": "IngredientFlag"
+      },
+      "Job": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed",
+              "resting"
+            ],
+            "title": "Status"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "result": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Job"
+      },
+      "JobAccepted": {
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job"
+        ],
+        "title": "JobAccepted"
+      },
+      "ListDiffItem": {
+        "properties": {
+          "change": {
+            "type": "string",
+            "enum": [
+              "added",
+              "removed",
+              "changed"
+            ],
+            "title": "Change"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Section"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "previous_qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Qty"
+          }
+        },
+        "type": "object",
+        "required": [
+          "change",
+          "key",
+          "name",
+          "section"
+        ],
+        "title": "ListDiffItem"
+      },
+      "ListItem": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "Stable key: normalized name, or add-<id> for quick adds."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Section"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ListSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "sale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sale"
+          },
+          "staple": {
+            "type": "boolean",
+            "title": "Staple",
+            "default": false
+          },
+          "from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From"
+          },
+          "added": {
+            "type": "boolean",
+            "title": "Added",
+            "default": false
+          },
+          "edited": {
+            "type": "boolean",
+            "title": "Edited",
+            "default": false
+          },
+          "checked": {
+            "type": "boolean",
+            "title": "Checked",
+            "default": false
+          },
+          "checked_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "section"
+        ],
+        "title": "ListItem"
+      },
+      "ListItemCreate": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "Free text such as \"2 lbs apples\"."
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "produce",
+                  "frozen",
+                  "meat",
+                  "dry",
+                  "dairy",
+                  "beverages"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section",
+            "description": "Force an aisle; default auto-files it."
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ListItemCreate"
+      },
+      "ListItemPatch": {
+        "properties": {
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "produce",
+                  "frozen",
+                  "meat",
+                  "dry",
+                  "dairy",
+                  "beverages"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "type": "object",
+        "title": "ListItemPatch"
+      },
+      "ListSource": {
+        "properties": {
+          "slot_id": {
+            "type": "integer",
+            "title": "Slot Id"
+          },
+          "day": {
+            "type": "string",
+            "enum": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat",
+              "sun"
+            ],
+            "title": "Day"
+          },
+          "recipe_id": {
+            "type": "integer",
+            "title": "Recipe Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot_id",
+          "day",
+          "recipe_id",
+          "title"
+        ],
+        "title": "ListSource"
+      },
+      "ListStatus": {
+        "properties": {
+          "approved": {
+            "type": "boolean",
+            "title": "Approved"
+          },
+          "diff_count": {
+            "type": "integer",
+            "title": "Diff Count"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "unchecked": {
+            "type": "integer",
+            "title": "Unchecked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "approved",
+          "diff_count",
+          "total",
+          "unchecked"
+        ],
+        "title": "ListStatus"
+      },
+      "MoveRequest": {
+        "properties": {
+          "to": {
+            "type": "string",
+            "enum": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat",
+              "sun"
+            ],
+            "title": "To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "to"
+        ],
+        "title": "MoveRequest"
+      },
+      "Ok": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Ok"
+      },
+      "OrderViaRequest": {
+        "properties": {
+          "order_via": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "amazon",
+              "share",
+              "self"
+            ],
+            "title": "Order Via"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_via"
+        ],
+        "title": "OrderViaRequest"
+      },
+      "Pantry": {
+        "properties": {
+          "photos": {
+            "items": {
+              "$ref": "#/components/schemas/PantryPhoto"
+            },
+            "type": "array",
+            "title": "Photos"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PantryItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "areas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Areas"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PantryStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "photos",
+          "items",
+          "areas",
+          "status"
+        ],
+        "title": "Pantry"
+      },
+      "PantryItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "found",
+              "unsure",
+              "confirmed",
+              "removed"
+            ],
+            "title": "State"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "photo_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Id"
+          },
+          "added_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Added By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "area",
+          "name",
+          "state"
+        ],
+        "title": "PantryItem"
+      },
+      "PantryItemCreate": {
+        "properties": {
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "area",
+          "name"
+        ],
+        "title": "PantryItemCreate"
+      },
+      "PantryItemPatch": {
+        "properties": {
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "found",
+                  "unsure",
+                  "confirmed",
+                  "removed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "title": "PantryItemPatch"
+      },
+      "PantryPhoto": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "uploaded_by": {
+            "type": "string",
+            "enum": [
+              "lauren",
+              "joe",
+              "leidy"
+            ],
+            "title": "Uploaded By"
+          },
+          "read_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "uploaded_by",
+          "created_at"
+        ],
+        "title": "PantryPhoto"
+      },
+      "PantryReadRequest": {
+        "properties": {
+          "photo_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Ids",
+            "description": "Default: photos not read yet."
+          }
+        },
+        "type": "object",
+        "title": "PantryReadRequest"
+      },
+      "PantryStatus": {
+        "properties": {
+          "last_photo_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Photo At"
+          },
+          "photo_count": {
+            "type": "integer",
+            "title": "Photo Count",
+            "default": 0
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review",
+            "description": "Items still found or unsure."
+          },
+          "unsure": {
+            "type": "integer",
+            "title": "Unsure",
+            "default": 0
+          },
+          "confirmed": {
+            "type": "integer",
+            "title": "Confirmed",
+            "default": 0
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done",
+            "description": "True once someone confirmed the latest read."
+          }
+        },
+        "type": "object",
+        "required": [
+          "needs_review",
+          "done"
+        ],
+        "title": "PantryStatus"
+      },
+      "Person": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "lauren",
+              "joe",
+              "leidy"
+            ],
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "color"
+        ],
+        "title": "Person"
+      },
+      "PlanRequest": {
+        "properties": {
+          "days": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "mon",
+                    "tue",
+                    "wed",
+                    "thu",
+                    "fri",
+                    "sat",
+                    "sun"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days",
+            "description": "Only these days; default: untouched days."
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "title": "PlanRequest"
+      },
+      "ProposalAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "apply",
+              "dismiss"
+            ],
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "ProposalAction"
+      },
+      "ProposalResponse": {
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ChatMessageOut"
+          },
+          "week": {
+            "$ref": "#/components/schemas/Week"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "week"
+        ],
+        "title": "ProposalResponse"
+      },
+      "QueueAddRequest": {
+        "properties": {
+          "recipe_id": {
+            "type": "integer",
+            "title": "Recipe Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipe_id"
+        ],
+        "title": "QueueAddRequest"
+      },
+      "QueueItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "recipe": {
+            "$ref": "#/components/schemas/RecipeSummary"
+          },
+          "by": {
+            "type": "string",
+            "enum": [
+              "lauren",
+              "joe",
+              "leidy"
+            ],
+            "title": "By"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "recipe",
+          "by",
+          "created_at"
+        ],
+        "title": "QueueItem"
+      },
+      "Recipe": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "short_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "total_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Min"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd"
+          },
+          "healthy": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Healthy"
+          },
+          "delicious": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delicious"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "imported",
+              "ai",
+              "manual"
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "saved"
+            ],
+            "title": "Status"
+          },
+          "last_made": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Made"
+          },
+          "prep_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Min"
+          },
+          "cook_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Min"
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/Ingredient"
+            },
+            "type": "array",
+            "title": "Ingredients"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepGroup"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "leftovers": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leftovers"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "source",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Recipe"
+      },
+      "RecipeCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "short_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "prep_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Min"
+          },
+          "cook_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Min"
+          },
+          "total_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Min"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd"
+          },
+          "healthy": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Healthy"
+          },
+          "delicious": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delicious"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/Ingredient"
+            },
+            "type": "array",
+            "title": "Ingredients"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepGroup"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "leftovers": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leftovers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "RecipeCreate",
+        "description": "Manual recipe entry (no AI). AI drafts go through POST /api/recipes/draft."
+      },
+      "RecipeDetail": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "short_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "total_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Min"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd"
+          },
+          "healthy": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Healthy"
+          },
+          "delicious": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delicious"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "imported",
+              "ai",
+              "manual"
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "saved"
+            ],
+            "title": "Status"
+          },
+          "last_made": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Made"
+          },
+          "prep_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Min"
+          },
+          "cook_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Min"
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/Ingredient"
+            },
+            "type": "array",
+            "title": "Ingredients"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepGroup"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "leftovers": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leftovers"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "on_week_days": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "mon",
+                "tue",
+                "wed",
+                "thu",
+                "fri",
+                "sat",
+                "sun"
+              ]
+            },
+            "type": "array",
+            "title": "On Week Days",
+            "description": "Days of the current week using it."
+          },
+          "in_queue": {
+            "type": "boolean",
+            "title": "In Queue",
+            "default": false
+          },
+          "ratings": {
+            "items": {
+              "$ref": "#/components/schemas/CookLogEntry"
+            },
+            "type": "array",
+            "title": "Ratings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "source",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "RecipeDetail"
+      },
+      "RecipeDraftRequest": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "describe",
+              "link",
+              "photo",
+              "paste"
+            ],
+            "title": "Mode"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "photo_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Path",
+            "description": "Media-relative path of an uploaded photo."
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "RecipeDraftRequest"
+      },
+      "RecipePatch": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "short_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "prep_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prep Min"
+          },
+          "cook_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook Min"
+          },
+          "total_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Min"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd"
+          },
+          "healthy": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Healthy"
+          },
+          "delicious": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delicious"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "ingredients": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Ingredient"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingredients"
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StepGroup"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps"
+          },
+          "leftovers": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leftovers"
+          }
+        },
+        "type": "object",
+        "title": "RecipePatch"
+      },
+      "RecipeSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "short_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "total_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Min"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd"
+          },
+          "healthy": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Healthy"
+          },
+          "delicious": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delicious"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "imported",
+              "ai",
+              "manual"
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "saved"
+            ],
+            "title": "Status"
+          },
+          "last_made": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Made"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "source",
+          "status"
+        ],
+        "title": "RecipeSummary"
+      },
+      "RejectRequest": {
+        "properties": {
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "remember": {
+            "type": "boolean",
+            "title": "Remember",
+            "default": false
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "open",
+              "another"
+            ],
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "RejectRequest"
+      },
+      "RejectResponse": {
+        "properties": {
+          "week": {
+            "$ref": "#/components/schemas/Week"
+          },
+          "feedback_id": {
+            "type": "integer",
+            "title": "Feedback Id"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Job"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "week",
+          "feedback_id"
+        ],
+        "title": "RejectResponse"
+      },
+      "RequestAnswer": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "planned",
+              "declined"
+            ],
+            "title": "Status"
+          },
+          "reply": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reply"
+          },
+          "list_items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "List Items",
+            "description": "Free-text items (\"2 lbs apples\") to add to this week's list."
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "RequestAnswer"
+      },
+      "RequestCounts": {
+        "properties": {
+          "new": {
+            "type": "integer",
+            "title": "New"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "new_from": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "lauren",
+                "joe",
+                "leidy"
+              ]
+            },
+            "type": "array",
+            "title": "New From"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new",
+          "total"
+        ],
+        "title": "RequestCounts"
+      },
+      "RequestCreate": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meal",
+              "out"
+            ],
+            "title": "Type"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "RequestCreate"
+      },
+      "RequestOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "who": {
+            "type": "string",
+            "enum": [
+              "lauren",
+              "joe",
+              "leidy"
+            ],
+            "title": "Who"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "meal",
+              "out"
+            ],
+            "title": "Type"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "planned",
+              "declined"
+            ],
+            "title": "Status"
+          },
+          "reply": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reply"
+          },
+          "week_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Week Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "who",
+          "type",
+          "text",
+          "status",
+          "created_at"
+        ],
+        "title": "RequestOut"
+      },
+      "Section": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Exact CLAUDE.md section name."
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Short display label."
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ListItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "label",
+          "icon",
+          "items"
+        ],
+        "title": "Section"
+      },
+      "Slot": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "day": {
+            "type": "string",
+            "enum": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat",
+              "sun"
+            ],
+            "title": "Day"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "cook",
+              "leftover",
+              "leidy",
+              "custom",
+              "open"
+            ],
+            "title": "Kind"
+          },
+          "recipe_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipe Id"
+          },
+          "recipe": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Recipe"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "suggested",
+                  "thinking",
+                  "kept",
+                  "edited",
+                  "approved",
+                  "rejected"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "By"
+          },
+          "basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basis"
+          },
+          "why": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Why"
+          },
+          "cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook"
+          },
+          "ingredient_flags": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/IngredientFlag"
+            },
+            "type": "object",
+            "title": "Ingredient Flags"
+          },
+          "ingredients": {
+            "items": {
+              "$ref": "#/components/schemas/SlotIngredient"
+            },
+            "type": "array",
+            "title": "Ingredients",
+            "description": "Effective ingredients (week override or recipe) with tags."
+          },
+          "ingredients_edited": {
+            "type": "boolean",
+            "title": "Ingredients Edited",
+            "default": false
+          },
+          "votes": {
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "up",
+                "down"
+              ]
+            },
+            "type": "object",
+            "title": "Votes",
+            "description": "person key -> up/down"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "day",
+          "kind"
+        ],
+        "title": "Slot"
+      },
+      "SlotIngredient": {
+        "properties": {
+          "qty": {
+            "type": "string",
+            "title": "Qty",
+            "default": ""
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "tag": {
+            "type": "string",
+            "enum": [
+              "have",
+              "sale",
+              "list"
+            ],
+            "title": "Tag"
+          },
+          "sale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sale"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "key",
+          "tag"
+        ],
+        "title": "SlotIngredient"
+      },
+      "SlotPatch": {
+        "properties": {
+          "ingredients": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Ingredient"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingredients"
+          },
+          "ingredient_flags": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/IngredientFlag"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingredient Flags"
+          },
+          "reset_ingredients": {
+            "type": "boolean",
+            "title": "Reset Ingredients",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "SlotPatch",
+        "description": "Meal-detail edits for this week only. Marks a cook slot as edited."
+      },
+      "StapleCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "produce",
+                  "frozen",
+                  "meat",
+                  "dry",
+                  "dairy",
+                  "beverages"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "StapleCreate"
+      },
+      "StapleOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Section"
+          },
+          "from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "section",
+          "active"
+        ],
+        "title": "StapleOut"
+      },
+      "StaplePatch": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "produce",
+                  "frozen",
+                  "meat",
+                  "dry",
+                  "dairy",
+                  "beverages"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "title": "StaplePatch"
+      },
+      "StepGroup": {
+        "properties": {
+          "group": {
+            "type": "string",
+            "title": "Group"
+          },
+          "steps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Steps",
+            "description": "Markdown; quantities in **bold**."
+          }
+        },
+        "type": "object",
+        "required": [
+          "group"
+        ],
+        "title": "StepGroup"
+      },
+      "Store": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "ads_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ads Url"
+          },
+          "instacart_retailer_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instacart Retailer Key"
+          },
+          "deal_count": {
+            "type": "integer",
+            "title": "Deal Count",
+            "default": 0
+          },
+          "ad_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ad From"
+          },
+          "ad_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ad To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "key",
+          "name"
+        ],
+        "title": "Store"
+      },
+      "StoreChangeResponse": {
+        "properties": {
+          "week": {
+            "$ref": "#/components/schemas/Week"
+          },
+          "notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notice",
+            "description": "e.g. 'Switched ads to Amazon Fresh'"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Job"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "week"
+        ],
+        "title": "StoreChangeResponse"
+      },
+      "SwapOptionsRequest": {
+        "properties": {
+          "prefs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Prefs"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "title": "SwapOptionsRequest"
+      },
+      "SwapRequest": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "recipe",
+              "text",
+              "leftover",
+              "leidy",
+              "open"
+            ],
+            "title": "Kind"
+          },
+          "recipe_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipe Id"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basis",
+            "description": "What the person asked for, echoed in the UI."
+          },
+          "cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cook"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "SwapRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VoteRequest": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "up",
+                  "down"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value",
+            "description": "null clears your vote"
+          }
+        },
+        "type": "object",
+        "title": "VoteRequest"
+      },
+      "Week": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "monday": {
+            "type": "string",
+            "format": "date",
+            "title": "Monday"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "\"Week of August 24\""
+          },
+          "store": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Store"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "order_via": {
+            "type": "string",
+            "enum": [
+              "delivery",
+              "pickup",
+              "amazon",
+              "share",
+              "self"
+            ],
+            "title": "Order Via"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            },
+            "type": "array",
+            "title": "Slots"
+          },
+          "list_diff_count": {
+            "type": "integer",
+            "title": "List Diff Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "monday",
+          "label",
+          "order_via",
+          "slots"
+        ],
+        "title": "Week"
+      },
+      "WeekStoreRequest": {
+        "properties": {
+          "store_key": {
+            "type": "string",
+            "title": "Store Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_key"
+        ],
+        "title": "WeekStoreRequest"
+      }
+    }
+  }
+}
