@@ -15,7 +15,11 @@ __pycache__/
 # App build
 data/cafe.db
 data/cafe.db-*
+data/household.db
+data/household.db-*
 data/media/
+data/backups/
+data/pi-backup/
 node_modules/
 frontend/dist/
 frontend/test-results/
@@ -23,3 +27,6 @@ frontend/playwright-report/
 frontend/e2e/screenshots/
 backend/.venv/
 .pytest_cache/
+
+# Home Wi-Fi details for flashing the Pi
+deploy/pi-firstboot/wifi.env

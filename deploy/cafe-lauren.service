@@ -1,0 +1,14 @@
+[Unit]
+Description=Café Lauren
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=%h/cafe_lauren/backend
+ExecStart=%h/cafe_lauren/backend/.venv/bin/uvicorn cafe.main:create_app --factory --host 0.0.0.0 --port 8080 --timeout-graceful-shutdown 5
+TimeoutStopSec=20
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Café Lauren nightly backup
+
+[Service]
+Type=oneshot
+ExecStart=%h/cafe_lauren/deploy/backup.sh

@@ -2,6 +2,54 @@
 
 A Claude Code project for weekly meal planning for a family of 5. Integrates with Notion for the grocery list/recipe database, a local grocery store for weekly deals, and phone photos for pantry inventory.
 
+## The App on the Raspberry Pi
+
+The household uses a web app served from a Raspberry Pi at `http://cafe.local:8080` (home Wi-Fi only). The code is in `backend/` (FastAPI, SQLite) and `frontend/` (React PWA). `docs/BUILD_PLAN.md` has the design. The Notion workflow and slash commands described further down are the older system and are being retired.
+
+**The Pi holds the only real copy of the household's data.** The database on this Mac is a development copy. Protecting the Pi's database matters more than shipping any change.
+
+### Rules
+
+- Data flows Pi → Mac only. Never run `deploy/copy-data.sh`; it overwrites the Pi's database with the Mac's and was for the first install.
+- Never edit, replace or delete files in `~/cafe_lauren/data/` on the Pi by hand. Use the scripts below.
+- Never push without the tests passing. Do not use `--skip-tests` or `--allow-dirty` unless the user asks for it.
+- Ask the user before pushing a change that includes a new database migration, and before running `deploy/restore.sh`.
+- Do not print or copy the contents of `.env`.
+
+### Making a change
+
+1. To test against real data, stop the local app and run `deploy/pull-data.sh`. It replaces the Mac's development database and photos with a fresh copy from the Pi.
+2. Make the change. Run the app locally: `uv run uvicorn cafe.main:create_app --factory --port 8080` in `backend/`, and `npm run dev` in `frontend/`.
+3. Run `uv run pytest` in `backend/`. For screen changes also run `npm run test:e2e` in `frontend/`.
+4. Commit. `deploy/push.sh` refuses uncommitted changes, so every push can be rolled back.
+5. Run `deploy/push.sh`. It runs the backend tests, builds the frontend, copies `backend/`, `frontend/dist/` and `deploy/` to the Pi, restarts the service and waits for the health check. It never touches the Pi's `data/` or `.env`.
+
+`deploy/push.sh --dry-run` runs the tests and build and lists what would be copied, without changing the Pi.
+
+### Database changes
+
+A change to `backend/cafe/models.py` needs a new migration in `backend/migrations/versions/`. The app applies migrations when it starts, and copies the database into `data/backups/` first.
+
+- Run `deploy/pull-data.sh`, then start the local app, so the migration is tried on a copy of the real data before it reaches the Pi.
+- Prefer migrations that add tables or columns. Avoid dropping or renaming in the same change that stops using the old name.
+- Run `deploy/fetch-backup.sh` just before the push, so a copy exists off the Pi.
+
+### If a push goes wrong
+
+- Code only: `deploy/push.sh --ref <earlier commit>` ships that commit. `deploy/restore.sh` with no arguments lists recent pushes.
+- A migration damaged or changed data: run `deploy/push.sh --ref <earlier commit>`, then `deploy/restore.sh <backup name>` with the backup taken before the migration. Anything the family entered after that backup is lost, so tell the user first.
+- `deploy/restore.sh` saves the database it replaces as `before-restore-<time>.db`, so a restore can be undone.
+
+### The Pi
+
+- Log in with `ssh cafe`. The user is `joe`; the app is in `~/cafe_lauren`.
+- The app runs as a per-user systemd service: `systemctl --user status cafe-lauren`, logs with `journalctl --user -u cafe-lauren`.
+- `sudo` does not work on the Pi (the account has no password), so nothing in `deploy/` may depend on it.
+- The SD card is slow. The app can take a few minutes to answer after a restart; `push.sh` waits up to five.
+- Long SSH sessions to the Pi can drop over its Wi-Fi. Keep remote commands short, as `push.sh` does: start the work detached, then check on it with new connections.
+- Backups: nightly at 3:30am into `data/backups/` on the Pi (14 kept). `deploy/fetch-backup.sh` copies them and the photos to `data/pi-backup/` on the Mac.
+- Rebuilding the Pi from nothing: `deploy/flash-sd.sh`, `deploy/add-wifi.sh`, `deploy/push.sh --with-env`, then `deploy/restore.sh data/pi-backup/backups/<newest file>`, which uploads that backup and the photos and restores it.
+
 ## Notion Integration
 
 - **Grocery List page ID:** `$NOTION_GROCERY_PAGE_ID` (from `.env`)

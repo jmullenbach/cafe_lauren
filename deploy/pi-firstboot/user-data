@@ -1,0 +1,35 @@
+#cloud-config
+# First-boot setup for the Café Lauren Pi. deploy/flash-sd.sh copies this to the
+# SD card's boot partition. SSH is by key only; the account has no password.
+hostname: cafe
+manage_etc_hosts: true
+timezone: America/Chicago
+
+users:
+  - name: joe
+    groups: [sudo, adm, users]
+    shell: /bin/bash
+    lock_passwd: true
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFSJHkZrg1nD7XervJv0XiiXCr7AXn383M32LRqOLPzj jmullenbach
+
+ssh_pwauth: false
+
+write_files:
+  # Passwordless sudo for joe. Named to sort last so it wins over other rules.
+  - path: /etc/sudoers.d/zz-cafe-joe
+    permissions: "0440"
+    content: |
+      joe ALL=(ALL) NOPASSWD:ALL
+  # Wi-Fi power saving makes the Pi drop quiet connections.
+  - path: /etc/NetworkManager/conf.d/wifi-powersave-off.conf
+    content: |
+      [connection]
+      wifi.powersave = 2
+
+runcmd:
+  - raspi-config nonint do_wifi_country US
+  - rfkill unblock wifi
+  - systemctl enable --now ssh
+  - systemctl enable --now avahi-daemon
