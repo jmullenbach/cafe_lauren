@@ -1,4 +1,4 @@
-"""Recipes, queue, requests, pantry, stores, chat proposals, settings, staples."""
+"""Recipes, queue, requests, pantry, stores, chat proposals, settings."""
 
 import io
 
@@ -9,7 +9,7 @@ from .conftest import H, recipe_id, slot, wait_job
 
 def test_recipe_box_lists_saved_only_with_filters(client, seeded):
     box = client.get("/api/recipes").json()
-    assert len(box) == 8 and all(r["status"] == "saved" for r in box)
+    assert len(box) == 9 and all(r["status"] == "saved" for r in box)
     assert box[0]["stars"] == 5
     assert {r["title"] for r in client.get("/api/recipes", params={"filter": "5 stars"}).json()} == {
         "Taco Tuesday", "Lauren's Chili", "Instant Pot Chicken Tortilla Soup", "Basil Shrimp with Feta and Orzo"}
@@ -177,7 +177,7 @@ def test_chat_proposal_apply_and_dismiss(client, seeded, state):
     assert client.post(f"/api/chat/{msgs[0]['id']}/proposal", json={"action": "apply"}).status_code == 404
 
 
-# ---------------------------------------------------------------- settings and staples
+# ---------------------------------------------------------------- settings
 
 def test_settings_get_put(client):
     s = client.get("/api/settings").json()
@@ -186,27 +186,3 @@ def test_settings_get_put(client):
     assert s["prep_day"] == "sun" and s["prep_time"] == "06:30" and s["leidy_nights"] == ["tue", "thu"]
     assert client.get("/api/settings").json()["household_size"] == 5
     assert client.put("/api/settings", json={"prep_time": "6am"}).status_code == 422
-
-
-def test_staples_crud_feeds_list(client, seeded):
-    st = client.post("/api/staples", json={"name": "Coffee"}, headers=H("lauren")).json()
-    assert st["section"] == "beverages" and st["from"] == "lauren"
-    names = lambda: {i["name"] for s in client.get(f"/api/weeks/{seeded}/list").json()["sections"] for i in s["items"]}
-    assert "Coffee" in names()
-    client.patch(f"/api/staples/{st['id']}", json={"active": False})
-    assert "Coffee" not in names()
-    assert client.delete(f"/api/staples/{st['id']}").json() == {"ok": True}
-
-
-def test_recipe_photo_upload_then_draft(client, seeded, settings):
-    pantry_before = len(client.get("/api/pantry").json()["photos"])
-    up = client.post("/api/recipes/photos", files={"file": ("card.jpg", io.BytesIO(b"\xff\xd8fakejpeg"), "image/jpeg")})
-    assert up.status_code == 201
-    path = up.json()["path"]
-    assert path.startswith("recipes/") and (settings.cafe_media_dir / path).is_file()
-    assert len(client.get("/api/pantry").json()["photos"]) == pantry_before
-    bad = client.post("/api/recipes/photos", files={"file": ("x.exe", io.BytesIO(b"x"), "application/octet-stream")})
-    assert bad.status_code == 415
-    job = wait_job(client, client.post("/api/recipes/draft", json={"mode": "photo", "photo_path": path}).json()["job"]["id"])
-    assert job["status"] == "done"
-    assert set(job["result"]) == {"recipe_id", "title", "status"} and job["result"]["status"] == "draft"

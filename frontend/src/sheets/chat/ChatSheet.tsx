@@ -7,12 +7,13 @@ import { ChoiceChips } from '../../components/forms/ChoiceChips';
 import { Input } from '../../components/forms/Input';
 import { SuggestedTag } from '../../components/kitchen/SuggestedTag';
 import { JobState } from '../../components/feedback/JobState';
-import { useChat, useResolveProposal, useSendChat } from '../../api/hooks';
+import { useChat, useResolveListChanges, useResolveProposal, useSendChat } from '../../api/hooks';
 import { useJobStatus } from '../../api/jobs';
-import type { ChatProposal } from '../../api/models';
+import type { ChatListChange, ChatProposal } from '../../api/models';
 import { useUi } from '../../state/UiContext';
 import { useWeekData } from '../../state/useWeekSlots';
 import { CHAT_STARTERS } from '../../lib/meal';
+import { CHANGE_LOOK, ChangeText } from './ListReviewSheet';
 import '../../styles/screens-a.css';
 
 function Proposal({ p, busy, onApply, onDismiss }: { p: ChatProposal; busy: boolean; onApply: () => void; onDismiss: () => void }) {
@@ -27,13 +28,34 @@ function Proposal({ p, busy, onApply, onDismiss }: { p: ChatProposal; busy: bool
   );
 }
 
-/** Ask Café. Chat never edits the plan: Café's replies carry proposals the person applies or dismisses. */
+/** Café's proposed grocery list changes: a short summary, with the full review one tap away. */
+function ListChanges({ changes, busy, onReview, onApproveAll }: { changes: ChatListChange[]; busy: boolean; onReview: () => void; onApproveAll: () => void }) {
+  const pending = changes.filter((c) => c.state === 'pending').length;
+  const count = (s: ChatListChange['state']) => changes.filter((c) => c.state === s).length;
+  const summary = [[count('applied'), 'approved'], [count('dismissed'), 'dismissed'], [count('missed'), 'no longer on the list']].filter(([n]) => n).map(([n, t]) => `${n} ${t}`).join(' · ');
+  return (
+    <div data-testid="list-changes" data-pending={pending} style={{ marginTop: 10, padding: 12, borderRadius: 'var(--radius-m)', background: 'var(--surface-card)', border: pending ? '1px dashed var(--sage-300)' : '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span style={{ font: '600 14px/1.3 var(--font-sans)', color: 'var(--text-strong)' }}>Grocery list · {changes.length} {changes.length === 1 ? 'change' : 'changes'}</span>
+      {changes.map((c) => (
+        <span key={c.id} style={{ display: 'flex', gap: 6, font: '400 13px/1.35 var(--font-sans)', color: 'var(--text-body)', opacity: c.state === 'dismissed' || c.state === 'missed' ? 0.5 : 1 }}>
+          <b style={{ width: 12, flex: 'none', color: CHANGE_LOOK[c.op].fg }}>{CHANGE_LOOK[c.op].mark}</b><span><ChangeText c={c} /></span>
+        </span>
+      ))}
+      {pending > 0
+        ? <div style={{ display: 'flex', gap: 8 }}><Button size="s" variant="secondary" icon="list-checks" style={{ flex: 1 }} disabled={busy} onClick={onReview}>Review in list</Button><Button size="s" variant="accent" icon="check" style={{ flex: 1 }} disabled={busy} onClick={onApproveAll}>Approve all</Button></div>
+        : <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ flex: 1, font: '400 12.5px/1.3 var(--font-sans)', color: 'var(--text-muted)' }}>{summary}</span><Button size="s" variant="ghost" onClick={onReview}>See in list</Button></div>}
+    </div>
+  );
+}
+
+/** Ask Café. Chat never edits the plan or the list: Café's replies carry proposals the person applies or dismisses. */
 export function ChatSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { monday, me } = useWeekData();
-  const { toast } = useUi();
+  const { toast, openSheet } = useUi();
   const { data: msgs = [] } = useChat(monday);
   const send = useSendChat();
   const resolve = useResolveProposal();
+  const resolveList = useResolveListChanges();
   const [text, setText] = useState('');
   const [jobId, setJobId] = useState<number | null>(null);
   const [pendingText, setPendingText] = useState<string | null>(null);
@@ -55,6 +77,8 @@ export function ChatSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const asked = msgs.filter((m) => m.from === 'me').map((m) => m.text);
   const apply = (id: number, action: 'apply' | 'dismiss', label: string) =>
     resolve.mutate({ messageId: id, action }, { onSuccess: () => { if (action === 'apply') toast({ tone: 'success', icon: 'check', title: 'Plan updated', message: label }); } });
+  const approveAll = (id: number, changes: ChatListChange[]) =>
+    resolveList.mutate({ messageId: id, changes: changes.filter((c) => c.state === 'pending').map((c) => ({ id: c.id, action: 'apply' as const })) }, { onSuccess: () => toast({ tone: 'success', icon: 'check', title: 'List updated' }) });
   // Café has not answered yet: still no reply after the message that was just sent.
   const typing = (waiting || send.isPending) && msgs.length <= baseline.current + 1;
 
@@ -68,8 +92,9 @@ export function ChatSheet({ open, onClose }: { open: boolean; onClose: () => voi
         {msgs.map((m) => m.from === 'me'
           ? <div key={m.id} style={{ alignSelf: 'flex-end', maxWidth: '82%', padding: '10px 14px', borderRadius: '16px 16px 4px 16px', background: 'var(--char-900)', color: 'var(--linen-50)', font: '400 14px/1.45 var(--font-sans)' }}>{m.text}</div>
           : <div key={m.id} style={{ alignSelf: 'flex-start', maxWidth: '92%' }}>
-              <div style={{ padding: '10px 14px', borderRadius: '16px 16px 16px 4px', background: 'var(--surface-sunken)', color: 'var(--text-strong)', font: '400 14px/1.5 var(--font-sans)' }}>{m.text}</div>
+              <div style={{ padding: '10px 14px', borderRadius: '16px 16px 16px 4px', background: 'var(--surface-sunken)', color: 'var(--text-strong)', font: '400 14px/1.5 var(--font-sans)', whiteSpace: 'pre-wrap' }}>{m.text}</div>
               {m.proposal && <Proposal p={m.proposal} busy={resolve.isPending} onApply={() => apply(m.id, 'apply', m.proposal!.label)} onDismiss={() => apply(m.id, 'dismiss', m.proposal!.label)} />}
+              {!!m.list_changes?.length && <ListChanges changes={m.list_changes} busy={resolveList.isPending} onReview={() => openSheet({ type: 'list-review', messageId: m.id })} onApproveAll={() => approveAll(m.id, m.list_changes!)} />}
             </div>)}
         {pendingText != null && !msgs.some((m) => m.from === 'me' && m.text === pendingText) && <div style={{ alignSelf: 'flex-end', maxWidth: '82%', padding: '10px 14px', borderRadius: '16px 16px 4px 16px', background: 'var(--char-900)', color: 'var(--linen-50)', font: '400 14px/1.45 var(--font-sans)' }}>{pendingText}</div>}
         {typing && <div data-testid="chat-typing" style={{ alignSelf: 'flex-start', padding: '10px 14px', borderRadius: '16px 16px 16px 4px', background: 'var(--surface-sunken)', color: 'var(--text-muted)', font: '400 14px/1.5 var(--font-sans)' }}>Thinking<span style={{ marginLeft: 6 }}><i className="clm-thinking-dot" /><i className="clm-thinking-dot" /><i className="clm-thinking-dot" /></span></div>}

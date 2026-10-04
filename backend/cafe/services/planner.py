@@ -7,6 +7,7 @@ Nothing here writes AI output to live state. Results become:
     and a `recipe_fill` job writes them once the idea is picked,
   - pantry items with state `found` or `unsure`,
   - chat proposals with state `pending`,
+  - chat list changes with state `pending` (grocery list adds, edits and removals),
   - deals rows (read from the store's ad).
 Slots a person has kept, edited, approved, rejected or voted on are never touched.
 """
@@ -44,8 +45,7 @@ def touched(slot: m.Slot) -> bool:
 
 def plannable_days(week: m.Week, days: list[str] | None = None) -> list[str]:
     wanted = set(days) if days else set(W.DAYS)
-    return [sl.day for sl in sorted(week.slots, key=lambda x: W.DAYS.index(x.day))
-            if sl.day in wanted and not touched(sl)]
+    return [sl.day for sl in W.day_slots(week) if sl.day in wanted and not touched(sl)]
 
 
 # ---------------------------------------------------------------- context
@@ -70,19 +70,21 @@ def current_deals(db: Session, week: m.Week) -> list[m.Deal]:
 
 def base_context(db: Session, week: m.Week) -> dict[str, Any]:
     cfg = W.all_settings(db)
-    slots = sorted(week.slots, key=lambda x: W.DAYS.index(x.day))
+    slots = W.day_slots(week)
     fixed = [{"day": sl.day, "kind": sl.kind, "title": _title(sl), "status": sl.status, "cook": sl.cook}
              for sl in slots if touched(sl)]
     recent = []
     for wk in db.scalars(select(m.Week).where(m.Week.monday < week.monday).order_by(m.Week.monday.desc()).limit(4)):
-        meals = {sl.day: _title(sl) for sl in sorted(wk.slots, key=lambda x: W.DAYS.index(x.day))
+        meals = {sl.day: _title(sl) for sl in W.day_slots(wk)
                  if sl.kind != "open" and sl.status != "rejected" and _title(sl)}
         if meals:
             recent.append({"monday": wk.monday.isoformat(), "meals": meals})
     box = [{"id": r.id, "title": r.title, "stars": r.stars, "method": r.method, "total_min": r.total_min,
             "last_made": r.last_made.isoformat() if r.last_made else None, "default_cook": r.default_cook, "tags": r.tags or [],
             "ingredients": _ingredient_names(r)}
-           for r in db.scalars(select(m.Recipe).where(m.Recipe.status == "saved").order_by(m.Recipe.id))]
+           for r in db.scalars(select(m.Recipe).where(m.Recipe.status == "saved").order_by(m.Recipe.id))
+           if not W.is_staples(r)]  # staples are not dinners
+    staples = [{"id": r.id, "title": r.title, "ingredients": _ingredient_names(r)} for r in W.staples_recipes(db)]
     queue = [{"recipe_id": q.recipe_id, "title": q.recipe.title, "by": q.by}
              for q in db.scalars(select(m.QueueEntry).order_by(m.QueueEntry.id))]
     reqs = [{"who": r.who, "type": r.type, "text": r.text, "date": r.created_at.date().isoformat()}
@@ -99,7 +101,7 @@ def base_context(db: Session, week: m.Week) -> dict[str, Any]:
         monday=week.monday.isoformat(), fixed=fixed, household_size=cfg.household_size,
         cook_nights_target=cfg.cook_nights_target, leidy_nights=list(cfg.leidy_nights),
         store=week.store.name if week.store else None, deals=deals, pantry=pantry, requests=reqs,
-        queue=queue, recipe_box=box, recent_weeks=recent, feedback=feedback,
+        queue=queue, recipe_box=box, staples_recipes=staples, recent_weeks=recent, feedback=feedback,
     )
 
 
@@ -131,8 +133,23 @@ def chat_context(db: Session, week: m.Week, who: str, message: str, before_id: i
     rows = list(db.scalars(stmt.order_by(m.ChatMessage.id.desc()).limit(20)))[::-1]
     history = [{"from": x.from_, "text": x.text} for x in rows]
     plan = [{"day": sl.day, "kind": sl.kind, "title": _title(sl), "status": sl.status, "cook": sl.cook}
-            for sl in sorted(week.slots, key=lambda x: W.DAYS.index(x.day))]
-    return A.ChatContext(**base_context(db, week), days=[], who=who, message=message, history=history, week=plan)
+            for sl in W.day_slots(week)]
+    return A.ChatContext(**base_context(db, week), days=[], who=who, message=message, history=history, week=plan,
+                         grocery_list=list_context(db, week))
+
+
+def list_context(db: Session, week: m.Week) -> list[dict[str, Any]]:
+    """The grocery list as the List screen shows it, trimmed to what Café needs to read and change it."""
+    out = []
+    for i in grocery.derive_items(db, week):
+        row = {"key": i.key, "name": i.name, "qty": i.qty, "section": i.section, "for": i.note,
+               "sale": i.sale, "checked": i.checked}
+        if i.staple:
+            row["staple"] = True
+        if i.added:
+            row["added_by"] = i.from_
+        out.append(row)
+    return out
 
 
 # ---------------------------------------------------------------- recipes
@@ -315,6 +332,28 @@ def apply_suggestion(db: Session, slot: m.Slot, sug: A.MealSuggestion, *, keep_b
     return True
 
 
+def place_staples(db: Session, slot: m.Slot | None, recipe: m.Recipe | None) -> None:
+    """Café's default for the Lunches & breakfast slot: a staples recipe, flagged against the pantry and deals."""
+    if slot is None or recipe is None:
+        return
+    slot.kind, slot.recipe_id, slot.text, slot.status, slot.by = "cook", recipe.id, None, "suggested", CAFE
+    slot.cook, slot.why, slot.basis, slot.ingredients_override = None, [], None, None
+    slot.ingredient_flags = ingredient_flags(db, slot.week, recipe, [])
+    db.flush()
+
+
+def apply_staples(db: Session, week: m.Week, recipe_id: int | None) -> bool:
+    """Put Café's staples pick on Lunches & breakfast, unless a person has already decided it."""
+    slot = W.extra_slot(week)
+    if slot is None or touched(slot):
+        return False
+    pick = db.get(m.Recipe, recipe_id) if recipe_id is not None else None
+    if not (W.is_staples(pick) and pick.status == "saved"):
+        pick = slot.recipe or W.default_staples(db)
+    place_staples(db, slot, pick)
+    return pick is not None
+
+
 def apply_plan(db: Session, week: m.Week, plan: A.PlanSuggestion, days: list[str]) -> list[str]:
     """Fill only `days`, and only those still untouched now (a person may have acted meanwhile)."""
     allowed = set(plannable_days(week, days))
@@ -326,6 +365,7 @@ def apply_plan(db: Session, week: m.Week, plan: A.PlanSuggestion, days: list[str
         if apply_suggestion(db, slot, sug):
             filled.append(sug.day)
             allowed.discard(sug.day)
+    apply_staples(db, week, plan.staples_recipe_id)
     return filled
 
 
@@ -440,7 +480,70 @@ def store_deals(db: Session, store: m.Store, result: A.AdsReadResult, image_path
     return count
 
 
+LIST_FIELDS = ("name", "qty", "section", "note")
+
+
+def propose_list_changes(db: Session, week: m.Week, changes: list[A.ListChange]) -> tuple[list[dict[str, Any]], list[str]]:
+    """Turn Café's list changes into pending proposals. Returns (proposals, the ones naming no list item)."""
+    items = {i.key: i for i in grocery.derive_items(db, week)}
+    out: list[dict[str, Any]] = []
+    missed: list[str] = []
+    for c in changes:
+        row: dict[str, Any]
+        if c.op == "add":
+            if not (c.text or "").strip():
+                continue
+            parsed = grocery.parse_free_text(c.text.strip())
+            row = {"key": None, "name": parsed.name, "qty": parsed.qty, "section": c.section or parsed.section,
+                   "note": c.note, "before": None}
+        else:
+            it = items.get(c.key or "")
+            if it is None:
+                missed.append(c.name or c.key or c.op)
+                continue
+            now = {"name": it.name, "qty": it.qty, "section": it.section, "note": it.note}
+            if c.op == "remove":
+                row = {"key": it.key, **now, "before": None}
+            else:
+                after = {**now, **{k: v for k in LIST_FIELDS if (v := getattr(c, k)) is not None}}
+                if after == now:
+                    continue
+                row = {"key": it.key, **after, "before": now}
+        out.append({"id": len(out) + 1, "op": c.op, **row, "state": "pending"})
+    return out, missed
+
+
+def resolve_list_change(db: Session, week: m.Week, change: dict[str, Any], action: str,
+                        edits: dict[str, Any]) -> dict[str, Any]:
+    """Apply or dismiss one pending list change; `edits` are the person's own values for it."""
+    if action != "apply":
+        return {**change, "state": "dismissed"}
+    c = {**change, **{k: v for k, v in edits.items() if k in LIST_FIELDS}}
+    c["qty"], c["note"] = (c["qty"] or "").strip() or None, (c["note"] or "").strip() or None
+    try:
+        if c["op"] == "add":
+            c["key"] = f"add-{grocery.add_row(db, week, c['name'].strip(), c['qty'], c['section'], CAFE, c['note']).id}"
+        elif c["op"] == "remove":
+            grocery.remove_item(db, week, c["key"])
+        else:
+            it = grocery.find_item(db, week, c["key"])
+            # "" clears an amount or note; a list edit reads None as "leave it".
+            data = {k: (c[k] if k in ("name", "section") else c[k] or "")
+                    for k in LIST_FIELDS if (c[k] or None) != (getattr(it, k) or None)}
+            grocery.patch_item(db, week, c["key"], data)
+    except LookupError:
+        return {**change, "state": "missed"}
+    return {**c, "state": "applied"}
+
+
 def store_chat_reply(db: Session, asked: m.ChatMessage, reply: A.ChatReply) -> m.ChatMessage:
+    body = reply.text.strip()
+    week = db.get(m.Week, asked.week_id) if asked.week_id else None
+    list_changes: list[dict[str, Any]] = []
+    if reply.list_changes and week is not None:
+        list_changes, missed = propose_list_changes(db, week, reply.list_changes)
+        if missed:
+            body += "\n\nI could not find these on the list: " + ", ".join(missed) + "."
     proposal = None
     p = reply.proposal
     if p is not None:
@@ -448,7 +551,7 @@ def store_chat_reply(db: Session, asked: m.ChatMessage, reply: A.ChatReply) -> m
         text = None if r else (p.text or p.label)
         proposal = {"day": p.day, "recipe_id": r.id if r else None, "text": text, "label": p.label,
                     "detail": p.detail, "state": "pending"}
-    msg = m.ChatMessage(who=asked.who, from_="cafe", text=reply.text.strip(), proposal=proposal,
+    msg = m.ChatMessage(who=asked.who, from_="cafe", text=body, proposal=proposal, list_changes=list_changes or None,
                         week_id=asked.week_id)
     db.add(msg)
     db.flush()

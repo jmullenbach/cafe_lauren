@@ -8,13 +8,15 @@ from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from .. import models as m
 from .. import schemas as s
 from . import grocery
 
 DAYS = s.DAYS
+EXTRA = s.EXTRA
+STAPLES_TAG = s.STAPLES_TAG
 
 DEFAULT_SETTINGS: dict[str, Any] = s.AppSettings(
     models={
@@ -91,10 +93,13 @@ def get_or_create_week(db: Session, monday: date) -> m.Week:
                   order_via=get_setting(db, "default_order_via", "delivery"))
     db.add(week)
     db.flush()
-    for d in DAYS:
+    for d in [*DAYS, EXTRA]:
         db.add(m.Slot(week_id=week.id, day=d, kind="open", why=[], ingredient_flags={}))
     db.flush()
     db.refresh(week)
+    from . import planner as P  # imported here: planner imports this module
+
+    P.place_staples(db, extra_slot(week), default_staples(db))
     return week
 
 
@@ -107,6 +112,49 @@ def get_slot(db: Session, slot_id: int) -> m.Slot:
     if slot is None:
         raise HTTPException(status_code=404, detail="Slot not found")
     return slot
+
+
+def day_slots(week: m.Week) -> list[m.Slot]:
+    """The seven nights in order, without the Lunches & breakfast slot."""
+    return sorted((sl for sl in week.slots if sl.day in DAYS), key=lambda x: DAYS.index(x.day))
+
+
+def extra_slot(week: m.Week) -> m.Slot | None:
+    return next((sl for sl in week.slots if sl.day == EXTRA), None)
+
+
+def is_staples(r: m.Recipe | None) -> bool:
+    return r is not None and STAPLES_TAG in (r.tags or [])
+
+
+def staples_recipes(db: Session) -> list[m.Recipe]:
+    return [r for r in db.scalars(select(m.Recipe).where(m.Recipe.status == "saved").order_by(m.Recipe.id))
+            if is_staples(r)]
+
+
+def default_staples(db: Session) -> m.Recipe | None:
+    """The staples recipe a new week starts with: the one used most recently, else the first."""
+    options = staples_recipes(db)
+    if not options:
+        return None
+    last = db.scalar(select(m.Slot.recipe_id).join(m.Week).where(
+        m.Slot.day == EXTRA, m.Slot.recipe_id.in_([r.id for r in options])).order_by(m.Week.monday.desc()))
+    return next((r for r in options if r.id == last), options[0])
+
+
+def ensure_staples_recipe(db: Session, names: list[str]) -> tuple[m.Recipe, int]:
+    """Add `names` to the "Staples" recipe, creating it if needed. Returns it and how many were new."""
+    r = next((x for x in staples_recipes(db) if x.title.lower() == "staples"), None)
+    if r is None:
+        r = m.Recipe(title="Staples", short_title="Staples", tags=[STAPLES_TAG], ingredients=[], steps=[],
+                     description="Breakfast, lunch and household basics we buy every week.",
+                     source="imported", status="saved")
+        db.add(r)
+    have = {grocery.item_key(str(i.get("name", ""))) for i in r.ingredients or []}
+    new = [n.strip() for n in names if n.strip() and grocery.item_key(n) not in have]
+    r.ingredients = [*(r.ingredients or []), *({"qty": "", "unit": "", "name": n, "group": None} for n in new)]
+    db.flush()
+    return r, len(new)
 
 
 def slot_by_day(week: m.Week, day: str) -> m.Slot:
@@ -165,11 +213,14 @@ def recipe_out(r: m.Recipe) -> dict[str, Any]:
 
 def slot_ingredients_out(slot: m.Slot) -> list[dict[str, Any]]:
     flags = slot.ingredient_flags or {}
+    db = object_session(slot)
+    pantry = grocery.pantry_keys(db) if slot.day == EXTRA and db is not None else []
     out = []
     for ing in grocery.slot_ingredients(slot):
         k = grocery.item_key(ing.get("name", ""))
         f = flags.get(k) or {}
-        tag = "have" if f.get("have") else ("sale" if f.get("sale") else "list")
+        have = f.get("have") or grocery.on_hand(k, pantry)
+        tag = "have" if have else ("sale" if f.get("sale") else "list")
         out.append({"qty": ing.get("qty", ""), "unit": ing.get("unit", ""), "name": ing.get("name", ""),
                     "group": ing.get("group"), "key": k, "tag": tag, "sale": f.get("sale")})
     return out
@@ -202,12 +253,13 @@ def store_out(db: Session, store: m.Store, on: date | None = None) -> dict[str, 
 def week_out(db: Session, week: m.Week) -> s.Week:
     db.flush()
     db.refresh(week)
-    slots = sorted(week.slots, key=lambda x: DAYS.index(x.day))
+    extra = extra_slot(week)
     return s.Week.model_validate({
         "id": week.id, "monday": week.monday, "label": week_label(week.monday),
         "store": store_out(db, week.store, week.monday) if week.store else None,
         "order_via": week.order_via, "approved_by": week.approved_by, "approved_at": week.approved_at,
-        "slots": [slot_out(x) for x in slots],
+        "slots": [slot_out(x) for x in day_slots(week)],
+        "extra": slot_out(extra) if extra else None,
         "list_diff_count": len(grocery.diff(db, week)),
     })
 

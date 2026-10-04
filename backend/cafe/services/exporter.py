@@ -125,6 +125,9 @@ def week_markdown(db: Session, week: m.Week) -> str:
         else:
             what = s.text or s.kind.title()
         L.append(f"- **{DAY_NAMES[d]}:** {what}")
+    extra = slots.get(W.EXTRA)
+    if extra is not None and extra.recipe is not None:
+        L.append(f"- **Lunches & breakfast:** {extra.recipe.title}")
     L += ["", "## Grocery List", ""]
     items = grocery.derive_items(db, week)
     for sec in grocery.SECTIONS:

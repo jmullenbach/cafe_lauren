@@ -26,28 +26,10 @@ def list_out(db, week: m.Week) -> s.GroceryList:
 
 
 def _item(db, week: m.Week, key: str) -> grocery.Item:
-    for it in grocery.derive_items(db, week):
-        if it.key == key:
-            return it
-    raise HTTPException(status_code=404, detail="List item not found")
-
-
-def _add_row(db, week: m.Week, key: str) -> m.ListAdd | None:
-    if not key.startswith("add-"):
-        return None
     try:
-        row = db.get(m.ListAdd, int(key[4:]))
-    except ValueError:
-        return None
-    return row if row is not None and row.week_id == week.id else None
-
-
-def _edit_row(db, week: m.Week, key: str) -> m.ListEdit:
-    e = db.scalar(select(m.ListEdit).where(m.ListEdit.week_id == week.id, m.ListEdit.item_key == key))
-    if e is None:
-        e = m.ListEdit(week_id=week.id, item_key=key, removed=False)
-        db.add(e)
-    return e
+        return grocery.find_item(db, week, key)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="List item not found") from None
 
 
 @router.get("", response_model=s.GroceryList, operation_id="getList")
@@ -58,10 +40,7 @@ def get_list(monday: date, db: DB, who: User) -> s.GroceryList:
 @router.post("/items", response_model=s.GroceryList, status_code=201, operation_id="addListItem")
 def add_item(monday: date, body: s.ListItemCreate, db: DB, who: User) -> s.GroceryList:
     week = W.get_or_create_week(db, monday)
-    p = grocery.parse_free_text(body.text)
-    db.add(m.ListAdd(week_id=week.id, name=p.name, qty=p.qty, section=body.section or p.section,
-                     note=body.note, from_=who))
-    db.flush()
+    grocery.add_item(db, week, body.text, who, section=body.section, note=body.note)
     return list_out(db, week)
 
 
@@ -69,25 +48,17 @@ def add_item(monday: date, body: s.ListItemCreate, db: DB, who: User) -> s.Groce
 def patch_item(monday: date, key: str, body: s.ListItemPatch, db: DB, who: User) -> s.GroceryList:
     week = W.get_or_create_week(db, monday)
     _item(db, week, key)
-    data = body.model_dump(exclude_unset=True)
-    row = _add_row(db, week, key)
-    target = row if row is not None else _edit_row(db, week, key)
-    for k, v in data.items():
-        setattr(target, k, v)
-    db.flush()
+    grocery.patch_item(db, week, key, body.model_dump(exclude_unset=True))
     return list_out(db, week)
 
 
 @router.delete("/items/{key}", response_model=s.GroceryList, operation_id="deleteListItem")
 def delete_item(monday: date, key: str, db: DB, who: User) -> s.GroceryList:
     week = W.get_or_create_week(db, monday)
-    row = _add_row(db, week, key)
-    if row is not None:
-        db.delete(row)
-    else:
-        _item(db, week, key)
-        _edit_row(db, week, key).removed = True
-    db.flush()
+    try:
+        grocery.remove_item(db, week, key)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="List item not found") from None
     return list_out(db, week)
 
 

@@ -3,7 +3,10 @@ import type { Recipe, RecipeSummary, Slot } from '../api/models';
 import type { DayKey } from '../components/types';
 
 export const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
-export const DAYNAME: Record<string, string> = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
+export const DAYNAME: Record<string, string> = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday', extra: 'Lunches & breakfast' };
+/** The week's catch-all slot (not a night), and the tag on the recipes meant for it. */
+export const EXTRA = 'extra';
+export const STAPLES_TAG = 'Staples';
 export const REJECT_REASONS = ['Too much work', 'Had it recently', "Kids won't eat it", 'Too pricey', 'Not in the mood', 'Missing equipment'];
 export const SWAP_PREFS = ['Weekly specials', 'Quicker', 'Lighter', 'Kid-friendly', 'Use what we have', 'Cheaper', 'Different protein'];
 export const CHAT_STARTERS = ['Make Thursday vegetarian', 'We have leftover rice', 'Something cheaper than shrimp', 'What can Leidy make?'];

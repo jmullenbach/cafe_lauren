@@ -10,5 +10,6 @@ How to shape the week:
 - `why`: 2-3 short reasons a person would care about, e.g. "Pork chops on sale, $2.29/lb", "Joe asked for it Monday", "Uses the meatballs in the freezer", "5-star favorite, last made in March".
 - `ingredients`: for every ingredient of the chosen recipe (from the box entry or your new recipe), give `{name, have, sale}`.
 - kind `open` only if there is a reason to leave the night empty.
+- Besides the nights, the week has one "Lunches & breakfast" slot for the household staples. Set `staples_recipe_id` to a recipe from `staples_recipes`: the usual one unless a request or the `note` points at another. Never put a staples recipe on a night.
 
 Return one entry per day in `days`, in day order, plus a one-sentence `summary`.

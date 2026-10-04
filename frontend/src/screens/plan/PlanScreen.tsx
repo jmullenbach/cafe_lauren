@@ -74,6 +74,33 @@ function SlotCard({ s }: { s: Slot }) {
   );
 }
 
+/** Lunches & breakfast: the week's catch-all, where the staples go. */
+function ExtraCard({ s }: { s: Slot }) {
+  const { openSheet } = useUi();
+  const nav = useNavigate();
+  const r = s.kind === 'cook' ? s.recipe : null;
+  const swap = () => openSheet({ type: 'swap', slotId: s.id });
+  if (!r) return (
+    <div data-testid="slot-extra" data-kind="open" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', border: '1.5px dashed var(--border-strong)' }}>
+      <span style={{ flex: 1, minWidth: 0, font: 'italic 400 15px/1.3 var(--font-serif)', color: 'var(--text-strong)' }}>Nothing here this week</span>
+      <Button size="s" onClick={swap}>Pick staples</Button>
+    </div>
+  );
+  const ings = s.ingredients ?? [];
+  const buy = ings.filter((i) => i.tag !== 'have').length;
+  return (
+    <Card padding="none">
+      <div data-testid="slot-extra" data-kind="cook" style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div onClick={() => nav(mealRoute(s))} style={{ flex: 1, minWidth: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <h3 style={{ font: '400 20px/1.2 var(--font-serif)', color: 'var(--text-strong)' }}>{r.title}</h3>
+          <span style={{ font: '500 12.5px/1.3 var(--font-sans)', color: 'var(--text-muted)' }}>{ings.length} items · {buy} to buy{s.ingredients_edited ? ' · edited for this week' : ''}</span>
+        </div>
+        <Button size="s" variant="ghost" onClick={swap}>Change</Button>
+      </div>
+    </Card>
+  );
+}
+
 function ApproveBar() {
   const { week, slots, monday, nameOf } = useWeekData();
   const approve = useApproveWeek();
@@ -114,7 +141,7 @@ function UpNext() {
 
 export function PlanScreen() {
   const { openSheet } = useUi();
-  const { week, slots, monday, loading } = useWeekData();
+  const { week, slots, extra, monday, loading } = useWeekData();
   const plan = usePlanWeek();
   const [planJob, setPlanJob] = useState<number | null>(null);
   const planning = useRunningJobs('plan_week').length > 0;
@@ -139,6 +166,11 @@ export function PlanScreen() {
         </Card>
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{slots.map((s) => <SlotCard key={s.id} s={s} />)}</div>
+      {extra && <>
+        <SectionHead title="Lunches & breakfast" />
+        <p style={{ font: '400 13px/1.45 var(--font-sans)', color: 'var(--text-muted)', margin: '-4px 0 10px' }}>The staples, and anything else outside dinner. It all goes on the grocery list.</p>
+        <ExtraCard s={extra} />
+      </>}
       <UpNext />
       {!week?.approved_by && !empty && <ApproveBar />}
     </Screen>

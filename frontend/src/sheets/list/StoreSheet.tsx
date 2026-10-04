@@ -3,13 +3,11 @@ import { Button } from '../../components/core/Button';
 import { Icon } from '../../components/core/Icon';
 import { Card } from '../../components/display/Card';
 import { ListRow } from '../../components/layout/Layout';
-import { useGroceryList, useSetOrderVia, useSetWeekStore, useStores, useWeek } from '../../api/hooks';
+import { useSetOrderVia, useSetWeekStore, useStores, useWeek } from '../../api/hooks';
 import { useCurrentMonday } from '../../state/useCurrentMonday';
 import { useUi } from '../../state/UiContext';
-import { copyText } from '../../lib/clipboard';
-import { dateRange, listText } from '../../lib/listText';
-import { InstacartNotSetUp } from '../../screens/list/ListScreen';
-import { useOpenInstacart } from '../../screens/list/useOrdering';
+import { dateRange } from '../../lib/listText';
+import { useSendToInstacart } from '../../screens/list/useOrdering';
 
 const VIA = [
   { id: 'delivery', label: 'Instacart delivery', sub: 'Cermak or Aldi · usually Saturday morning', icon: 'truck' },
@@ -31,22 +29,16 @@ function Choice({ icon, title, sub, on, onClick, last, disabled }: { icon: strin
 const overline = { display: 'block', font: 'var(--type-overline)', letterSpacing: 'var(--ls-overline)', textTransform: 'uppercase', color: 'var(--text-muted)' } as const;
 
 export function StoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { toast, openSheet } = useUi();
+  const { toast } = useUi();
   const monday = useCurrentMonday();
   const { data: week } = useWeek(monday);
   const { data: stores = [] } = useStores();
-  const { data: list } = useGroceryList(monday);
   const setStore = useSetWeekStore();
   const setVia = useSetOrderVia();
-  const ic = useOpenInstacart(monday);
+  const ic = useSendToInstacart(monday);
   const via = week?.order_via ?? 'delivery';
   const instacart = via === 'delivery' || via === 'pickup';
   const notice = (n?: string | null, fallback?: { title: string }) => (n ? toast({ icon: 'store', title: n }) : fallback ? toast({ icon: 'store', ...fallback }) : undefined);
-  const copy = async () => {
-    if (!list) return;
-    const ok = await copyText(listText(list, week?.store?.name));
-    toast(ok ? { tone: 'success', icon: 'clipboard-list', title: 'List copied', message: 'Paste it into Google Keep, Notes or a text.' } : { tone: 'warning', icon: 'triangle-alert', title: 'Could not copy' });
-  };
   return (
     <Sheet open={open} onClose={onClose} title="Store & ordering" subtitle="Café reads this store's weekly ad when it plans, and sorts the list by its aisles."
       footer={<Button size="l" fullWidth onClick={onClose}>Done</Button>}>
@@ -66,10 +58,7 @@ export function StoreSheet({ open, onClose }: { open: boolean; onClose: () => vo
         ))}
       </Card>
       {instacart && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
-          <Button variant="accent" fullWidth icon="shopping-cart" disabled={ic.busy} onClick={ic.open}>{ic.busy ? 'Opening…' : 'Open in Instacart'}</Button>
-          {ic.notSetUp && <InstacartNotSetUp onCopy={copy} onSend={() => openSheet({ type: 'send' })} />}
-        </div>
+        <Button variant="accent" fullWidth icon="shopping-cart" disabled={!ic.ready} onClick={ic.send} style={{ marginTop: 16 }}>Send to Instacart</Button>
       )}
     </Sheet>
   );

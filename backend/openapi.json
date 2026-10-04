@@ -1978,248 +1978,6 @@
         }
       }
     },
-    "/api/staples": {
-      "get": {
-        "tags": [
-          "staples"
-        ],
-        "summary": "List Staples",
-        "operationId": "listStaples",
-        "parameters": [
-          {
-            "name": "x-cafe-user",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "lauren | joe | leidy",
-              "title": "X-Cafe-User"
-            },
-            "description": "lauren | joe | leidy"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/StapleOut"
-                  },
-                  "title": "Response Liststaples"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "staples"
-        ],
-        "summary": "Create Staple",
-        "operationId": "createStaple",
-        "parameters": [
-          {
-            "name": "x-cafe-user",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "lauren | joe | leidy",
-              "title": "X-Cafe-User"
-            },
-            "description": "lauren | joe | leidy"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StapleCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StapleOut"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/staples/{staple_id}": {
-      "patch": {
-        "tags": [
-          "staples"
-        ],
-        "summary": "Patch Staple",
-        "operationId": "patchStaple",
-        "parameters": [
-          {
-            "name": "staple_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Staple Id"
-            }
-          },
-          {
-            "name": "x-cafe-user",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "lauren | joe | leidy",
-              "title": "X-Cafe-User"
-            },
-            "description": "lauren | joe | leidy"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StaplePatch"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StapleOut"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "staples"
-        ],
-        "summary": "Delete Staple",
-        "operationId": "deleteStaple",
-        "parameters": [
-          {
-            "name": "staple_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Staple Id"
-            }
-          },
-          {
-            "name": "x-cafe-user",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "lauren | joe | leidy",
-              "title": "X-Cafe-User"
-            },
-            "description": "lauren | joe | leidy"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Ok"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/pantry": {
       "get": {
         "tags": [
@@ -3678,6 +3436,77 @@
         }
       }
     },
+    "/api/chat/{message_id}/list-changes": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Resolve List Changes",
+        "description": "Approve or dismiss some of the grocery list changes Café proposed, with any edits made on the way.",
+        "operationId": "resolveListChanges",
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Message Id"
+            }
+          },
+          {
+            "name": "x-cafe-user",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "lauren | joe | leidy",
+              "title": "X-Cafe-User"
+            },
+            "description": "lauren | joe | leidy"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListChangesAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListChangesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/jobs/stream": {
       "get": {
         "tags": [
@@ -4617,6 +4446,105 @@
         ],
         "title": "Body_uploadRecipePhoto"
       },
+      "ChatListChange": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "add",
+              "update",
+              "remove"
+            ],
+            "title": "Op"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key",
+            "description": "List item it changes; for an add, set once applied."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Section"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ListChangeBefore"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The item before an update."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "applied",
+              "dismissed",
+              "missed"
+            ],
+            "title": "State",
+            "description": "missed: the item left the list before the change was approved.",
+            "default": "pending"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "op",
+          "name",
+          "section"
+        ],
+        "title": "ChatListChange",
+        "description": "One grocery list change Café proposed. name/qty/section/note are the item as it would end up\n(for a removal, the item as it is)."
+      },
       "ChatMessageOut": {
         "properties": {
           "id": {
@@ -4653,6 +4581,13 @@
                 "type": "null"
               }
             ]
+          },
+          "list_changes": {
+            "items": {
+              "$ref": "#/components/schemas/ChatListChange"
+            },
+            "type": "array",
+            "title": "List Changes"
           },
           "week_id": {
             "anyOf": [
@@ -5369,6 +5304,162 @@
         ],
         "title": "JobAccepted"
       },
+      "ListChangeBefore": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty"
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "produce",
+              "frozen",
+              "meat",
+              "dry",
+              "dairy",
+              "beverages"
+            ],
+            "title": "Section"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "section"
+        ],
+        "title": "ListChangeBefore"
+      },
+      "ListChangeDecision": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "apply",
+              "dismiss"
+            ],
+            "title": "Action"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty",
+            "description": "Edits made while approving; unset keeps Café's value."
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "produce",
+                  "frozen",
+                  "meat",
+                  "dry",
+                  "dairy",
+                  "beverages"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "action"
+        ],
+        "title": "ListChangeDecision"
+      },
+      "ListChangesAction": {
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/ListChangeDecision"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "changes"
+        ],
+        "title": "ListChangesAction"
+      },
+      "ListChangesResponse": {
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ChatMessageOut"
+          },
+          "list": {
+            "$ref": "#/components/schemas/GroceryList"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "list"
+        ],
+        "title": "ListChangesResponse"
+      },
       "ListDiffItem": {
         "properties": {
           "change": {
@@ -5665,7 +5756,8 @@
               "thu",
               "fri",
               "sat",
-              "sun"
+              "sun",
+              "extra"
             ],
             "title": "Day"
           },
@@ -7624,7 +7716,8 @@
               "thu",
               "fri",
               "sat",
-              "sun"
+              "sun",
+              "extra"
             ],
             "title": "Day"
           },
@@ -7882,133 +7975,6 @@
         "type": "object",
         "title": "SlotPatch",
         "description": "Meal-detail edits for this week only. Marks a cook slot as edited."
-      },
-      "StapleCreate": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Name"
-          },
-          "section": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "produce",
-                  "frozen",
-                  "meat",
-                  "dry",
-                  "dairy",
-                  "beverages"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Section"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "StapleCreate"
-      },
-      "StapleOut": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "section": {
-            "type": "string",
-            "enum": [
-              "produce",
-              "frozen",
-              "meat",
-              "dry",
-              "dairy",
-              "beverages"
-            ],
-            "title": "Section"
-          },
-          "from": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "From"
-          },
-          "active": {
-            "type": "boolean",
-            "title": "Active"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "section",
-          "active"
-        ],
-        "title": "StapleOut"
-      },
-      "StaplePatch": {
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "section": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "produce",
-                  "frozen",
-                  "meat",
-                  "dry",
-                  "dairy",
-                  "beverages"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Section"
-          },
-          "active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Active"
-          }
-        },
-        "type": "object",
-        "title": "StaplePatch"
       },
       "StepGroup": {
         "properties": {
@@ -8370,7 +8336,19 @@
               "$ref": "#/components/schemas/Slot"
             },
             "type": "array",
-            "title": "Slots"
+            "title": "Slots",
+            "description": "The seven nights, Monday first."
+          },
+          "extra": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Slot"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The \"Lunches & breakfast\" slot (day \"extra\"): where the staples go."
           },
           "list_diff_count": {
             "type": "integer",

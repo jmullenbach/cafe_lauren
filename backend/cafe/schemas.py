@@ -18,6 +18,10 @@ from pydantic import BaseModel, ConfigDict, Field
 PersonKey = Literal["lauren", "joe", "leidy"]
 Day = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 DAYS: list[str] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+# The week's catch-all "Lunches & breakfast" slot. Stored as a slot, but it is not a night.
+EXTRA = "extra"
+SlotDay = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun", "extra"]
+STAPLES_TAG = "Staples"
 SlotKind = Literal["cook", "leftover", "leidy", "custom", "open"]
 SlotStatus = Literal["suggested", "thinking", "kept", "edited", "approved", "rejected"]
 VoteValue = Literal["up", "down"]
@@ -190,7 +194,7 @@ class SlotIngredient(Ingredient):
 
 class Slot(Model):
     id: int
-    day: Day
+    day: SlotDay
     kind: SlotKind
     recipe_id: int | None = None
     recipe: Recipe | None = None
@@ -217,7 +221,8 @@ class Week(Model):
     order_via: OrderVia
     approved_by: str | None = None
     approved_at: datetime | None = None
-    slots: list[Slot]
+    slots: list[Slot] = Field(description="The seven nights, Monday first.")
+    extra: Slot | None = Field(default=None, description='The "Lunches & breakfast" slot (day "extra"): where the staples go.')
     list_diff_count: int = 0
 
 
@@ -380,34 +385,12 @@ class PantryReadRequest(Model):
     photo_ids: list[int] | None = Field(default=None, description="Default: photos not read yet.")
 
 
-# ---------------------------------------------------------------- staples
-
-
-class StapleOut(Model):
-    id: int
-    name: str
-    section: SectionKey
-    from_: str | None = Field(default=None, alias="from")
-    active: bool
-
-
-class StapleCreate(Model):
-    name: str = Field(min_length=1)
-    section: SectionKey | None = None
-
-
-class StaplePatch(Model):
-    name: str | None = None
-    section: SectionKey | None = None
-    active: bool | None = None
-
-
 # ---------------------------------------------------------------- grocery list
 
 
 class ListSource(Model):
     slot_id: int
-    day: Day
+    day: SlotDay
     recipe_id: int
     title: str
 
@@ -538,12 +521,36 @@ class ChatProposal(Model):
     state: Literal["pending", "applied", "dismissed"] = "pending"
 
 
+class ListChangeBefore(Model):
+    name: str
+    qty: str | None = None
+    section: SectionKey
+    note: str | None = None
+
+
+class ChatListChange(Model):
+    """One grocery list change Café proposed. name/qty/section/note are the item as it would end up
+    (for a removal, the item as it is)."""
+
+    id: int
+    op: Literal["add", "update", "remove"]
+    key: str | None = Field(default=None, description="List item it changes; for an add, set once applied.")
+    name: str
+    qty: str | None = None
+    section: SectionKey
+    note: str | None = None
+    before: ListChangeBefore | None = Field(default=None, description="The item before an update.")
+    state: Literal["pending", "applied", "dismissed", "missed"] = Field(
+        default="pending", description="missed: the item left the list before the change was approved.")
+
+
 class ChatMessageOut(Model):
     id: int
     who: PersonKey
     from_: Literal["me", "cafe"] = Field(alias="from")
     text: str
     proposal: ChatProposal | None = None
+    list_changes: list[ChatListChange] = Field(default_factory=list)
     week_id: int | None = None
     created_at: datetime
 
@@ -564,6 +571,24 @@ class ProposalAction(Model):
 class ProposalResponse(Model):
     message: ChatMessageOut
     week: Week
+
+
+class ListChangeDecision(Model):
+    id: int
+    action: Literal["apply", "dismiss"]
+    qty: str | None = Field(default=None, description="Edits made while approving; unset keeps Café's value.")
+    name: str | None = None
+    note: str | None = None
+    section: SectionKey | None = None
+
+
+class ListChangesAction(Model):
+    changes: list[ListChangeDecision] = Field(min_length=1)
+
+
+class ListChangesResponse(Model):
+    message: ChatMessageOut
+    list: GroceryList
 
 
 # ---------------------------------------------------------------- jobs

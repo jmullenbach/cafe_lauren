@@ -13,7 +13,7 @@ import { useCurrentMonday } from '../../state/useCurrentMonday';
 import { useUi } from '../../state/UiContext';
 import { copyText } from '../../lib/clipboard';
 import { dateRange, itemNote, listText } from '../../lib/listText';
-import { SECTION_ORDER, useOpenInstacart } from './useOrdering';
+import { SECTION_ORDER, useSendToInstacart } from './useOrdering';
 import type { ListItem, Section } from '../../api/models';
 
 const VIA_LABEL: Record<string, string> = { delivery: 'Instacart delivery', pickup: 'Instacart pickup', amazon: 'Amazon delivery', share: 'Send the list', self: "We'll shop it ourselves" };
@@ -100,7 +100,7 @@ export function ListScreen() {
   const { data: list } = useGroceryList(monday);
   const { data: week } = useWeek(monday);
   const confirm = useConfirmListDiff();
-  const ic = useOpenInstacart(monday);
+  const ic = useSendToInstacart(monday);
   const store = week?.store;
   const via = week?.order_via ?? 'delivery';
   const left = list?.unchecked ?? 0;
@@ -147,10 +147,7 @@ export function ListScreen() {
       ) : via === 'amazon' ? (
         <p data-testid="amazon-na" style={{ display: 'flex', gap: 8, font: '400 13px/1.45 var(--font-sans)', color: 'var(--text-muted)', margin: '0 0 8px' }}><Icon name="info" size={16} style={{ marginTop: 1 }} />Amazon ordering is not available yet. Copy the list or send it instead.</p>
       ) : list?.approved ? (
-        <div style={{ marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Button size="l" fullWidth variant="accent" icon="shopping-cart" disabled={ic.busy} onClick={ic.open}>{ic.busy ? 'Opening…' : `Open in Instacart · ${left} items`}</Button>
-          {ic.notSetUp && <InstacartNotSetUp onSend={() => openSheet({ type: 'send' })} onCopy={copy} />}
-        </div>
+        <Button size="l" fullWidth variant="accent" icon="shopping-cart" onClick={ic.send} style={{ marginBottom: 8 }}>Send to Instacart · {left} items</Button>
       ) : null}
       <QuickAdd monday={monday ?? ''} />
       {sections.map((sec) => (
@@ -165,17 +162,5 @@ export function ListScreen() {
         </div>
       ))}
     </Screen>
-  );
-}
-
-export function InstacartNotSetUp({ onSend, onCopy }: { onSend: () => void; onCopy: () => void }) {
-  return (
-    <div data-testid="instacart-not-set-up" ref={(el) => el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })} style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 14px', borderRadius: 'var(--radius-s)', background: 'var(--honey-100)', color: 'var(--honey-700)', font: '400 13px/1.45 var(--font-sans)' }}>
-      <span style={{ display: 'flex', gap: 8 }}><Icon name="info" size={16} style={{ marginTop: 2 }} /><span><b>Not set up yet.</b> Instacart needs a key before it can open the list. Copy it or send it for now.</span></span>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Button size="s" variant="secondary" icon="clipboard-list" onClick={onCopy}>Copy list</Button>
-        <Button size="s" variant="secondary" icon="send" onClick={onSend}>Send the list</Button>
-      </div>
-    </div>
   );
 }

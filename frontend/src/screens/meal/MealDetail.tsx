@@ -19,7 +19,7 @@ import { Screen, BackHeader, SectionHead, MealPhoto, Why, BottomBar } from '../.
 import { useAddToQueue, useDeleteRecipe, useKeepSlot, useMarkCooked, usePatchSlot, useRecipe, useRemoveFromQueue, useSaveRecipe } from '../../api/hooks';
 import { useUi } from '../../state/UiContext';
 import { useWeekData } from '../../state/useWeekSlots';
-import { Md, costStr, dayKey, hasSale, stepTimer, timeStr } from '../../lib/meal';
+import { DAYNAME, EXTRA, Md, costStr, dayKey, hasSale, stepTimer, timeStr } from '../../lib/meal';
 import { Meta, RecipeWriting, isWriting } from '../plan/parts';
 import '../../styles/screens-a.css';
 
@@ -48,11 +48,13 @@ export function MealDetail() {
   const [sp] = useSearchParams();
   const nav = useNavigate();
   const { openSheet, toast } = useUi();
-  const { slots, nameOf } = useWeekData();
+  const { allSlots, nameOf } = useWeekData();
   const recipeId = Number(id);
   const { data: m, isLoading, isError } = useRecipe(Number.isFinite(recipeId) ? recipeId : undefined);
   const day = sp.get('day');
-  const s = day ? slots.find((x) => x.day === day && x.recipe_id === recipeId) : undefined;
+  const s = day ? allSlots.find((x) => x.day === day && x.recipe_id === recipeId) : undefined;
+  /** Lunches & breakfast: not a night, so no day tag, cook, review or cooking mode. */
+  const extra = s?.day === EXTRA;
   const keep = useKeepSlot();
   const patchSlot = usePatchSlot();
   const markCooked = useMarkCooked();
@@ -105,13 +107,13 @@ export function MealDetail() {
   return (
     <>
       <Screen bottom={120}>
-        <BackHeader title={m.title} onBack={() => nav(-1)} right={s && <IconButton icon="ellipsis" label="Change" onClick={() => openSheet({ type: 'edit', slotId: s.id })} />} />
-        <MealPhoto height={200} radius="var(--radius-m)">{s && <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6 }}><DayTag day={dayKey(s.day)} />{hasSale(s) && <Badge tone="sale" variant="solid" icon="tag">On sale</Badge>}</div>}</MealPhoto>
+        <BackHeader title={m.title} onBack={() => nav(-1)} right={s && !extra && <IconButton icon="ellipsis" label="Change" onClick={() => openSheet({ type: 'edit', slotId: s.id })} />} />
+        <MealPhoto height={200} radius="var(--radius-m)">{s && <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6 }}>{extra ? <Badge variant="solid">{DAYNAME[EXTRA]}</Badge> : <DayTag day={dayKey(s.day)} />}{hasSale(s) && <Badge tone="sale" variant="solid" icon="tag">On sale</Badge>}</div>}</MealPhoto>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
           {status && <SuggestedTag status={status} by={status === 'suggested' || status === 'draft' ? undefined : nameOf(s?.by)} style={{ alignSelf: 'flex-start' }} />}
           {s?.job_id != null && !isWriting(m) && <JobState jobId={s.job_id} thinking="Finding something else…" />}
           <RecipeWriting recipe={m} jobId={s?.job_id ?? null} />
-          {s && (s.kind === 'cook' || s.kind === 'leidy') && <CookChip cook={s.cook} onClick={() => openSheet({ type: 'cook', slotId: s.id })} style={{ alignSelf: 'flex-start', height: 28, font: '600 13px/1 var(--font-sans)' }} />}
+          {s && !extra && (s.kind === 'cook' || s.kind === 'leidy') && <CookChip cook={s.cook} onClick={() => openSheet({ type: 'cook', slotId: s.id })} style={{ alignSelf: 'flex-start', height: 28, font: '600 13px/1 var(--font-sans)' }} />}
           <h1 style={{ font: '300 30px/1.1 var(--font-serif)', letterSpacing: 'var(--ls-display)', color: 'var(--text-strong)' }}>{m.title}</h1>
           <p style={{ font: 'var(--type-description)', fontSize: 16, color: 'var(--text-body)' }}>{m.description}</p>
           <Meta method={m.method} time={timeStr(m)} cost={costStr(m)} />
@@ -158,6 +160,7 @@ export function MealDetail() {
       <BottomBar>
         {editing ? <><Button variant="secondary" style={{ flex: 1 }} onClick={() => { setIngs(base); setServes(5); setEditing(false); }}>Cancel</Button><Button style={{ flex: 1.4 }} icon="check" disabled={!dirty || patchSlot.isPending} onClick={save}>Save changes</Button></>
           : draft ? <><Button variant="secondary" style={{ flex: 1 }} icon="x" onClick={() => delRecipe.mutate(m.id, { onSuccess: () => nav(-1) })}>Discard</Button><Button variant="accent" style={{ flex: 1.4 }} icon="book-open" onClick={() => saveRecipe.mutate(m.id, { onSuccess: () => { toast({ tone: 'success', icon: 'book-open', title: 'Saved to the recipe box' }); nav(-1); } })}>Save to recipe box</Button></>
+          : s && extra ? <Button size="l" fullWidth variant="secondary" icon="refresh-cw" onClick={() => openSheet({ type: 'swap', slotId: s.id })}>Swap for something else</Button>
           : s && s.status === 'suggested' ? <ReviewActions style={{ flex: 1 }} onReject={() => openSheet({ type: 'reject', slotId: s.id })} onSwap={() => openSheet({ type: 'swap', slotId: s.id })} onApprove={() => keep.mutate(s.id, { onSuccess: () => toast({ tone: 'success', icon: 'check', title: 'Kept', message: 'Others can still vote or swap it.' }) })} />
           : flat.length > 0 && cooking >= 0 && !done ? <><Button variant="secondary" icon="arrow-left" style={{ flex: 1 }} disabled={cooking === 0} onClick={() => setCooking(cooking - 1)}>Back</Button><Button style={{ flex: 1.4 }} iconRight="arrow-right" onClick={() => setCooking(cooking + 1)}>{cooking === flat.length - 1 ? 'Done cooking' : 'Next step'}</Button></>
           : !s ? <>{onWeek

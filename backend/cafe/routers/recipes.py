@@ -27,7 +27,7 @@ def _get(db, recipe_id: int) -> m.Recipe:
 
 def _detail(db, r: m.Recipe, tz: str) -> s.RecipeDetail:
     week = W.current_week(db, tz)
-    days = [sl.day for sl in week.slots if sl.recipe_id == r.id]
+    days = [sl.day for sl in W.day_slots(week) if sl.recipe_id == r.id]
     in_queue = db.scalar(select(m.QueueEntry.id).where(m.QueueEntry.recipe_id == r.id)) is not None
     logs = db.scalars(select(m.CookLog).where(m.CookLog.recipe_id == r.id).order_by(m.CookLog.date.desc())).all()
     return s.RecipeDetail.model_validate({**W.recipe_out(r), "on_week_days": days, "in_queue": in_queue,

@@ -59,7 +59,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.scheduler = prep
 
     for r in (core.router, weeks.router, slots.router, recipes.router, inbox.queue_router,
-              inbox.requests_router, inbox.staples_router, pantry.router, grocery_list.router,
+              inbox.requests_router, pantry.router, grocery_list.router,
               stores.router, chat.router, jobs.router, ordering.router, export_router.router):
         app.include_router(r)
 

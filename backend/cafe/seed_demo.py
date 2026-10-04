@@ -20,6 +20,7 @@ from . import models as m
 from .config import REPO_ROOT, Settings, get_settings
 from .db import Database, run_migrations
 from .services import grocery
+from .services import planner as P
 from .services import weeks as W
 
 PHOTO_SRC = REPO_ROOT / "design_handoff_cafe_lauren_app" / "assets" / "photos"
@@ -112,8 +113,7 @@ PANTRY = [  # area, name, qty, sure, note, photo index
     ("Pantry", "Cream of chicken soup", "1 can", True, None, 1),
 ]
 
-STAPLES = [("Bananas", None), ("Eggs", None), ("Milk", None), ("Bread", None), ("Frozen fruit", None),
-           ("Soda water", "joe"), ("Yogurt", "leidy"), ("Cornstarch", "leidy")]
+STAPLES = ["Bananas", "Eggs", "Milk", "Bread", "Frozen fruit", "Soda water", "Yogurt", "Cornstarch"]
 
 DEALS = {
     "cermak": [
@@ -186,7 +186,10 @@ def seed(db: Session, settings: Settings, monday: date | None = None, copy_photo
         recipes[key].default_cook = who
     db.flush()
 
+    W.ensure_staples_recipe(db, STAPLES)
+
     week = W.get_or_create_week(db, monday)
+    P.place_staples(db, W.extra_slot(week), W.default_staples(db))
     week.store_id = db.scalar(select(m.Store.id).where(m.Store.key == "cermak"))
     week.order_via = "delivery"
     for spec in SLOTS:
@@ -235,8 +238,6 @@ def seed(db: Session, settings: Settings, monday: date | None = None, copy_photo
         db.add(m.PantryItem(area=area, name=name, qty=qty, state="found" if sure else "unsure", note=note,
                             photo_id=photo_rows[pi].id))
 
-    for name, frm in STAPLES:
-        db.add(m.Staple(name=name, section=grocery.section_of(name), from_=frm, active=True))
 
     for store_key, deals in DEALS.items():
         sid = db.scalar(select(m.Store.id).where(m.Store.key == store_key))

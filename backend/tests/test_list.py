@@ -38,7 +38,8 @@ def test_derived_from_cook_slots_minus_have_plus_staples(client, seeded):
     assert {"bananas", "eggs", "milk", "bread", "soda water", "yogurt", "cornstarch"} <= names
     corn = find(lst, "sweet corn")
     assert corn["sale"] == "3/$1" and corn["note"] == "Tacos"
-    assert find(lst, "Soda water")["staple"] and find(lst, "Soda water")["from"] == "joe"
+    soda = find(lst, "Soda water")
+    assert soda["staple"] and soda["note"] is None and soda["sources"][0]["day"] == "extra"
 
 
 def test_same_unit_summed_across_meals(client, seeded):

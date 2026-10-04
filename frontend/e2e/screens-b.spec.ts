@@ -66,15 +66,21 @@ test('list: sections, quick add, edit, check, copy, store sheet, instacart', asy
   await expect(sheet.locator('[aria-pressed="true"]', { hasText: 'Instacart delivery' })).toBeVisible();
   // Amazon is not available.
   await expect(sheet.locator('[aria-disabled="true"]', { hasText: 'Amazon delivery' })).toBeVisible();
-  await sheet.getByRole('button', { name: 'Open in Instacart' }).click();
-  await expect(sheet.getByTestId('instacart-not-set-up')).toContainText('Not set up yet');
-  await expect(sheet.getByRole('button', { name: 'Copy list' })).toBeVisible();
-  await expect(sheet.getByRole('button', { name: 'Send the list', exact: true })).toBeVisible();
+  // Send to Instacart copies the list for its assistant, then opens Instacart.
+  await page.evaluate(() => { (window as any).__opened = []; window.open = ((u: string) => { (window as any).__opened.push(u); return window; }) as typeof window.open; });
+  await sheet.getByRole('button', { name: 'Send to Instacart' }).click();
+  await expect(page.getByText("into Instacart's assistant")).toBeVisible();
+  expect(await page.evaluate(() => (window as any).__opened)).toEqual(['https://www.instacart.com/store']);
+  const pasted = await page.evaluate(() => navigator.clipboard.readText());
+  expect(pasted).toMatch(/^Please add these to my cart from .+:\n- /);
+  expect(pasted).not.toContain('☐');
   await settle(page);
   await page.screenshot({ path: `${SHOTS}/b-store-sheet-instacart.png` });
 
   // Send sheet.
-  await sheet.getByRole('button', { name: 'Send the list', exact: true }).click();
+  await sheet.getByText('Send the list to someone').click();
+  await sheet.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: /Send the list ·/ }).click();
   await settle(page);
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Send the list' })).toBeVisible();
   await expect(page.getByRole('dialog').getByText(/notion/i)).toHaveCount(0);

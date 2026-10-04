@@ -369,4 +369,5 @@ async def chat(ctx: JobContext) -> dict[str, Any]:
     with ctx.session() as db:
         asked = db.get(m.ChatMessage, ctx.payload["message_id"])
         msg = P.store_chat_reply(db, asked, reply)
-        return {"message_id": msg.id, "proposal": msg.proposal is not None}
+        return {"message_id": msg.id, "proposal": msg.proposal is not None,
+                "list_changes": len(msg.list_changes or [])}

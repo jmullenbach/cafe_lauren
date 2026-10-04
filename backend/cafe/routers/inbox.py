@@ -1,4 +1,4 @@
-"""Queue ("Up next"), requests (inbox) and staples."""
+"""Queue ("Up next") and requests (inbox)."""
 
 from __future__ import annotations
 
@@ -15,7 +15,6 @@ from ..services import weeks as W
 
 queue_router = APIRouter(prefix="/api/queue", tags=["queue"])
 requests_router = APIRouter(prefix="/api/requests", tags=["requests"])
-staples_router = APIRouter(prefix="/api/staples", tags=["staples"])
 
 
 # ---------------------------------------------------------------- queue
@@ -87,39 +86,3 @@ def answer_request(request_id: int, body: s.RequestAnswer, db: DB, who: User, cf
                              note=None, from_=r.who))
     db.flush()
     return s.RequestOut.model_validate(r)
-
-
-# ---------------------------------------------------------------- staples
-
-
-@staples_router.get("", response_model=list[s.StapleOut], operation_id="listStaples")
-def list_staples(db: DB, who: User) -> list[s.StapleOut]:
-    return [s.StapleOut.model_validate(x) for x in db.scalars(select(m.Staple).order_by(m.Staple.id))]
-
-
-@staples_router.post("", response_model=s.StapleOut, status_code=201, operation_id="createStaple")
-def create_staple(body: s.StapleCreate, db: DB, who: User) -> s.StapleOut:
-    st = m.Staple(name=body.name.strip(), section=body.section or grocery.section_of(body.name),
-                  from_=who, active=True)
-    db.add(st)
-    db.flush()
-    return s.StapleOut.model_validate(st)
-
-
-@staples_router.patch("/{staple_id}", response_model=s.StapleOut, operation_id="patchStaple")
-def patch_staple(staple_id: int, body: s.StaplePatch, db: DB, who: User) -> s.StapleOut:
-    st = db.get(m.Staple, staple_id)
-    if st is None:
-        raise HTTPException(status_code=404, detail="Staple not found")
-    for k, v in body.model_dump(exclude_unset=True).items():
-        setattr(st, k, v)
-    db.flush()
-    return s.StapleOut.model_validate(st)
-
-
-@staples_router.delete("/{staple_id}", response_model=s.Ok, operation_id="deleteStaple")
-def delete_staple(staple_id: int, db: DB, who: User) -> s.Ok:
-    st = db.get(m.Staple, staple_id)
-    if st is not None:
-        db.delete(st)
-    return s.Ok()

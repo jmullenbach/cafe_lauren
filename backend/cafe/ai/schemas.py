@@ -96,6 +96,7 @@ class MealSuggestion(Out):
 
 class PlanSuggestion(Out):
     slots: list[MealSuggestion] = Field(description="One entry per requested day, in day order.")
+    staples_recipe_id: int | None = Field(default=None, description="id from `staples_recipes` for the week's Lunches & breakfast slot, or null if there are none.")
     summary: str = Field(description="One or two sentences on the shape of the week.")
 
 
@@ -178,9 +179,20 @@ class ChatProposalOut(Out):
     detail: str = Field(description="One line: why, time and cost.")
 
 
+class ListChange(Out):
+    op: Literal["add", "update", "remove"]
+    key: str | None = Field(default=None, description="`key` of the grocery_list item to update or remove. Null for add.")
+    text: str | None = Field(default=None, description='For add: amount and item, e.g. "2 lbs chicken thighs".')
+    qty: str | None = Field(default=None, description='For update: the new amount, e.g. "3 lbs". Null leaves it.')
+    name: str | None = Field(default=None, description="For update: the new name. Null leaves it.")
+    note: str | None = Field(default=None, description='For add or update: a short note, e.g. "Leidy asked". Null leaves it.')
+    section: SectionKey | None = Field(default=None, description="For add or update: the aisle. Null files an add automatically and leaves an update where it is.")
+
+
 class ChatReply(Out):
     text: str = Field(description="A short reply in Café's voice.")
     proposal: ChatProposalOut | None = Field(default=None, description="A change to one night, or null. Never applied without the person.")
+    list_changes: list[ListChange] = Field(default_factory=list, description="Grocery list changes to propose. The person approves each one. Empty when none.")
 
 
 # ---------------------------------------------------------------- contexts (inputs)
@@ -203,6 +215,7 @@ class PlanContext(Ctx):
     requests: list[dict[str, Any]] = Field(default_factory=list)
     queue: list[dict[str, Any]] = Field(default_factory=list)
     recipe_box: list[dict[str, Any]] = Field(default_factory=list)
+    staples_recipes: list[dict[str, Any]] = Field(default_factory=list, description="Recipes for the Lunches & breakfast slot; never a dinner.")
     recent_weeks: list[dict[str, Any]] = Field(default_factory=list)
     feedback: list[dict[str, Any]] = Field(default_factory=list)
     note: str | None = None
@@ -227,6 +240,7 @@ class ChatContext(PlanContext):
     message: str
     history: list[dict[str, str]] = Field(default_factory=list)
     week: list[dict[str, Any]] = Field(default_factory=list)
+    grocery_list: list[dict[str, Any]] = Field(default_factory=list, description="This week's grocery list as the app shows it.")
 
 
 class FillContext(Ctx):

@@ -28,6 +28,13 @@ def _person_key(db, key: str | None) -> str | None:
     return key
 
 
+def _night(slot: m.Slot) -> m.Slot:
+    """Moves, rejections and Café's swap ideas are for nights, not the Lunches & breakfast slot."""
+    if slot.day == W.EXTRA:
+        raise HTTPException(status_code=422, detail="Lunches & breakfast is not a night")
+    return slot
+
+
 @router.post("/{slot_id}/keep", response_model=s.Week, operation_id="keepSlot")
 def keep(slot_id: int, db: DB, who: User) -> s.Week:
     slot = W.get_slot(db, slot_id)
@@ -64,6 +71,8 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
     Picking a new idea Café has not written out yet takes effect at once; with `jobs`, a
     recipe_fill job is queued to write its ingredients and steps (slot.job_id points at it)."""
     by = by or who
+    if slot.day == W.EXTRA and body.kind not in ("recipe", "open"):
+        raise HTTPException(status_code=422, detail="Lunches & breakfast takes a recipe or stays empty")
     slot.ingredients_override = None
     slot.job_id = None
     slot.basis = body.basis
@@ -75,6 +84,8 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
         slot.why = list(body.why) if body.why is not None else list(opt.get("why") or [])
         if opt.get("ingredient_flags"):
             slot.ingredient_flags = dict(opt["ingredient_flags"])
+        elif slot.day == W.EXTRA:
+            slot.ingredient_flags = P.ingredient_flags(db, slot.week, r, [])
         W.set_slot_cook(slot, r)
         if body.cook is not None:
             slot.cook = _person_key(db, body.cook)
@@ -114,7 +125,7 @@ def swap(slot_id: int, body: s.SwapRequest, db: DB, who: User, jobs: Jobs) -> s.
 
 @router.post("/{slot_id}/swap-options", response_model=s.JobAccepted, status_code=202, operation_id="swapOptions")
 def swap_options(slot_id: int, body: s.SwapOptionsRequest, db: DB, who: User, jobs: Jobs) -> s.JobAccepted:
-    slot = W.get_slot(db, slot_id)
+    slot = _night(W.get_slot(db, slot_id))
     # A newer ask supersedes older ones for this night: one worker, so they would only queue up.
     for old in db.scalars(select(m.Job).where(m.Job.type == J.SWAP_OPTIONS, m.Job.status.in_(J.ACTIVE))):
         if (old.payload or {}).get("slot_id") == slot.id:
@@ -127,7 +138,7 @@ def swap_options(slot_id: int, body: s.SwapOptionsRequest, db: DB, who: User, jo
 
 @router.post("/{slot_id}/reject", response_model=s.RejectResponse, operation_id="rejectSlot")
 def reject(slot_id: int, body: s.RejectRequest, db: DB, who: User, jobs: Jobs) -> s.RejectResponse:
-    slot = W.get_slot(db, slot_id)
+    slot = _night(W.get_slot(db, slot_id))
     old_recipe = slot.recipe_id
     basis = " · ".join([*body.reasons, *([body.note.strip()] if body.note and body.note.strip() else [])])
     fb = m.Feedback(kind="rejection", recipe_id=old_recipe, text=body.note, reasons=body.reasons,
@@ -156,7 +167,7 @@ def reject(slot_id: int, body: s.RejectRequest, db: DB, who: User, jobs: Jobs) -
 
 @router.post("/{slot_id}/move", response_model=s.Week, operation_id="moveSlot")
 def move(slot_id: int, body: s.MoveRequest, db: DB, who: User) -> s.Week:
-    a = W.get_slot(db, slot_id)
+    a = _night(W.get_slot(db, slot_id))
     week = a.week
     if a.day == body.to:
         return W.week_out(db, week)

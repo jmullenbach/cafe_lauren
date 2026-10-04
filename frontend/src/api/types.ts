@@ -418,42 +418,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/staples": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Staples */
-        get: operations["listStaples"];
-        put?: never;
-        /** Create Staple */
-        post: operations["createStaple"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/staples/{staple_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete Staple */
-        delete: operations["deleteStaple"];
-        options?: never;
-        head?: never;
-        /** Patch Staple */
-        patch: operations["patchStaple"];
-        trace?: never;
-    };
     "/api/pantry": {
         parameters: {
             query?: never;
@@ -802,6 +766,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/{message_id}/list-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve List Changes
+         * @description Approve or dismiss some of the grocery list changes Café proposed, with any edits made on the way.
+         */
+        post: operations["resolveListChanges"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/jobs/stream": {
         parameters: {
             query?: never;
@@ -1076,6 +1060,45 @@ export interface components {
              */
             file: string;
         };
+        /**
+         * ChatListChange
+         * @description One grocery list change Café proposed. name/qty/section/note are the item as it would end up
+         *     (for a removal, the item as it is).
+         */
+        ChatListChange: {
+            /** Id */
+            id: number;
+            /**
+             * Op
+             * @enum {string}
+             */
+            op: "add" | "update" | "remove";
+            /**
+             * Key
+             * @description List item it changes; for an add, set once applied.
+             */
+            key?: string | null;
+            /** Name */
+            name: string;
+            /** Qty */
+            qty?: string | null;
+            /**
+             * Section
+             * @enum {string}
+             */
+            section: "produce" | "frozen" | "meat" | "dry" | "dairy" | "beverages";
+            /** Note */
+            note?: string | null;
+            /** @description The item before an update. */
+            before?: components["schemas"]["ListChangeBefore"] | null;
+            /**
+             * State
+             * @description missed: the item left the list before the change was approved.
+             * @default pending
+             * @enum {string}
+             */
+            state: "pending" | "applied" | "dismissed" | "missed";
+        };
         /** ChatMessageOut */
         ChatMessageOut: {
             /** Id */
@@ -1093,6 +1116,8 @@ export interface components {
             /** Text */
             text: string;
             proposal?: components["schemas"]["ChatProposal"] | null;
+            /** List Changes */
+            list_changes?: components["schemas"]["ChatListChange"][];
             /** Week Id */
             week_id?: number | null;
             /**
@@ -1365,6 +1390,51 @@ export interface components {
         JobAccepted: {
             job: components["schemas"]["Job"];
         };
+        /** ListChangeBefore */
+        ListChangeBefore: {
+            /** Name */
+            name: string;
+            /** Qty */
+            qty?: string | null;
+            /**
+             * Section
+             * @enum {string}
+             */
+            section: "produce" | "frozen" | "meat" | "dry" | "dairy" | "beverages";
+            /** Note */
+            note?: string | null;
+        };
+        /** ListChangeDecision */
+        ListChangeDecision: {
+            /** Id */
+            id: number;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "apply" | "dismiss";
+            /**
+             * Qty
+             * @description Edits made while approving; unset keeps Café's value.
+             */
+            qty?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Section */
+            section?: ("produce" | "frozen" | "meat" | "dry" | "dairy" | "beverages") | null;
+        };
+        /** ListChangesAction */
+        ListChangesAction: {
+            /** Changes */
+            changes: components["schemas"]["ListChangeDecision"][];
+        };
+        /** ListChangesResponse */
+        ListChangesResponse: {
+            message: components["schemas"]["ChatMessageOut"];
+            list: components["schemas"]["GroceryList"];
+        };
         /** ListDiffItem */
         ListDiffItem: {
             /**
@@ -1467,7 +1537,7 @@ export interface components {
              * Day
              * @enum {string}
              */
-            day: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+            day: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun" | "extra";
             /** Recipe Id */
             recipe_id: number;
             /** Title */
@@ -2115,7 +2185,7 @@ export interface components {
              * Day
              * @enum {string}
              */
-            day: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+            day: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun" | "extra";
             /**
              * Kind
              * @enum {string}
@@ -2205,38 +2275,6 @@ export interface components {
              * @default false
              */
             reset_ingredients: boolean;
-        };
-        /** StapleCreate */
-        StapleCreate: {
-            /** Name */
-            name: string;
-            /** Section */
-            section?: ("produce" | "frozen" | "meat" | "dry" | "dairy" | "beverages") | null;
-        };
-        /** StapleOut */
-        StapleOut: {
-            /** Id */
-            id: number;
-            /** Name */
-            name: string;
-            /**
-             * Section
-             * @enum {string}
-             */
-            section: "produce" | "frozen" | "meat" | "dry" | "dairy" | "beverages";
-            /** From */
-            from?: string | null;
-            /** Active */
-            active: boolean;
-        };
-        /** StaplePatch */
-        StaplePatch: {
-            /** Name */
-            name?: string | null;
-            /** Section */
-            section?: ("produce" | "frozen" | "meat" | "dry" | "dairy" | "beverages") | null;
-            /** Active */
-            active?: boolean | null;
         };
         /** StepGroup */
         StepGroup: {
@@ -2356,8 +2394,13 @@ export interface components {
             approved_by?: string | null;
             /** Approved At */
             approved_at?: string | null;
-            /** Slots */
+            /**
+             * Slots
+             * @description The seven nights, Monday first.
+             */
             slots: components["schemas"]["Slot"][];
+            /** @description The "Lunches & breakfast" slot (day "extra"): where the staples go. */
+            extra?: components["schemas"]["Slot"] | null;
             /**
              * List Diff Count
              * @default 0
@@ -3442,146 +3485,6 @@ export interface operations {
             };
         };
     };
-    listStaples: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description lauren | joe | leidy */
-                "x-cafe-user"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StapleOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    createStaple: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description lauren | joe | leidy */
-                "x-cafe-user"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StapleCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StapleOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    deleteStaple: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description lauren | joe | leidy */
-                "x-cafe-user"?: string | null;
-            };
-            path: {
-                staple_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Ok"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    patchStaple: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description lauren | joe | leidy */
-                "x-cafe-user"?: string | null;
-            };
-            path: {
-                staple_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StaplePatch"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StapleOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     getPantry: {
         parameters: {
             query?: never;
@@ -4357,6 +4260,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProposalResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolveListChanges: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description lauren | joe | leidy */
+                "x-cafe-user"?: string | null;
+            };
+            path: {
+                message_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ListChangesAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListChangesResponse"];
                 };
             };
             /** @description Validation Error */

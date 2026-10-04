@@ -86,7 +86,7 @@ def test_section_of(name, section):
 
 
 def test_every_known_name_files_into_one_of_six():
-    names = [i[1] for d in MEALS.values() for i in d["ings"]] + [n for n, _ in STAPLES] + [p[1] for p in PANTRY]
+    names = [i[1] for d in MEALS.values() for i in d["ings"]] + list(STAPLES) + [p[1] for p in PANTRY]
     names += ["", "???", "zzz unknown thing", "Grandma's special", "kombucha", "dish soap"]
     for n in names:
         assert section_of(n) in SECTION_KEYS

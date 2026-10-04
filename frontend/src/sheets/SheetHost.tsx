@@ -1,5 +1,6 @@
 import { useUi } from '../state/UiContext';
 import { ChatSheet } from './chat/ChatSheet';
+import { ListReviewSheet } from './chat/ListReviewSheet';
 import { SwapSheet } from './meal/SwapSheet';
 import { RejectSheet } from './meal/RejectSheet';
 import { EditSheet } from './meal/EditSheet';
@@ -18,6 +19,7 @@ export function SheetHost() {
   const { sheet, closeSheet } = useUi();
   return (<>
     <ChatSheet open={sheet?.type === 'chat'} onClose={closeSheet} />
+    <ListReviewSheet open={sheet?.type === 'list-review'} messageId={sheet?.messageId as number | undefined} />
     <SwapSheet open={sheet?.type === 'swap'} slotId={sheet?.slotId} />
     <RejectSheet open={sheet?.type === 'reject'} slotId={sheet?.slotId} />
     <EditSheet open={sheet?.type === 'edit'} slotId={sheet?.slotId} />

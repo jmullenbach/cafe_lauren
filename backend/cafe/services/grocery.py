@@ -3,7 +3,7 @@
 The list for a week is built every time from:
   1. cook (and Leidy) slots with a recipe, their ingredients minus the ones
      flagged `have` for this week,
-  2. active staples not confirmed in the pantry,
+  2. the Lunches & breakfast slot's recipe (the staples), handled the same way,
   3. `list_adds` (quick adds),
   4. `list_edits` (renames, amounts, notes, aisle moves, removals).
 Checks are layered on top. Sections are the six from CLAUDE.md, in store order.
@@ -19,6 +19,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .. import models as m
+from ..schemas import EXTRA
 
 # ---------------------------------------------------------------- sections
 
@@ -349,6 +350,7 @@ class Item:
 
 
 DAY_ORDER = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+SLOT_ORDER = [*DAY_ORDER, EXTRA]
 LIST_SLOT_KINDS = {"cook", "leidy"}
 
 
@@ -363,53 +365,51 @@ def slot_short(slot: m.Slot) -> str:
     return (r.short_title or r.title) if r else (slot.text or "")
 
 
-def _staple_on_hand(staple_key: str, pantry_keys: list[set[str]]) -> bool:
-    words = set(staple_key.split())
-    return any(words <= pk for pk in pantry_keys)
+def pantry_keys(db: Session) -> list[set[str]]:
+    return [set(item_key(p.name).split())
+            for p in db.scalars(select(m.PantryItem).where(m.PantryItem.state == "confirmed"))]
+
+
+def on_hand(key: str, pantry: list[set[str]]) -> bool:
+    """A staple is on hand when a confirmed pantry item covers all its words (checked live, not frozen in flags)."""
+    words = set(key.split())
+    return bool(words) and any(words <= pk for pk in pantry)
 
 
 def plan_items(db: Session, week: m.Week) -> dict[str, Item]:
-    """Items from the plan alone: cook slots + staples (before adds/edits)."""
+    """Items from the plan alone: the nights, then Lunches & breakfast (before adds/edits)."""
     items: dict[str, Item] = {}
-    slots = sorted(week.slots, key=lambda s: DAY_ORDER.index(s.day))
+    slots = sorted(week.slots, key=lambda s: SLOT_ORDER.index(s.day))
+    pantry = pantry_keys(db)
     for slot in slots:
         if slot.kind not in LIST_SLOT_KINDS or slot.recipe is None or slot.status == "rejected":
             continue
         flags = slot.ingredient_flags or {}
         short = slot_short(slot)
+        staple = slot.day == EXTRA  # staples carry a badge instead of a meal note
         for ing in slot_ingredients(slot):
             name = ing.get("name", "").strip()
             if not name:
                 continue
             k = item_key(name)
             flag = flags.get(k) or flags.get(name.lower()) or {}
-            if flag.get("have"):
+            if flag.get("have") or (staple and on_hand(k, pantry)):
                 continue
             qty = join_qty(ing.get("qty"), ing.get("unit")) or None
             src = {"slot_id": slot.id, "day": slot.day, "recipe_id": slot.recipe.id, "title": short}
             if k in items:
                 it = items[k]
                 it.qty = add_qty(it.qty, qty) or None
-                if short and short not in (it.note or "").split(" + "):
+                if short and not staple and short not in (it.note or "").split(" + "):
                     it.note = f"{it.note} + {short}" if it.note else short
                 it.sources.append(src)
                 it.sale = it.sale or flag.get("sale")
             else:
                 items[k] = Item(
                     key=k, name=name, qty=qty, section=section_of(name, ing.get("unit", "")),
-                    note=short or None, sources=[src], sale=flag.get("sale"),
+                    note=None if staple else short or None, sources=[src], sale=flag.get("sale"),
+                    staple=staple,
                 )
-
-    pantry_keys = [
-        set(item_key(p.name).split())
-        for p in db.scalars(select(m.PantryItem).where(m.PantryItem.state == "confirmed"))
-    ]
-    for st in db.scalars(select(m.Staple).where(m.Staple.active.is_(True)).order_by(m.Staple.id)):
-        k = item_key(st.name)
-        if k in items or _staple_on_hand(k, pantry_keys):
-            continue
-        items[k] = Item(key=k, name=st.name, qty=None, section=st.section or section_of(st.name),
-                        staple=True, from_=st.from_)
     return items
 
 
@@ -450,6 +450,69 @@ def group_sections(items: list[Item]) -> list[dict[str, Any]]:
         {**sec, "items": [i.as_dict() for i in items if i.section == sec["key"]]}
         for sec in SECTIONS
     ]
+
+
+# ---------------------------------------------------------------- changes
+# Shared by the list endpoints and Ask Café. A key that is not on the list raises LookupError.
+
+
+def find_item(db: Session, week: m.Week, key: str) -> Item:
+    for it in derive_items(db, week):
+        if it.key == key:
+            return it
+    raise LookupError(key)
+
+
+def _add_row(db: Session, week: m.Week, key: str) -> m.ListAdd | None:
+    if not key.startswith("add-"):
+        return None
+    try:
+        row = db.get(m.ListAdd, int(key[4:]))
+    except ValueError:
+        return None
+    return row if row is not None and row.week_id == week.id else None
+
+
+def _edit_row(db: Session, week: m.Week, key: str) -> m.ListEdit:
+    e = db.scalar(select(m.ListEdit).where(m.ListEdit.week_id == week.id, m.ListEdit.item_key == key))
+    if e is None:
+        e = m.ListEdit(week_id=week.id, item_key=key, removed=False)
+        db.add(e)
+    return e
+
+
+def add_row(db: Session, week: m.Week, name: str, qty: str | None, section: str, by: str | None,
+            note: str | None = None) -> m.ListAdd:
+    row = m.ListAdd(week_id=week.id, name=name, qty=qty, section=section, note=note, from_=by)
+    db.add(row)
+    db.flush()
+    return row
+
+
+def add_item(db: Session, week: m.Week, text: str, by: str | None, section: str | None = None,
+             note: str | None = None) -> m.ListAdd:
+    p = parse_free_text(text)
+    return add_row(db, week, p.name, p.qty, section or p.section, by, note)
+
+
+def patch_item(db: Session, week: m.Week, key: str, data: dict[str, Any]) -> None:
+    """Set qty / name / note / section on an item: on the quick add itself, else as a list edit."""
+    find_item(db, week, key)
+    row = _add_row(db, week, key)
+    target = row if row is not None else _edit_row(db, week, key)
+    for k, v in data.items():
+        setattr(target, k, v)
+    db.flush()
+
+
+def remove_item(db: Session, week: m.Week, key: str) -> None:
+    row = _add_row(db, week, key)
+    if row is not None:
+        db.delete(row)
+    else:
+        find_item(db, week, key)
+        _edit_row(db, week, key).removed = True
+    db.flush()
 
 
 # ---------------------------------------------------------------- snapshot and diff

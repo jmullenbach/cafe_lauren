@@ -7,7 +7,7 @@ Run from the repo root:
                                                             [--fixtures DIR] [--menus DIR]
 
 * Menu database entries -> `recipes` (source=imported, status=saved).
-* The "Staples" entry -> `staples` (section from the grocery service).
+* The "Staples" entry -> the ingredients of a recipe titled and tagged "Staples".
 * data/archive/*/menu.md and data/current_week/menu.md -> past `weeks` + `slots`.
 
 Idempotent: recipes are matched by Notion page id, staples by name, weeks by Monday.
@@ -44,6 +44,7 @@ from sqlalchemy.orm import Session  # noqa: E402
 from cafe import models as m  # noqa: E402
 from cafe.config import Settings  # noqa: E402
 from cafe.db import Database, run_migrations  # noqa: E402
+from cafe.services import weeks as W  # noqa: E402
 from cafe.services.grocery import parse_free_text, section_of  # noqa: E402
 
 NOTION_VERSION = "2022-06-28"
@@ -529,16 +530,9 @@ def import_staples(db: Session, source, page: dict[str, Any], report: Report) ->
     items = parse_staple_lines(page, blocks)
     if not items:
         report.bad("staples", "Staples entry has no items")
-    have = {s.name.strip().lower(): s for s in db.scalars(select(m.Staple))}
-    for name in items:
-        if name.lower() in have:
-            report.staples_existing += 1
-            continue
-        s = m.Staple(name=name[:200], section=section_of(name), active=True)
-        db.add(s)
-        have[name.lower()] = s
-        report.staples_created += 1
-    db.flush()
+    _recipe, new = W.ensure_staples_recipe(db, [n[:200] for n in items])
+    report.staples_created += new
+    report.staples_existing += len(items) - new
 
 
 def import_notion(db: Session, source, report: Report) -> None:

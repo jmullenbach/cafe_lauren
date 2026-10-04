@@ -7,8 +7,8 @@ import type {
   AppSettingsUpdate, CheckRequest, CookRequest, CookedRequest, DealsParams, GroceryList, Job, JobAccepted, ListItemCreate,
   ListItemPatch, MoveRequest, OrderViaRequest, PantryItemCreate, PantryItemPatch, PantryReadRequest, PlanRequest, ProposalAction,
   QueueAddRequest, RecipeCreate, RecipeDraftRequest, RecipeListParams, RecipePatch, RejectRequest, RequestAnswer,
-  RequestCreate, SlotPatch, StapleCreate, StaplePatch, SwapOptionsRequest, SwapRequest, VoteRequest, Week, WeekStoreRequest,
-  ChatSend,
+  RequestCreate, SlotPatch, SwapOptionsRequest, SwapRequest, VoteRequest, Week, WeekStoreRequest,
+  ChatSend, ListChangesAction,
 } from './models';
 import { useUser } from '../state/UserContext';
 
@@ -46,10 +46,6 @@ export const useQueue = () => {
 export const useRequests = (status?: string) => {
   const enabled = useEnabled();
   return useQuery({ queryKey: keys.requests(status), queryFn: () => ep.listRequests(status), enabled });
-};
-export const useStaples = () => {
-  const enabled = useEnabled();
-  return useQuery({ queryKey: keys.staples, queryFn: ep.listStaples, enabled });
 };
 export const usePantry = () => {
   const enabled = useEnabled();
@@ -199,7 +195,7 @@ const useQueueMutation = <V,>(fn: (v: V) => Promise<import('./models').QueueItem
 export const useAddToQueue = () => useQueueMutation((b: QueueAddRequest) => ep.addToQueue(b));
 export const useRemoveFromQueue = () => useQueueMutation((recipeId: number) => ep.removeFromQueue(recipeId));
 
-// ---------------------------------------------------------------- requests and staples
+// ---------------------------------------------------------------- requests
 export const useCreateRequest = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (b: RequestCreate) => ep.createRequest(b), onSuccess: () => { qc.invalidateQueries({ queryKey: keys.requestsAll }); qc.invalidateQueries({ queryKey: keys.state }); } });
@@ -210,18 +206,6 @@ export const useAnswerRequest = () => {
     mutationFn: ({ id, ...b }: { id: number } & RequestAnswer) => ep.answerRequest(id, b),
     onSuccess: () => { qc.invalidateQueries({ queryKey: keys.requestsAll }); qc.invalidateQueries({ queryKey: keys.state }); },
   });
-};
-export const useCreateStaple = () => {
-  const qc = useQueryClient();
-  return useMutation({ mutationFn: (b: StapleCreate) => ep.createStaple(b), onSuccess: () => qc.invalidateQueries({ queryKey: keys.staples }) });
-};
-export const usePatchStaple = () => {
-  const qc = useQueryClient();
-  return useMutation({ mutationFn: ({ id, ...b }: { id: number } & StaplePatch) => ep.patchStaple(id, b), onSuccess: () => qc.invalidateQueries({ queryKey: keys.staples }) });
-};
-export const useDeleteStaple = () => {
-  const qc = useQueryClient();
-  return useMutation({ mutationFn: (id: number) => ep.deleteStaple(id), onSuccess: () => qc.invalidateQueries({ queryKey: keys.staples }) });
 };
 
 // ---------------------------------------------------------------- pantry
@@ -268,6 +252,14 @@ export const useResolveProposal = () => {
   return useMutation({
     mutationFn: ({ messageId, ...b }: { messageId: number } & ProposalAction) => ep.resolveProposal(messageId, b),
     onSuccess: (r) => { putWeek(qc, r.week); qc.invalidateQueries({ queryKey: keys.chatAll }); },
+  });
+};
+/** Approve or dismiss grocery list changes Café proposed in a chat reply. */
+export const useResolveListChanges = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ messageId, ...b }: { messageId: number } & ListChangesAction) => ep.resolveListChanges(messageId, b),
+    onSuccess: (r) => { putList(qc, r.list.monday, r.list); qc.invalidateQueries({ queryKey: keys.chatAll }); },
   });
 };
 export const usePutSettings = () => {

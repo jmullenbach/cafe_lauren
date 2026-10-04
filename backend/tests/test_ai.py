@@ -225,6 +225,62 @@ def test_chat_produces_pending_proposal(client, seeded, state):
     assert slot(r["week"], "wed")["recipe_id"] == p["recipe_id"]
 
 
+def test_chat_proposes_list_changes_for_approval(client, seeded):
+    def items():
+        return {i["key"]: i for sec in client.get(f"/api/weeks/{seeded}/list").json()["sections"] for i in sec["items"]}
+
+    before = items()
+    keep, gone, other = list(before.values())[:3]
+    seen: dict = {}
+
+    class Lister(C.FakeCafeAI):
+        async def chat(self, ctx):
+            seen["list"] = ctx.grocery_list
+            return A.ChatReply(text="Here is what I would change.", proposal=None, list_changes=[
+                A.ListChange(op="add", text="2 lbs chicken thighs", note="Leidy asked"),
+                A.ListChange(op="update", key=keep["key"], qty="9 lbs"),
+                A.ListChange(op="remove", key=gone["key"]),
+                A.ListChange(op="remove", key=other["key"]),
+                A.ListChange(op="remove", key="not on the list"),
+            ])
+
+    C.set_ai(Lister())
+    sent = client.post("/api/chat", json={"text": "Add chicken for Leidy and fix the list"}).json()
+    assert run_job(client, sent["job"])["result"]["list_changes"] == 4
+    assert {i["key"] for i in seen["list"]} == set(before)  # Café saw the list as shown
+    reply = client.get("/api/chat").json()[-1]
+    add, upd, rem, rem2 = reply["list_changes"]
+    assert "not on the list" in reply["text"] and all(c["state"] == "pending" for c in reply["list_changes"])
+    assert (add["name"], add["qty"], add["section"]) == ("chicken thighs", "2 lbs", "meat")
+    assert upd["qty"] == "9 lbs" and upd["before"]["qty"] == keep["qty"] and rem["name"] == gone["name"]
+    assert items() == before  # nothing reaches the list until approved
+
+    url = f"/api/chat/{reply['id']}/list-changes"
+    # approve the add with an edit, approve the update, dismiss one removal
+    r = client.post(url, json={"changes": [{"id": add["id"], "action": "apply", "qty": "3 lbs"},
+                                           {"id": upd["id"], "action": "apply"},
+                                           {"id": rem2["id"], "action": "dismiss"}]}).json()
+    states = {c["id"]: c["state"] for c in r["message"]["list_changes"]}
+    assert states == {add["id"]: "applied", upd["id"]: "applied", rem["id"]: "pending", rem2["id"]: "dismissed"}
+    after = items()
+    added = next(i for i in after.values() if i["name"] == "chicken thighs")
+    assert added["qty"] == "3 lbs" and added["from"] == "cafe" and added["note"] == "Leidy asked"
+    assert added["key"] == r["message"]["list_changes"][0]["key"]
+    assert after[keep["key"]]["qty"] == "9 lbs" and gone["key"] in after and other["key"] in after
+    # the last one; a resolved change is not applied twice
+    r = client.post(url, json={"changes": [{"id": rem["id"], "action": "apply"}, {"id": add["id"], "action": "apply"}]}).json()
+    assert gone["key"] not in items() and len(items()) == len(before)
+    assert all(c["state"] != "pending" for c in r["message"]["list_changes"])
+    assert client.post("/api/chat/9999/list-changes", json={"changes": [{"id": 1, "action": "apply"}]}).status_code == 404
+
+
+def test_fake_chat_proposes_list_changes(client, seeded):
+    sent = client.post("/api/chat", json={"text": "Can you check the grocery list?"}).json()
+    run_job(client, sent["job"])
+    reply = client.get("/api/chat").json()[-1]
+    assert [c["op"] for c in reply["list_changes"]] == ["add", "update", "remove"] and reply["proposal"] is None
+
+
 # ---------------------------------------------------------------- recipe drafts
 
 

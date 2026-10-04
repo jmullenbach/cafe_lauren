@@ -14,7 +14,6 @@ export const keys = {
   queue: ['api', 'queue'] as const,
   requests: (status?: string) => ['api', 'requests', status ?? 'all'] as const,
   requestsAll: ['api', 'requests'] as const,
-  staples: ['api', 'staples'] as const,
   pantry: ['api', 'pantry'] as const,
   stores: ['api', 'stores'] as const,
   deals: (p?: DealsParams) => ['api', 'deals', p ?? {}] as const,

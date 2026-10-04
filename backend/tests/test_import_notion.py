@@ -93,15 +93,15 @@ def test_property_ingredients_and_select_stars(database):
     assert recipe(database, "Basil Shrimp with Feta and Orzo").stars == 5
 
 
-def test_staples_imported_not_recipe(database):
+def test_staples_imported_as_tagged_recipe(database):
     rep = run(database)
-    with database.session() as s:
-        staples = {x.name: x.section for x in s.scalars(select(m.Staple))}
-        assert s.scalar(select(m.Recipe).where(m.Recipe.title == "Staples")) is None
-    assert staples["Eggs"] == "dairy" and staples["Bananas"] == "produce"
-    assert staples["Butter"] == "dairy"  # " — ON SALE" suffix stripped
-    assert "Shredded cheese" in staples and "Frozen peas" in staples
-    assert rep.staples_created == len(staples)
+    r = recipe(database, "Staples")
+    assert r.tags == ["Staples"] and r.status == "saved"
+    names = [i["name"] for i in r.ingredients]
+    assert "Eggs" in names and "Bananas" in names
+    assert "Butter" in names  # " — ON SALE" suffix stripped
+    assert "Shredded cheese" in names and "Frozen peas" in names
+    assert rep.staples_created == len(names)
 
 
 def test_menu_weeks_and_slots(database):

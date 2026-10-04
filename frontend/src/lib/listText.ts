@@ -13,6 +13,13 @@ export function listText(list: GroceryList, storeName?: string): string {
   return lines.join('\n').trim();
 }
 
+/** The unchecked items as a request to paste into Instacart's assistant: one plain line per item, no aisle headings. */
+export function instacartText(list: GroceryList, storeName?: string): string {
+  const items = list.sections.flatMap((s) => s.items).filter((i) => !i.checked);
+  const lines = items.map((i) => '- ' + [i.qty, i.name].filter(Boolean).join(' ') + (i.note ? ` (${i.note})` : ''));
+  return [`Please add these to my cart${storeName ? ' from ' + storeName : ''}:`, ...lines].join('\n');
+}
+
 export function itemNote(i: { note?: string | null; sources?: Array<{ title: string }> }): string | undefined {
   if (i.note) return i.note;
   const t = [...new Set((i.sources ?? []).map((s) => s.title))];

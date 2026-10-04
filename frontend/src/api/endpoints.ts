@@ -1,11 +1,12 @@
 import { api, del, get, patch, post, put } from './client';
 import type {
   AdUploadResponse, AppSettings, AppSettingsUpdate, AppState, ChatMessageOut, ChatSend, ChatSendResponse, CheckRequest,
-  CookRequest, CookedRequest, CookedResponse, Deal, DealsParams, GroceryList, Health, Job, JobAccepted, ListItemCreate,
+  CookRequest, CookedRequest, CookedResponse, Deal, DealsParams, GroceryList, Health, Job, JobAccepted, ListChangesAction,
+  ListChangesResponse, ListItemCreate,
   ListItemPatch, MoveRequest, Ok, OrderViaRequest, Pantry, PantryItem, PantryItemCreate, PantryItemPatch, PantryReadRequest,
   PlanRequest, ProposalAction, ProposalResponse, QueueAddRequest, QueueItem, RecipeCreate, RecipeDetail, RecipeDraftRequest,
   RecipeListParams, RecipePatch, RecipeSummary, RejectRequest, RejectResponse, RequestAnswer, RequestCreate, RequestOut,
-  SlotPatch, StapleCreate, StaplePatch, StapleOut, Store, StoreChangeResponse, SwapOptionsRequest, SwapRequest, VoteRequest,
+  SlotPatch, Store, StoreChangeResponse, SwapOptionsRequest, SwapRequest, VoteRequest,
   Week, WeekStoreRequest,
 } from './models';
 
@@ -56,14 +57,10 @@ export const getQueue = () => get<QueueItem[]>('/api/queue');
 export const addToQueue = (b: QueueAddRequest) => post<QueueItem[]>('/api/queue', b);
 export const removeFromQueue = (recipeId: number) => del<QueueItem[]>(`/api/queue/${recipeId}`);
 
-// requests and staples
+// requests
 export const listRequests = (status?: string) => get<RequestOut[]>(`/api/requests${qs({ status })}`);
 export const createRequest = (b: RequestCreate) => post<RequestOut>('/api/requests', b);
 export const answerRequest = (id: number, b: RequestAnswer) => post<RequestOut>(`/api/requests/${id}/answer`, b);
-export const listStaples = () => get<StapleOut[]>('/api/staples');
-export const createStaple = (b: StapleCreate) => post<StapleOut>('/api/staples', b);
-export const patchStaple = (id: number, b: StaplePatch) => patch<StapleOut>(`/api/staples/${id}`, b);
-export const deleteStaple = (id: number) => del<Ok>(`/api/staples/${id}`);
 
 // pantry
 export const getPantry = () => get<Pantry>('/api/pantry');
@@ -109,6 +106,7 @@ export const listDeals = (p?: DealsParams) => get<Deal[]>(`/api/deals${qs(p)}`);
 export const getChat = (monday?: string) => get<ChatMessageOut[]>(`/api/chat${qs({ monday })}`);
 export const sendChat = (b: ChatSend) => post<ChatSendResponse>('/api/chat', b);
 export const resolveProposal = (messageId: number, b: ProposalAction) => post<ProposalResponse>(`/api/chat/${messageId}/proposal`, b);
+export const resolveListChanges = (messageId: number, b: ListChangesAction) => post<ListChangesResponse>(`/api/chat/${messageId}/list-changes`, b);
 
 // jobs
 export const listJobs = (active = true) => get<Job[]>(`/api/jobs${qs({ active })}`);

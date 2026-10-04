@@ -95,7 +95,7 @@ class Slot(TimestampMixin, Base):
     __tablename__ = "slots"
     __table_args__ = (UniqueConstraint("week_id", "day", name="uq_slot_week_day"),)
     week_id: Mapped[int] = mapped_column(ForeignKey("weeks.id", ondelete="CASCADE"))
-    day: Mapped[str] = mapped_column(String(8))  # mon..sun
+    day: Mapped[str] = mapped_column(String(8))  # mon..sun, or "extra" for Lunches & breakfast
     kind: Mapped[str] = mapped_column(String(12), default="open")  # cook, leftover, leidy, custom, open
     recipe_id: Mapped[int | None] = mapped_column(
         ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True
@@ -171,6 +171,8 @@ class PantryItem(TimestampMixin, Base):
 
 
 class Staple(TimestampMixin, Base):
+    """Superseded by recipes tagged "Staples" (migration 0005 copied these over). Kept so old rows are not lost."""
+
     __tablename__ = "staples"
     name: Mapped[str] = mapped_column(String(200))
     section: Mapped[str] = mapped_column(String(20))
@@ -248,6 +250,7 @@ class ChatMessage(TimestampMixin, Base):
     from_: Mapped[str] = mapped_column("from", String(8))  # me, cafe
     text: Mapped[str] = mapped_column(Text)
     proposal: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    list_changes: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
     week_id: Mapped[int | None] = mapped_column(
         ForeignKey("weeks.id", ondelete="SET NULL"), nullable=True
     )

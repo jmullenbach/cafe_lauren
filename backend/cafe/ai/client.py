@@ -386,7 +386,8 @@ class FakeCafeAI:
                 key = spare.pop(0)
             taken.add(self._fx().MEALS[key]["title"])
             out.append(self._meal(key, day, ctx.recipe_box))
-        return A.PlanSuggestion(slots=out, summary="Sale pork and chicken early in the week, shrimp on Friday.")
+        return A.PlanSuggestion(slots=out, summary="Sale pork and chicken early in the week, shrimp on Friday.",
+                                staples_recipe_id=next((r["id"] for r in ctx.staples_recipes), None))
 
     def _pick(self, key: str, box: list[dict[str, Any]], why: list[str] | None = None) -> A.MealPick:
         """A light option: the recipe-box id if the meal is there, else a new idea (no ingredients or steps)."""
@@ -472,6 +473,14 @@ class FakeCafeAI:
     async def chat(self, ctx: A.ChatContext) -> A.ChatReply:
         self.calls.append({"task": "chat"})
         low = ctx.message.lower()
+        if "grocery list" in low:
+            changes = [A.ListChange(op="add", text="2 lbs chicken thighs", note="Leidy asked")]
+            if len(ctx.grocery_list) > 1:
+                first, second = ctx.grocery_list[0], ctx.grocery_list[1]
+                changes += [A.ListChange(op="update", key=first["key"], qty="3 lbs"),
+                            A.ListChange(op="remove", key=second["key"])]
+            return A.ChatReply(text="I checked the list. Three changes would cover it. Nothing changes until you approve them.",
+                               proposal=None, list_changes=changes)
         day = next((d for d, name in zip(A.Day.__args__, ["monday", "tuesday", "wednesday", "thursday", "friday",
                                                           "saturday", "sunday"]) if name in low), "thu")
         names = {"mon": "Monday", "tue": "Tuesday", "wed": "Wednesday", "thu": "Thursday", "fri": "Friday",
