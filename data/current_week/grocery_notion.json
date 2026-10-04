@@ -1,0 +1,149 @@
+{
+  "to_buy": [
+    {
+      "section": "🥬 Produce",
+      "items": [
+        {
+          "text": "2 lbs green beans — pork chops + citrus chicken",
+          "bold_prefix": "2 lbs"
+        },
+        {
+          "text": "1.5 lbs Yukon gold potatoes — pork chops — ON SALE $0.99/lb",
+          "bold_prefix": "1.5 lbs"
+        },
+        {
+          "text": "1 large white onion — pork chops",
+          "bold_prefix": "1"
+        },
+        {
+          "text": "2 bunches green onions — basil shrimp",
+          "bold_prefix": "2 bunches"
+        },
+        {
+          "text": "1 head garlic — citrus chicken",
+          "bold_prefix": "1 head"
+        },
+        {
+          "text": "1 head lettuce — tacos",
+          "bold_prefix": "1 head"
+        },
+        {
+          "text": "2 large tomatoes — tacos",
+          "bold_prefix": "2"
+        },
+        {
+          "text": "1.5 lbs ripe tomatoes (~2.5 cups diced) — basil shrimp",
+          "bold_prefix": "1.5 lbs"
+        },
+        {
+          "text": "1 lb Roma tomatoes — citrus chicken",
+          "bold_prefix": "1 lb"
+        },
+        {
+          "text": "1 bunch fresh basil — basil shrimp",
+          "bold_prefix": "1 bunch"
+        },
+        {
+          "text": "1 bunch fresh parsley — citrus chicken",
+          "bold_prefix": "1 bunch"
+        },
+        {
+          "text": "2 navel oranges — citrus chicken",
+          "bold_prefix": "2"
+        },
+        {
+          "text": "6 ears sweet corn — taco night side — ON SALE 3/$1",
+          "bold_prefix": "6 ears"
+        },
+        {
+          "text": "1 Earthbound organic salad 5 oz — shrimp night side — ON SALE $3.99",
+          "bold_prefix": "1"
+        }
+      ]
+    },
+    {
+      "section": "🥩 Meat / Deli / Bakery",
+      "items": [
+        {
+          "text": "2 lbs marinated pork taco meat (al pastor) — tacos — ON SALE $3.49/lb",
+          "bold_prefix": "2 lbs"
+        },
+        {
+          "text": "5 center-cut pork chops (~2.5 lbs) — ON SALE $2.29/lb",
+          "bold_prefix": "5"
+        },
+        {
+          "text": "1.5 lbs XL shrimp 16/20 — basil shrimp — ON SALE $9.99/lb",
+          "bold_prefix": "1.5 lbs"
+        },
+        {
+          "text": "2 lbs boneless chicken thighs (5) — citrus chicken",
+          "bold_prefix": "2 lbs"
+        }
+      ]
+    },
+    {
+      "section": "🥫 Dry Goods / Canned / Condiments",
+      "items": [
+        {
+          "text": "1 lb orzo (need 1¼ cups) — basil shrimp",
+          "bold_prefix": "1 lb"
+        },
+        {
+          "text": "12 taco shells or small tortillas — tacos",
+          "bold_prefix": "12"
+        },
+        {
+          "text": "1 jar salsa — tacos — ON SALE La Costeña $2.99",
+          "bold_prefix": "1 jar"
+        },
+        {
+          "text": "1 can Goya black beans 29 oz — taco side — ON SALE 2/$5",
+          "bold_prefix": "1 can"
+        }
+      ]
+    },
+    {
+      "section": "🧀 Dairy / Eggs",
+      "items": [
+        {
+          "text": "1 queso fresco 10 oz — tacos — ON SALE $1.99",
+          "bold_prefix": "1"
+        },
+        {
+          "text": "2 cups shredded cheddar / Mexican blend — tacos",
+          "bold_prefix": "2 cups"
+        },
+        {
+          "text": "1 cup sour cream — tacos",
+          "bold_prefix": "1 cup"
+        },
+        {
+          "text": "6 oz feta, crumbled — basil shrimp",
+          "bold_prefix": "6 oz"
+        }
+      ]
+    }
+  ],
+  "staples": [
+    "Grapes or strawberries or blueberries",
+    "Peaches — ON SALE $1.49/lb",
+    "Bananas",
+    "Lemons — ON SALE $0.99/lb (2 for shrimp + chicken)",
+    "Limes — ON SALE 10/$1 (tacos)",
+    "Frozen fruit",
+    "Frozen spinach",
+    "Deli ham or turkey — ON SALE turkey $5.99/lb",
+    "Deli cheese — ON SALE Muenster $3.49/lb",
+    "Bread",
+    "Eggs",
+    "Cheese sticks",
+    "Yogurt",
+    "Milk",
+    "Soda water",
+    "Tortilla chips",
+    "Pickles",
+    "Crackers",
+    "Cottage cheese"
+  ]
+}

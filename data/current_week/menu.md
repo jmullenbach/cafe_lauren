@@ -1,36 +1,45 @@
-# Weekly Menu — Week of March 7, 2026
+# Weekly Menu — Week of August 24, 2026
+
+Built around Cermak deals (Aug 13–26): al pastor pork $3.49/lb, pork chops $2.29/lb, XL shrimp $9.99/lb, lemons/limes, Yukon golds 99¢, corn 3/$1.
 
 ## Full Week Schedule
 
 | Day | Meal | Method | Notes |
 |-----|------|--------|-------|
-| **Saturday (Mar 7)** | *Leftovers / easy night* | — | Finishing last week |
-| **Sunday (Mar 8)** | **Instant Pot Chicken Tortilla Soup** | Instant Pot | 5-star favorite! Great leftovers for Mon/Tue |
-| **Monday (Mar 9)** | *Tortilla Soup leftovers* | — | Day 2 — add fresh avocado & chips |
-| **Tuesday (Mar 10)** | **Leidy #1** (Leidy cooks) | Skillet | Beef, pork, plantains, rice, beans |
-| **Wednesday (Mar 11)** | **Couscous Feta Chicken Salad** | Skillet + stovetop | Fresh & healthy; good leftovers Wed/Thu |
-| **Thursday (Mar 12)** | *Couscous salad leftovers or Leidy leftovers* | — | Mix & match |
-| **Friday (Mar 13)** | **Leidy #2** (Leidy cooks) | Sheet pan + skillet | Italian sausage with sweet potato, broccoli, pepper |
-
-## Leidy Cooks
-- **Tuesday:** Leidy #1 — Beef & pork with plantains, Rice-A-Roni, sides
-- **Friday:** Leidy #2 — Italian sausage with sweet potato, broccoli, pepper
+| **Monday (Aug 24)** | **Taco Tuesday (al pastor pork)** | Skillet | 5-star favorite; ON SALE pork taco meat. Leftovers → Tue |
+| **Tuesday (Aug 25)** | *Taco leftovers → taco-salad bowls* | — | Add lettuce, beans, queso fresco, lime |
+| **Wednesday (Aug 26)** | **Sheet Pan Pork Chops with Roasted Veggies** | Sheet pan | ON SALE chops $2.29/lb; Yukon golds, green beans, onion |
+| **Thursday (Aug 27)** | **Leidy #1** (Leidy cooks) | TBD | Ingredients to be added |
+| **Friday (Aug 28)** | **Basil Shrimp with Feta and Orzo** | Skillet | 5-star favorite; XL shrimp $9.99/lb; big salad side |
+| **Saturday (Aug 29)** | **Sheet Pan Citrus Chicken Thighs and Roasted Tomatoes** | Sheet pan | Lemons 99¢/lb; green beans side. Leftovers → Sun wraps |
+| **Sunday (Aug 30)** | *Leidy #2 or chicken leftovers* | — | Shred chicken into wraps w/ deli cheese |
 
 ## Cook-Fresh Meal Details
 
-| Meal | Method | Total Time | Health | Delicious | Cost (5 ppl) | Leftover Days |
-|------|--------|-----------|--------|-----------|--------------|---------------|
-| **Instant Pot Chicken Tortilla Soup** | Instant Pot | 35 min | 8/10 | 9/10 | ~$14 | 2-3 days |
-| **Couscous Feta Chicken Salad** | Skillet + stovetop | 25 min | 9/10 | 8/10 | ~$12 | 1-2 days |
-| **Leidy #1** | Skillet | 30 min | 7/10 | 8/10 | ~$15 | 1 day |
-| **Leidy #2** | Sheet pan + skillet | 30 min | 8/10 | 8/10 | ~$12 | 1 day |
+### Taco Tuesday (Monday)
+*Al pastor pork tacos with queso fresco, lettuce, tomato, salsa — with black beans and sweet corn sides.*
+- **Method:** Skillet | **Total:** 30 min
+- **Healthiness:** 7/10 | **Deliciousness:** 9/10 | **Cost:** ~$22
+- **Leftovers:** 1 day — Day 2: taco-salad bowls over lettuce with beans, corn, crushed tortilla chips
 
-## Key Deals Used
-- Roma tomatoes $0.99/lb (tortilla soup)
-- Avocados $1.99/4lb bag (tortilla soup topping + Leidy)
-- Cucumbers $0.79/ea (couscous salad)
-- Red onions $0.79/lb (tortilla soup, couscous salad)
+### Sheet Pan Pork Chops with Roasted Veggies (Wednesday)
+*Center-cut pork chops roasted with potatoes, green beans and onion, seasoned with smoked paprika and thyme.*
+- **Method:** Sheet pan | **Total:** 40 min
+- **Healthiness:** 8/10 | **Deliciousness:** 8/10 | **Cost:** ~$18
+- **Leftovers:** 1 day — Day 2: slice chops over a green salad, or chop into fried rice
 
-## Pantry Items Used
-- Freezer chicken thighs (tortilla soup)
-- Rice-A-Roni chicken (Leidy #1)
+### Basil Shrimp with Feta and Orzo (Friday)
+*Warm orzo tossed with tomatoes, green onion, basil, lemon, feta and sautéed shrimp.*
+- **Method:** Skillet + stovetop | **Total:** 30 min
+- **Healthiness:** 8/10 | **Deliciousness:** 9/10 | **Cost:** ~$26
+- **Leftovers:** 1 day — Day 2: serve cold as an orzo salad
+
+### Sheet Pan Citrus Chicken Thighs and Roasted Tomatoes (Saturday)
+*Boneless thighs roasted with orange/lemon, garlic, Roma tomatoes and green beans.*
+- **Method:** Sheet pan | **Total:** 45 min
+- **Healthiness:** 8/10 | **Deliciousness:** 8/10 | **Cost:** ~$20
+- **Leftovers:** 1–2 days — Day 2: shred into wraps with deli cheese; Day 3: over rice with the pan juices
+
+## Leidy Cooks
+- **Thursday:** Leidy #1 — *ingredients pending*
+- **Sunday (optional):** Leidy #2 — *ingredients pending*
