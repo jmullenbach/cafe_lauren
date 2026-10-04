@@ -73,6 +73,7 @@ class RecipeSummary(Model):
     healthy: int | None = None
     delicious: int | None = None
     stars: int | None = None
+    default_cook: str | None = Field(default=None, description="Person key who usually cooks it; carried to the night it is planned on.")
     tags: list[str] = Field(default_factory=list)
     source: RecipeSource
     status: RecipeStatus
@@ -109,6 +110,7 @@ class RecipePatch(Model):
     healthy: int | None = Field(default=None, ge=0, le=10)
     delicious: int | None = Field(default=None, ge=0, le=10)
     stars: int | None = Field(default=None, ge=0, le=5)
+    default_cook: str | None = Field(default=None, description="Person key, or null for anyone.")
     tags: list[str] | None = None
     ingredients: list[Ingredient] | None = None
     steps: list[StepGroup] | None = None
@@ -255,7 +257,7 @@ class MoveRequest(Model):
 
 
 class CookRequest(Model):
-    cook: str | None = Field(default=None, description="Who cooks: a person key or free text.")
+    cook: str | None = Field(default=None, description="Who cooks: a person key, or null to clear.")
 
 
 class SlotPatch(Model):

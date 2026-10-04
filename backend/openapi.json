@@ -4856,7 +4856,7 @@
               }
             ],
             "title": "Cook",
-            "description": "Who cooks: a person key or free text."
+            "description": "Who cooks: a person key, or null to clear."
           }
         },
         "type": "object",
@@ -6372,6 +6372,18 @@
             ],
             "title": "Stars"
           },
+          "default_cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Cook",
+            "description": "Person key who usually cooks it; carried to the night it is planned on."
+          },
           "tags": {
             "items": {
               "type": "string"
@@ -6736,6 +6748,18 @@
             ],
             "title": "Stars"
           },
+          "default_cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Cook",
+            "description": "Person key who usually cooks it; carried to the night it is planned on."
+          },
           "tags": {
             "items": {
               "type": "string"
@@ -7063,6 +7087,18 @@
             ],
             "title": "Stars"
           },
+          "default_cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Cook",
+            "description": "Person key, or null for anyone."
+          },
           "tags": {
             "anyOf": [
               {
@@ -7225,6 +7261,18 @@
               }
             ],
             "title": "Stars"
+          },
+          "default_cook": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Cook",
+            "description": "Person key who usually cooks it; carried to the night it is planned on."
           },
           "tags": {
             "items": {

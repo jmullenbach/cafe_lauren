@@ -3,6 +3,7 @@ import { ChatSheet } from './chat/ChatSheet';
 import { SwapSheet } from './meal/SwapSheet';
 import { RejectSheet } from './meal/RejectSheet';
 import { EditSheet } from './meal/EditSheet';
+import { CookSheet } from './meal/CookSheet';
 import { ScheduleSheet } from './meal/ScheduleSheet';
 import { AddRecipeSheet } from './recipes/AddRecipeSheet';
 import { StoreSheet } from './list/StoreSheet';
@@ -23,6 +24,7 @@ export function SheetHost() {
     <AddRecipeSheet open={sheet?.type === 'add-recipe' || sheet?.type === 'add'} onClose={closeSheet} />
     <StoreSheet open={sheet?.type === 'store'} onClose={closeSheet} />
     <SendSheet open={sheet?.type === 'send'} onClose={closeSheet} />
+    <CookSheet open={sheet?.type === 'cook'} slotId={sheet?.slotId} />
     <ScheduleSheet open={sheet?.type === 'schedule'} recipeId={sheet?.recipeId} />
   </>);
 }

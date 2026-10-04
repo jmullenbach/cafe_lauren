@@ -20,6 +20,14 @@ def _recipe(db, recipe_id: int | None) -> m.Recipe:
     return r
 
 
+def _person_key(db, key: str | None) -> str | None:
+    if key is None:
+        return None
+    if db.scalar(select(m.Person.id).where(m.Person.key == key)) is None:
+        raise HTTPException(status_code=422, detail=f"Unknown person: {key}")
+    return key
+
+
 @router.post("/{slot_id}/keep", response_model=s.Week, operation_id="keepSlot")
 def keep(slot_id: int, db: DB, who: User) -> s.Week:
     slot = W.get_slot(db, slot_id)
@@ -67,8 +75,9 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
         slot.why = list(body.why) if body.why is not None else list(opt.get("why") or [])
         if opt.get("ingredient_flags"):
             slot.ingredient_flags = dict(opt["ingredient_flags"])
+        W.set_slot_cook(slot, r)
         if body.cook is not None:
-            slot.cook = body.cook
+            slot.cook = _person_key(db, body.cook)
         db.execute(delete(m.QueueEntry).where(m.QueueEntry.recipe_id == r.id))
         W.reset_votes(db, slot, who, actor_up=True)
         if jobs is not None and P.needs_fill(r):
@@ -85,9 +94,13 @@ def apply_swap(db, slot: m.Slot, who: str, body: s.SwapRequest, by: str | None =
         slot.kind, slot.recipe_id = "leidy", r.id if r else None
         slot.text = body.text or (f"{r.title} (Leidy)" if r else "Leidy cooks")
         slot.status = "edited" if r else None
-        slot.cook = body.cook or "leidy"
+        W.set_slot_cook(slot, r)
+        if body.cook:
+            slot.cook = _person_key(db, body.cook)
     elif body.kind == "open":
         slot.kind, slot.recipe_id, slot.text, slot.status = "open", None, body.text, None
+    if body.kind in ("text", "leftover", "open"):
+        slot.cook = None
     slot.why = list(body.why) if body.why is not None else []
     W.reset_votes(db, slot, who)
 
@@ -124,6 +137,7 @@ def reject(slot_id: int, body: s.RejectRequest, db: DB, who: User, jobs: Jobs) -
     job = None
     if body.mode == "open":
         slot.kind, slot.recipe_id, slot.text, slot.status = "open", None, None, "rejected"
+        slot.cook = None
         slot.by, slot.basis, slot.why, slot.ingredients_override = who, basis or None, [], None
         slot.job_id = None
         slot.votes.clear()
@@ -165,7 +179,7 @@ def move(slot_id: int, body: s.MoveRequest, db: DB, who: User) -> s.Week:
 @router.post("/{slot_id}/cook", response_model=s.Week, operation_id="setSlotCook")
 def set_cook(slot_id: int, body: s.CookRequest, db: DB, who: User) -> s.Week:
     slot = W.get_slot(db, slot_id)
-    slot.cook = body.cook
+    slot.cook = _person_key(db, body.cook)
     return W.week_out(db, slot.week)
 
 

@@ -8,9 +8,11 @@ import { Badge } from '../../components/display/Badge';
 import { Card } from '../../components/display/Card';
 import { Score } from '../../components/display/Score';
 import { Stars } from '../../components/display/Stars';
+import { SegmentedControl } from '../../components/forms/SegmentedControl';
 import { SuggestedTag } from '../../components/kitchen/SuggestedTag';
 import { RecipeStep } from '../../components/kitchen/RecipeStep';
-import { useAddToQueue, useDeleteRecipe, useMarkCooked, useRecipe, useRemoveFromQueue, useSaveRecipe } from '../../api/hooks';
+import { useAddToQueue, useDeleteRecipe, useMarkCooked, usePatchRecipe, useRecipe, useRemoveFromQueue, useSaveRecipe } from '../../api/hooks';
+import { useWeekData } from '../../state/useWeekSlots';
 import { useUi } from '../../state/UiContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { keys } from '../../api/keys';
@@ -30,6 +32,8 @@ export function RecipeDetail() {
   const queue = useAddToQueue();
   const unqueue = useRemoveFromQueue();
   const cooked = useMarkCooked();
+  const patch = usePatchRecipe();
+  const { people } = useWeekData();
   const [rating, setRating] = useState(0);
   const [rateOpen, setRateOpen] = useState(false);
   const back = () => nav('/recipes');
@@ -67,6 +71,16 @@ export function RecipeDetail() {
           </div>
         )}
         {!draft && <Button size="s" variant="secondary" icon="calendar-days" style={{ marginTop: 14 }} onClick={() => openSheet({ type: 'schedule', recipeId: r.id })}>Put on a night</Button>}
+        {!draft && (
+          <div data-testid="default-cook" style={{ marginTop: 18 }}>
+            <span style={{ display: 'block', font: '600 13px/1 var(--font-sans)', color: 'var(--text-strong)', marginBottom: 8 }}>Usually cooked by</span>
+            <SegmentedControl size="s" value={r.default_cook ?? ''} onChange={(v) => patch.mutate({ id: r.id, default_cook: v || null }, {
+              onSuccess: () => toast({ tone: 'success', icon: 'chef-hat', title: v ? `${people.find((p) => p.key === v)?.name ?? v} usually cooks this` : 'Anyone can cook this', message: 'New nights use this. Nights already planned stay as they are.' }),
+              onError: fail('Could not save'),
+            })} options={[...people.map((p) => ({ value: p.key, label: p.name })), { value: '', label: 'Anyone' }]} />
+            <span style={{ display: 'block', font: '400 12.5px/1.4 var(--font-sans)', color: 'var(--text-muted)', marginTop: 8 }}>The default when this goes on a night. It doesn't change nights already planned; change those from the plan.</span>
+          </div>
+        )}
         {tags.length > 0 && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 14 }}>{tags.map((t) => <Badge key={t}>{t}</Badge>)}</div>}
         {draft && (
           <div data-testid="draft-banner" style={{ display: 'flex', gap: 10, padding: '12px 14px', borderRadius: 'var(--radius-s)', background: 'var(--honey-100)', color: 'var(--honey-700)', font: '400 13px/1.45 var(--font-sans)', marginTop: 16 }}>

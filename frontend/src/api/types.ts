@@ -1164,7 +1164,7 @@ export interface components {
         CookRequest: {
             /**
              * Cook
-             * @description Who cooks: a person key or free text.
+             * @description Who cooks: a person key, or null to clear.
              */
             cook?: string | null;
         };
@@ -1711,6 +1711,11 @@ export interface components {
             delicious?: number | null;
             /** Stars */
             stars?: number | null;
+            /**
+             * Default Cook
+             * @description Person key who usually cooks it; carried to the night it is planned on.
+             */
+            default_cook?: string | null;
             /** Tags */
             tags?: string[];
             /**
@@ -1817,6 +1822,11 @@ export interface components {
             delicious?: number | null;
             /** Stars */
             stars?: number | null;
+            /**
+             * Default Cook
+             * @description Person key who usually cooks it; carried to the night it is planned on.
+             */
+            default_cook?: string | null;
             /** Tags */
             tags?: string[];
             /**
@@ -1912,6 +1922,11 @@ export interface components {
             delicious?: number | null;
             /** Stars */
             stars?: number | null;
+            /**
+             * Default Cook
+             * @description Person key, or null for anyone.
+             */
+            default_cook?: string | null;
             /** Tags */
             tags?: string[] | null;
             /** Ingredients */
@@ -1954,6 +1969,11 @@ export interface components {
             delicious?: number | null;
             /** Stars */
             stars?: number | null;
+            /**
+             * Default Cook
+             * @description Person key who usually cooks it; carried to the night it is planned on.
+             */
+            default_cook?: string | null;
             /** Tags */
             tags?: string[];
             /**

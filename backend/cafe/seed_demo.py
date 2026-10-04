@@ -56,6 +56,8 @@ BOX = {
     "meatballs": ("Instant Pot Meatballs and Marinara", 3, "Instant Pot", 25, date(2026, 2, 2), ["Instant Pot", "Quick"]),
 }
 
+DEFAULT_COOKS = {"tacos": "joe", "chili": "lauren", "arroz": "leidy", "shrimp": "lauren", "chops": "joe"}
+
 STEPS = {
     "chops": [
         {"group": "Roast the Vegetables", "steps": [
@@ -180,6 +182,8 @@ def seed(db: Session, settings: Settings, monday: date | None = None, copy_photo
                      source="imported", status="saved", ingredients=[], steps=[])
         db.add(r)
         recipes[key] = r
+    for key, who in DEFAULT_COOKS.items():
+        recipes[key].default_cook = who
     db.flush()
 
     week = W.get_or_create_week(db, monday)
@@ -196,6 +200,8 @@ def seed(db: Session, settings: Settings, monday: date | None = None, copy_photo
         if meal:
             d = MEALS[meal]
             sl.recipe_id = recipes[meal].id
+            if "cook" not in spec:
+                sl.cook = recipes[meal].default_cook
             sl.why = list(d["why"])
             sl.ingredient_flags = {
                 grocery.item_key(name): {"have": tag == "have",

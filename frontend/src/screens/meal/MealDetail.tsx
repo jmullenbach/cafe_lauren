@@ -11,6 +11,7 @@ import { DayTag } from '../../components/display/DayTag';
 import { Score } from '../../components/display/Score';
 import { Stars } from '../../components/display/Stars';
 import { Input } from '../../components/forms/Input';
+import { CookChip } from '../../components/kitchen/CookChip';
 import { SuggestedTag } from '../../components/kitchen/SuggestedTag';
 import { ReviewActions } from '../../components/kitchen/ReviewActions';
 import { RecipeStep } from '../../components/kitchen/RecipeStep';
@@ -110,6 +111,7 @@ export function MealDetail() {
           {status && <SuggestedTag status={status} by={status === 'suggested' || status === 'draft' ? undefined : nameOf(s?.by)} style={{ alignSelf: 'flex-start' }} />}
           {s?.job_id != null && !isWriting(m) && <JobState jobId={s.job_id} thinking="Finding something else…" />}
           <RecipeWriting recipe={m} jobId={s?.job_id ?? null} />
+          {s && (s.kind === 'cook' || s.kind === 'leidy') && <CookChip cook={s.cook} onClick={() => openSheet({ type: 'cook', slotId: s.id })} style={{ alignSelf: 'flex-start', height: 28, font: '600 13px/1 var(--font-sans)' }} />}
           <h1 style={{ font: '300 30px/1.1 var(--font-serif)', letterSpacing: 'var(--ls-display)', color: 'var(--text-strong)' }}>{m.title}</h1>
           <p style={{ font: 'var(--type-description)', fontSize: 16, color: 'var(--text-body)' }}>{m.description}</p>
           <Meta method={m.method} time={timeStr(m)} cost={costStr(m)} />

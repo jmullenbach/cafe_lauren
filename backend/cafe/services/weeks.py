@@ -131,6 +131,17 @@ def set_vote(db: Session, slot: m.Slot, person: str, value: str | None) -> None:
     db.flush()
 
 
+def set_slot_cook(slot: m.Slot, recipe: m.Recipe | None) -> None:
+    """The one rule for who cooks a night when a meal is placed: a Leidy night is Leidy's,
+    a cook night takes the recipe's default, anything else has no cook."""
+    if slot.kind == "leidy":
+        slot.cook = "leidy"
+    elif slot.kind == "cook" and recipe is not None:
+        slot.cook = recipe.default_cook
+    else:
+        slot.cook = None
+
+
 def reset_votes(db: Session, slot: m.Slot, actor: str, actor_up: bool = False) -> None:
     """Swap/move rule: clear the slot's votes except the acting person's up vote.
 

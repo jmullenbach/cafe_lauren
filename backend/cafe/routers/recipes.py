@@ -107,6 +107,8 @@ def get_recipe(recipe_id: int, db: DB, who: User, cfg: AppSettingsDep) -> s.Reci
 @router.patch("/{recipe_id}", response_model=s.RecipeDetail, operation_id="patchRecipe")
 def patch_recipe(recipe_id: int, body: s.RecipePatch, db: DB, who: User, cfg: AppSettingsDep) -> s.RecipeDetail:
     r = _get(db, recipe_id)
+    if body.default_cook is not None and db.scalar(select(m.Person.id).where(m.Person.key == body.default_cook)) is None:
+        raise HTTPException(status_code=422, detail=f"Unknown person: {body.default_cook}")
     for k, v in body.model_dump(exclude_unset=True).items():
         setattr(r, k, v)
     return _detail(db, r, cfg.cafe_timezone)
@@ -117,6 +119,8 @@ def delete_recipe(recipe_id: int, db: DB, who: User) -> s.Ok:
     r = _get(db, recipe_id)
     for sl in db.scalars(select(m.Slot).where(m.Slot.recipe_id == r.id)):
         sl.kind, sl.recipe_id, sl.status = ("open", None, None) if sl.kind == "cook" else (sl.kind, None, sl.status)
+        if sl.kind == "open":
+            sl.cook = None
     db.delete(r)
     return s.Ok()
 

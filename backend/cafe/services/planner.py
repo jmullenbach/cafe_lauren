@@ -80,7 +80,7 @@ def base_context(db: Session, week: m.Week) -> dict[str, Any]:
         if meals:
             recent.append({"monday": wk.monday.isoformat(), "meals": meals})
     box = [{"id": r.id, "title": r.title, "stars": r.stars, "method": r.method, "total_min": r.total_min,
-            "last_made": r.last_made.isoformat() if r.last_made else None, "tags": r.tags or [],
+            "last_made": r.last_made.isoformat() if r.last_made else None, "default_cook": r.default_cook, "tags": r.tags or [],
             "ingredients": _ingredient_names(r)}
            for r in db.scalars(select(m.Recipe).where(m.Recipe.status == "saved").order_by(m.Recipe.id))]
     queue = [{"recipe_id": q.recipe_id, "title": q.recipe.title, "by": q.by}
@@ -300,9 +300,9 @@ def apply_suggestion(db: Session, slot: m.Slot, sug: A.MealSuggestion, *, keep_b
     slot.recipe_id = recipe.id if recipe else None
     if sug.kind == "leidy":
         slot.text = f"{recipe.title} (Leidy)" if recipe else (sug.text or "Leidy cooks")
-        slot.cook = "leidy"
     else:
         slot.text = None if recipe else (sug.text or None)
+    W.set_slot_cook(slot, recipe)
     slot.status = "suggested" if recipe else None
     slot.by = CAFE
     slot.why = list(sug.why)
@@ -342,6 +342,7 @@ def apply_replacement(db: Session, slot: m.Slot, pick: A.MealPick) -> m.Recipe |
         slot.kind, slot.recipe_id, slot.status = "open", None, "rejected"
         return None
     slot.kind, slot.recipe_id, slot.text, slot.status, slot.by = "cook", r.id, None, "suggested", CAFE
+    W.set_slot_cook(slot, r)
     slot.why = list(pick.why)
     slot.ingredients_override = None
     slot.ingredient_flags = ingredient_flags(db, slot.week, r, pick.ingredients)

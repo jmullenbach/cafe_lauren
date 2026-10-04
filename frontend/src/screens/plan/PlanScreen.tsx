@@ -6,6 +6,7 @@ import { IconButton } from '../../components/core/IconButton';
 import { Icon } from '../../components/core/Icon';
 import { Card } from '../../components/display/Card';
 import { DayTag } from '../../components/display/DayTag';
+import { CookChip, useCookPerson } from '../../components/kitchen/CookChip';
 import { SuggestedTag } from '../../components/kitchen/SuggestedTag';
 import { ReviewActions } from '../../components/kitchen/ReviewActions';
 import { JobState } from '../../components/feedback/JobState';
@@ -23,16 +24,18 @@ function SlotCard({ s }: { s: Slot }) {
   const nav = useNavigate();
   const keep = useKeepSlot();
   const { nameOf } = useWeekData();
+  const cookP = useCookPerson(s.cook);
   if (s.kind !== 'cook' || !s.recipe) {
     const open = s.kind === 'open';
     return (
-      <div data-testid={`slot-${s.day}`} data-kind={s.kind} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', background: open ? 'transparent' : 'var(--surface-sunken)', border: open ? '1.5px dashed var(--border-strong)' : '1px solid transparent' }}>
+      <div data-testid={`slot-${s.day}`} data-kind={s.kind} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 'var(--radius-card)', background: open ? 'transparent' : 'var(--surface-sunken)', border: open ? '1.5px dashed var(--border-strong)' : '1px solid transparent', ...(cookP ? { boxShadow: `inset 3px 0 0 ${cookP.tone.edge}` } : {}) }}>
         <DayTag day={dayKey(s.day)} short style={{ width: 44, justifyContent: 'center' }} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
           <span style={{ font: 'italic 400 15px/1.3 var(--font-serif)', color: open ? 'var(--text-strong)' : 'var(--text-body)' }}>{slotTitle(s)}</span>
           {open && s.basis && <span style={{ font: '400 12px/1.3 var(--font-sans)', color: 'var(--text-muted)' }}>Not this week: {s.basis}</span>}
           {s.kind === 'leidy' && !s.recipe && <span style={{ font: '400 12px/1.3 var(--font-sans)', color: 'var(--text-muted)' }}>Waiting on what she's making</span>}
         </div>
+        {s.kind === 'leidy' && <CookChip cook={s.cook} compact onClick={() => openSheet({ type: 'cook', slotId: s.id })} />}
         <Button size="s" variant={open ? 'primary' : 'ghost'} onClick={() => openSheet({ type: open ? 'swap' : 'edit', slotId: s.id })}>{open ? 'Pick a meal' : 'Change'}</Button>
       </div>
     );
@@ -42,12 +45,13 @@ function SlotCard({ s }: { s: Slot }) {
   const thinking = s.status === 'thinking';
   const why = (s.why ?? []).slice(0, 2).join(' · ');
   return (
-    <Card padding="none" selected={review} style={review ? { borderStyle: 'dashed', borderColor: 'var(--sage-300)', boxShadow: 'none' } : undefined}>
+    <Card padding="none" selected={review} style={{ ...(review ? { borderStyle: 'dashed', borderColor: 'var(--sage-300)', boxShadow: 'none' } : {}), ...(cookP ? { boxShadow: `inset 3px 0 0 ${cookP.tone.edge}${review ? '' : ', var(--shadow-1)'}` } : {}) }}>
       <div data-testid={`slot-${s.day}`} data-kind="cook" data-status={s.status ?? ''} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <DayTag day={dayKey(s.day)} />
           <SuggestedTag status={s.status ?? 'suggested'} by={s.status === 'suggested' ? undefined : nameOf(s.by)} />
           <span style={{ flex: 1 }} />
+          {!thinking && <CookChip cook={s.cook} onClick={() => openSheet({ type: 'cook', slotId: s.id })} />}
           {!review && !thinking && <IconButton icon="ellipsis" label="Change" size="s" onClick={() => openSheet({ type: 'edit', slotId: s.id })} />}
         </div>
         {thinking ? <Thinking slot={s} /> : <>

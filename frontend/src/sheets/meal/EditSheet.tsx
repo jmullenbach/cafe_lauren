@@ -20,7 +20,7 @@ export function EditSheet({ open, slotId }: { open: boolean; slotId?: unknown })
   const setCook = useSetSlotCook();
   const swap = useSwapSlot();
   if (!slot) return <Sheet open={false} />;
-  const cook = (slot.cook ?? (slot.kind === 'leidy' ? 'leidy' : 'lauren')).toLowerCase();
+  const cook = slot.cook ?? null;
   return (
     <Sheet open={open} onClose={closeSheet} title={`Change ${DAYNAME[slot.day]}`} subtitle={slotTitle(slot)}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -28,7 +28,7 @@ export function EditSheet({ open, slotId }: { open: boolean; slotId?: unknown })
           <ChoiceChips size="s" multi={false} value={slot.day} onChange={(to) => { if (to && to !== slot.day) move.mutate({ id: slot.id, to }, { onSuccess: () => { closeSheet(); toast({ icon: 'calendar-days', title: 'Moved', message: 'Swapped with ' + String(to).toUpperCase() }); } }); }}
             options={DAYS.map((d) => ({ value: d, label: DAYNAME[d].slice(0, 3) }))} /></div>
         {slot.kind === 'cook' && <div><span style={label}>Who's cooking</span>
-          <ChoiceChips size="s" multi={false} value={cook} onChange={(w) => w && setCook.mutate({ id: slot.id, cook: w })} options={COOKS} /></div>}
+          <ChoiceChips size="s" multi={false} value={cook} onChange={(w) => setCook.mutate({ id: slot.id, cook: w ?? null })} options={COOKS} /></div>}
         <Card padding="none" style={{ padding: '0 14px' }}>
           <ListRow icon="refresh-cw" title="Swap for a different meal" onClick={() => openSheet({ type: 'swap', slotId: slot.id })} />
           {slot.recipe_id != null && <ListRow icon="pencil" title="Edit ingredients or servings" onClick={() => { closeSheet(); nav(mealRoute(slot) + '&edit=1'); }} />}

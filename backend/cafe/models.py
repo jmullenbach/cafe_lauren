@@ -56,6 +56,7 @@ class Recipe(TimestampMixin, Base):
     healthy: Mapped[int | None] = mapped_column(Integer, nullable=True)
     delicious: Mapped[int | None] = mapped_column(Integer, nullable=True)
     stars: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    default_cook: Mapped[str | None] = mapped_column(String(20), nullable=True)
     tags: Mapped[list[str]] = mapped_column(JSON, default=list)
     ingredients: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
     steps: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
