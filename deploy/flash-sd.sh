@@ -34,5 +34,10 @@ for _ in $(seq 1 30); do [[ -d /Volumes/bootfs ]] && break; sleep 1; done
 cp "$HERE/pi-firstboot/user-data" /Volumes/bootfs/user-data
 touch /Volumes/bootfs/ssh
 sync
-diskutil eject "/dev/$DISK"
-echo "==> Done. Put the card in the Pi, plug in Ethernet, then power."
+if grep -q '^WIFI_SSID=.' "$HERE/pi-firstboot/wifi.env" 2>/dev/null; then
+  "$HERE/add-wifi.sh"   # writes the Wi-Fi settings and ejects the card
+else
+  diskutil eject "/dev/$DISK"
+  echo "==> Done, with no Wi-Fi settings (deploy/pi-firstboot/wifi.env is empty)."
+  echo "    Plug the Pi into the router with a cable, or fill that file in and run deploy/add-wifi.sh."
+fi

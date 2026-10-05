@@ -26,13 +26,13 @@ if [[ -f "$NAME" ]]; then
   # A backup file on this Mac (for example from data/pi-backup/): send it to the Pi first,
   # along with the photos saved beside it. Used when rebuilding the Pi from nothing.
   LOCAL="$NAME"; NAME="$(basename "$LOCAL")"
-  ssh "$PI" "mkdir -p ~/$DATA/backups ~/$DATA/media"
+  ssh -n "$PI" "mkdir -p ~/$DATA/backups ~/$DATA/media"
   rsync -az "$LOCAL" "$PI:~/$DATA/backups/$NAME"
   MEDIA="$(cd "$(dirname "$LOCAL")/.." && pwd)/media"
   [[ -d "$MEDIA" ]] && rsync -az "$MEDIA/" "$PI:~/$DATA/media/"
 fi
 [[ "$NAME" == */* ]] && { echo "Give a backup name as listed, or the path of a backup file on this Mac." >&2; exit 1; }
-ssh "$PI" "test -f ~/$DATA/backups/$NAME" || { echo "No backup named $NAME on the Pi." >&2; exit 1; }
+ssh -n "$PI" "test -f ~/$DATA/backups/$NAME" || { echo "No backup named $NAME on the Pi." >&2; exit 1; }
 
 echo "This replaces the Pi's live database with $NAME."
 read -r -p "Type RESTORE to continue: " answer

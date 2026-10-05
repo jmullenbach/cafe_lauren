@@ -42,5 +42,6 @@ sed -i '' "s/^instance_id: .*/instance_id: cafe-$(date +%s)/" "$BOOT/meta-data"
 cp "$HERE/pi-firstboot/user-data" "$BOOT/user-data"
 touch "$BOOT/ssh"
 sync
-diskutil eject "$BOOT"
+# Spotlight sometimes holds the card for a few seconds; retry.
+for _ in 1 2 3 4 5 6; do diskutil eject "$BOOT" && break; sleep 5; done
 echo "Done. Put the card in the Pi and power it on."

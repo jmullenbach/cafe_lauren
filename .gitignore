@@ -20,6 +20,7 @@ data/household.db-*
 data/media/
 data/backups/
 data/pi-backup/
+data/pi-logs/
 node_modules/
 frontend/dist/
 frontend/test-results/
