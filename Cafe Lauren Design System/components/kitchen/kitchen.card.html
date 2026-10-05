@@ -1,0 +1,21 @@
+<!-- @dsCard group="Components" viewport="700x620" name="Kitchen" subtitle="MealCard, VoteButtons, GroceryItem, RecipeStep, PhotoTile, SuggestedTag, ReviewActions" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.col{display:flex;flex-direction:column;gap:16px}.lbl{font:600 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);width:84px;flex:none}</style></head><body><div id="root"></div>
+<script type="text/babel">
+const NS=window.CafeLaurenDesignSystem_9f0e0a;
+const {MealCard,VoteButtons,GroceryItem,RecipeStep,PhotoTile,SuggestedTag,ReviewActions}=NS;
+function App(){const [v,sv]=React.useState('up');const [c,sc]=React.useState({a:true});
+return <div className="col"><div className="row"><SuggestedTag/><SuggestedTag status="thinking"/><SuggestedTag status="kept" by="Joe"/><SuggestedTag status="edited" by="Lauren"/><SuggestedTag status="approved"/><SuggestedTag status="rejected"/><SuggestedTag status="draft"/></div><ReviewActions onReject={()=>{}} onSwap={()=>{}} onApprove={()=>{}}/><div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:24}}>
+<MealCard day="fri" onSale stars={5} title="Basil Shrimp with Feta and Orzo" description="Warm orzo tossed with tomatoes, basil, lemon, feta and sautéed shrimp." method="Skillet" time="30 min" cost="~$26" healthy={8} delicious={9} footer={<VoteButtons value={v} onChange={sv} up={v==='up'?3:2} down={0} voters={[{name:'Lauren',color:'sage'},{name:'Joe',color:'slate'},{name:'Leidy',color:'terra'}]}/>}/>
+<div className="col" style={{gap:8}}>
+<div><GroceryItem qty="1.5 lbs" name="Yukon gold potatoes" note="Pork chops" sale="$0.99/lb" checked={c.a} onChange={x=>sc({...c,a:x})}/><GroceryItem qty="2 lbs" name="green beans" note="Pork chops + citrus chicken" checked={c.b} onChange={x=>sc({...c,b:x})}/><GroceryItem name="Bananas" staple checked={c.d} onChange={x=>sc({...c,d:x})}/></div>
+<RecipeStep index={1} done>Set Instant Pot to Sauté. Add <strong>1 tbsp olive oil</strong>.</RecipeStep>
+<RecipeStep index={2} timer="15 min">Lock lid and cook <strong>2.5 lbs chicken thighs</strong> on High Pressure.</RecipeStep>
+<div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}><PhotoTile src="../../assets/photos/pantry-1.jpg" label="Pantry" meta="Mar 1" aspect="1 / 1"/><PhotoTile src="../../assets/photos/pantry-2.jpg" label="Freezer" meta="Mar 1" aspect="1 / 1"/><PhotoTile empty aspect="1 / 1" label="Add photo"/></div>
+</div></div></div>}
+ReactDOM.createRoot(root).render(<App/>);
+</script></body></html>

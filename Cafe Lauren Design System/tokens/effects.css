@@ -1,0 +1,19 @@
+:root{
+--radius-xs:3px;--radius-s:6px;--radius-m:10px;--radius-l:16px;--radius-xl:24px;--radius-pill:999px;
+--radius-control:var(--radius-s);--radius-card:var(--radius-m);--radius-dialog:var(--radius-l);--radius-photo:var(--radius-m);
+
+--border-w:1px;/* @kind spacing */--border-w-strong:1.5px;/* @kind spacing */
+
+--shadow-0:none;
+--shadow-1:0 1px 2px rgba(36,34,31,.06),0 0 0 1px rgba(36,34,31,.03);
+--shadow-2:0 2px 4px rgba(36,34,31,.04),0 8px 20px -8px rgba(36,34,31,.14);
+--shadow-3:0 4px 10px rgba(36,34,31,.06),0 24px 48px -16px rgba(36,34,31,.24);
+--shadow-inset:inset 0 1px 2px rgba(36,34,31,.06);
+--focus-ring:0 0 0 3px rgba(111,133,98,.35);
+
+--ease-out:cubic-bezier(.2,.7,.2,1);/* @kind other */--ease-in-out:cubic-bezier(.45,0,.25,1);/* @kind other */
+--dur-fast:140ms;/* @kind other */--dur-base:220ms;/* @kind other */--dur-slow:360ms;/* @kind other */
+
+--scrim:rgba(36,34,31,.42);--blur-glass:saturate(1.2) blur(14px);/* @kind other */--glass-bg:rgba(251,248,243,.78);
+--photo-protect:linear-gradient(180deg,rgba(36,34,31,0) 45%,rgba(36,34,31,.62) 100%);/* @kind other */
+}

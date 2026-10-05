@@ -1,0 +1,18 @@
+<!-- @dsCard group="Components" viewport="700x460" name="Forms" subtitle="Input, Select, Checkbox, Switch, SegmentedControl, ChoiceChips" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.col{display:flex;flex-direction:column;gap:16px}.lbl{font:600 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);width:84px;flex:none}</style></head><body><div id="root"></div>
+<script type="text/babel">
+const NS=window.CafeLaurenDesignSystem_9f0e0a;
+const {Input,Select,Checkbox,Switch,SegmentedControl,ChoiceChips}=NS;
+function App(){const [a,sa]=React.useState(true);const [b,sb]=React.useState(false);const [s,ss]=React.useState(true);const [v,sv]=React.useState('aisle');const [ch,sch]=React.useState(['Too much work']);
+return <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}}>
+<div className="col"><Input label="Request a meal" icon="sparkles" placeholder="Something with salmon?"/><Select label="Cooking method" options={['Sheet pan','Instant Pot','Le Creuset','Skillet']}/><Input label="Recipe link" placeholder="https://" error="That link didn't open — try pasting the recipe text"/></div>
+<div className="col"><Checkbox checked={a} onChange={sa} strike label={<><b>2 lbs</b> green beans</>} description="Pork chops + citrus chicken"/><Checkbox checked={b} onChange={sb} strike label={<><b>1 head</b> garlic</>} description="Citrus chicken"/><Checkbox disabled label="Unavailable"/>
+<Switch checked={s} onChange={ss} label="Prioritize what's on sale" description="Uses this week's Cermak ad"/>
+<SegmentedControl value={v} onChange={sv} options={[{value:'aisle',label:'By aisle'},{value:'meal',label:'By meal'}]}/></div><div style={{gridColumn:'1 / -1'}}><ChoiceChips value={ch} onChange={sch} options={['Too much work','Had it recently',"Kids won't eat it",'Too pricey','Not in the mood']}/></div></div>}
+ReactDOM.createRoot(root).render(<App/>);
+</script></body></html>

@@ -1,0 +1,15 @@
+<!-- @dsCard group="Components" viewport="700x340" name="Navigation" subtitle="SideNav, Tabs, TabBar" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.col{display:flex;flex-direction:column;gap:16px}.lbl{font:600 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);width:84px;flex:none}</style></head><body><div id="root"></div>
+<script type="text/babel">
+const NS=window.CafeLaurenDesignSystem_9f0e0a;
+const {SideNav,Tabs,TabBar}=NS;
+function App(){const [n,sn]=React.useState('week');const [t,st]=React.useState('buy');
+return <div style={{display:'flex',gap:32,height:290}}><SideNav value={n} onChange={sn} style={{borderRadius:10}} header={<span style={{font:'400 22px/1 var(--font-serif)',color:'var(--text-strong)',padding:'0 12px'}}>Café Lauren</span>} items={[{id:'requests',label:'Requests',icon:'message-circle',badge:3},{id:'pantry',label:'Pantry',icon:'refrigerator'},{id:'week',label:'This week',icon:'calendar-days'},{id:'list',label:'Grocery list',icon:'shopping-basket',badge:42},{id:'cook',label:'Cook',icon:'chef-hat'}]}/>
+<div style={{flex:1,paddingTop:8}}><Tabs value={t} onChange={st} tabs={[{id:'buy',label:'To buy',count:42},{id:'staples',label:'Staples',count:18},{id:'got',label:'Got it'}]}/><div style={{marginTop:120,width:360,border:'1px solid var(--border-subtle)',borderRadius:10,overflow:'hidden'}}><TabBar safeArea={false} value={n==='week'?'plan':'home'} items={[{id:'home',label:'Home',icon:'house'},{id:'plan',label:'Plan',icon:'calendar-days',badge:2},{id:'list',label:'List',icon:'shopping-basket'},{id:'recipes',label:'Recipes',icon:'book-open'},{id:'inbox',label:'Inbox',icon:'message-circle',badge:3}]}/></div></div></div>}
+ReactDOM.createRoot(root).render(<App/>);
+</script></body></html>

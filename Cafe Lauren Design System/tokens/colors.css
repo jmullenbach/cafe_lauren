@@ -1,0 +1,66 @@
+:root{
+/* Linen — warm off-white surfaces (counter, napkin, plaster wall) */
+--linen-0:#FFFDF9;--linen-50:#FBF8F3;--linen-100:#F5F0E8;--linen-200:#EBE3D6;--linen-300:#DDD2C1;--linen-400:#C8BBA6;
+/* Oak — wood cutting board / shelving */
+--oak-200:#E4D2BA;--oak-300:#C9A882;--oak-500:#A47E55;--oak-700:#6E5236;
+/* Charcoal — ink, cast iron */
+--char-300:#ADA69C;--char-500:#78726A;--char-600:#5E5952;--char-700:#4A4640;--char-900:#24221F;
+/* Sage — herbs, greens; primary brand accent */
+--sage-50:#EEF1EA;--sage-100:#DDE4D5;--sage-300:#A9B89B;--sage-500:#6F8562;--sage-600:#5C7150;--sage-700:#4B5E40;--sage-900:#2F3B29;
+/* Terracotta — clay pot, roasted tomato; secondary accent, sale flags */
+--terra-50:#F8ECE5;--terra-100:#F0D5C6;--terra-300:#D99A7A;--terra-500:#B8603D;--terra-700:#8A4329;
+/* Honey — warm highlight, ratings */
+--honey-100:#F6EBC8;--honey-300:#E3C778;--honey-500:#C9A23B;--honey-700:#87681A;
+/* Tomato — destructive */
+--tomato-100:#F5DAD4;--tomato-500:#A8402F;--tomato-700:#7C2B1F;
+/* Slate — informational */
+--slate-100:#DFE6EA;--slate-500:#5B7183;--slate-700:#3E5060;
+
+/* Day-of-week tags (earthy takes on the Notion tag colors) */
+--day-mon:#E9D9A6;--day-mon-ink:#6B5414;
+--day-tue:#D3DDC8;--day-tue-ink:#3E5134;
+--day-wed:#EBCFCB;--day-wed-ink:#7A3A33;
+--day-thu:#DFDBD4;--day-thu-ink:#4A4640;
+--day-fri:#E8C3B3;--day-fri-ink:#7C3420;
+--day-sat:#E4D2BA;--day-sat-ink:#5C4329;
+--day-sun:#F0D2AE;--day-sun-ink:#7A4A12;
+--day-week:#D9D6E2;--day-week-ink:#47425E;
+--day-spare:#D8C9B8;--day-spare-ink:#5A4636;
+
+/* Semantic — surfaces */
+--surface-page:var(--linen-50);
+--surface-sunken:var(--linen-100);
+--surface-card:var(--linen-0);
+--surface-raised:#FFFFFF;
+--surface-inverse:var(--char-900);
+--surface-accent:var(--sage-50);
+--surface-wood:var(--oak-200);
+/* Semantic — text */
+--text-strong:var(--char-900);
+--text-body:var(--char-700);
+--text-muted:var(--char-500);
+--text-faint:var(--char-300);
+--text-inverse:var(--linen-50);
+--text-accent:var(--sage-700);
+--text-link:var(--sage-700);
+--text-link-hover:var(--sage-900);
+/* Semantic — borders */
+--border-subtle:var(--linen-200);
+--border-default:var(--linen-300);
+--border-strong:var(--linen-400);
+--border-focus:var(--sage-500);
+/* Semantic — actions */
+--action-primary:var(--char-900);
+--action-primary-hover:#3A3732;
+--action-primary-text:var(--linen-50);
+--action-accent:var(--sage-600);
+--action-accent-hover:var(--sage-700);
+--action-accent-text:#FFFFFF;
+/* Semantic — status */
+--status-sale:var(--terra-500);--status-sale-bg:var(--terra-50);
+--status-success:var(--sage-600);--status-success-bg:var(--sage-50);
+--status-warning:var(--honey-700);--status-warning-bg:var(--honey-100);
+--status-danger:var(--tomato-500);--status-danger-bg:var(--tomato-100);
+--status-info:var(--slate-500);--status-info-bg:var(--slate-100);
+--rating:var(--honey-500);
+}

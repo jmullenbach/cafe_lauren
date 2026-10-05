@@ -1,0 +1,47 @@
+<!-- @dsCard group="App" viewport="1280x800" name="Cafe Lauren app" subtitle="Weekly menu, requests & pantry, grocery list + Instacart, cook mode" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cafe Lauren</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="data.js"></script>
+</head><body>
+<div id="root"></div>
+<script type="text/babel" src="AppShell.jsx"></script>
+<script type="text/babel" src="WeekScreen.jsx"></script>
+<script type="text/babel" src="IntakeScreen.jsx"></script>
+<script type="text/babel" src="GroceryScreen.jsx"></script>
+<script type="text/babel" src="CookScreen.jsx"></script>
+<script type="text/babel">
+const { Toast } = window.CafeLaurenDesignSystem_9f0e0a;
+const D = window.CL_DATA;
+function App() {
+  const [screen, setScreen] = React.useState(() => localStorage.getItem('cl-screen') || 'week');
+  const [votes, setVotes] = React.useState(() => Object.fromEntries(D.meals.map(m => [m.id, { ...m.votes }])));
+  const [approved, setApproved] = React.useState(false);
+  const [requests, setRequests] = React.useState(D.requests);
+  const [checked, setChecked] = React.useState({});
+  const [ordered, setOrdered] = React.useState(false);
+  const [toast, setToast] = React.useState(null);
+  const go = s => { setScreen(s); localStorage.setItem('cl-screen', s); document.querySelector('main') && document.querySelector('main').scrollTo(0, 0); };
+  const flash = t => { setToast(t); clearTimeout(window.__t); window.__t = setTimeout(() => setToast(null), 3200); };
+  const setVote = (id, v) => setVotes(p => { const n = { ...p[id] }; if (v) n.lauren = v; else delete n.lauren; return { ...p, [id]: n }; });
+  const listCount = D.sections.flatMap(s => s.items.map(i => s.name + i.name)).filter(k => !checked[k]).length;
+  return (
+    <AppShell screen={screen} onNav={go} listCount={listCount} requestCount={requests.length} ordered={ordered}>
+      {screen === 'week' && <WeekScreen data={D} votes={votes} setVote={setVote} approved={approved} onCook={() => go('cook')}
+        onApprove={to => { if (to) return go(to); setApproved(true); flash({ tone: 'success', icon: 'circle-check', title: 'Menu approved', message: 'Joe and Leidy got a heads-up. The grocery list is ready.' }); }} />}
+      {screen === 'intake' && <IntakeScreen data={D} requests={requests} addRequest={r => { setRequests([...requests, r]); flash({ icon: 'send', title: 'Request added', message: "It'll be considered in Sunday's plan." }); }} />}
+      {screen === 'list' && <GroceryScreen data={D} checked={checked} toggle={k => setChecked(c => ({ ...c, [k]: !c[k] }))} ordered={ordered}
+        onOrder={() => { setOrdered(true); flash({ tone: 'success', icon: 'truck', title: 'Sent to Instacart', message: 'Delivery Saturday, 9–11am' }); }} />}
+      {screen === 'cook' && <CookScreen data={D} onFeedback={s => flash({ tone: 'success', icon: 'star', title: `Saved — ${s} stars`, message: 'Added to the recipe box.' })} />}
+      {toast && <div style={{ position: 'fixed', left: 'calc(50% + 124px)', bottom: 28, transform: 'translateX(-50%)', zIndex: 200 }}><Toast {...toast} onClose={() => setToast(null)} /></div>}
+    </AppShell>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body></html>

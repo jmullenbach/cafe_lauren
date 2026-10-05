@@ -1,0 +1,18 @@
+<!-- @dsCard group="Components" viewport="700x260" name="Core — Button, IconButton, Icon" subtitle="Variants, sizes, states" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>body{padding:24px;background:var(--surface-page)}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.col{display:flex;flex-direction:column;gap:16px}.lbl{font:600 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);width:84px;flex:none}</style></head><body><div id="root"></div>
+<script type="text/babel">
+const NS=window.CafeLaurenDesignSystem_9f0e0a;
+const {Button,IconButton,Icon}=NS;
+function App(){return <div className="col">
+<div className="row"><span className="lbl">Variants</span><Button>Plan the week</Button><Button variant="accent" icon="shopping-cart">Send to Instacart</Button><Button variant="secondary" icon="plus">Add request</Button><Button variant="ghost">Skip</Button><Button variant="danger" icon="trash-2">Clear</Button></div>
+<div className="row"><span className="lbl">Sizes</span><Button size="s">Small</Button><Button size="m">Medium</Button><Button size="l" iconRight="arrow-right">Large</Button><Button disabled>Disabled</Button></div>
+<div className="row"><span className="lbl">Icon btn</span><IconButton icon="ellipsis" label="More"/><IconButton icon="pencil" label="Edit" variant="secondary"/><IconButton icon="heart" label="Fav" active round/><IconButton icon="plus" label="Add" variant="primary" round/><IconButton icon="camera" label="Photo" variant="accent" size="l" round/></div>
+<div className="row" style={{color:'var(--text-body)'}}><span className="lbl">Icons</span>{['carrot','beef','fish','egg','milk','wheat','salad','soup','chef-hat','cooking-pot','refrigerator','snowflake','timer','shopping-basket','truck','tag'].map(n=><Icon key={n} name={n} size={22}/>)}</div>
+</div>}
+ReactDOM.createRoot(root).render(<App/>);
+</script></body></html>
